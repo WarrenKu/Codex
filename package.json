@@ -3,6 +3,9 @@
   "private": true,
   "version": "1.0.0",
   "type": "commonjs",
+  "dependencies": {
+    "redis": "^4.7.0"
+  },
   "scripts": {
     "dev": "node server.js",
     "start": "node server.js",

@@ -18,10 +18,10 @@ Lokal tetap memakai file `data/otp-store.json`.
 
 ## Vercel
 
-Di Vercel project ini tidak lagi memakai file JSON lokal. Storage dipindah ke KV via REST env:
+Di Vercel project ini tidak lagi memakai file JSON lokal. Storage bisa memakai salah satu:
 
-- `KV_REST_API_URL`
-- `KV_REST_API_TOKEN`
+- `Cordex_REDIS_URL` atau `REDIS_URL`
+- atau `KV_REST_API_URL` + `KV_REST_API_TOKEN`
 - `KV_STORE_KEY` opsional, default `otp-store`
 - `TELEGRAM_BOT_TOKEN`
 - `TELEGRAM_BOT_USERNAME` opsional tapi disarankan
@@ -32,7 +32,7 @@ Langkah singkat:
 1. Push project ke GitHub.
 2. Import repo ke Vercel.
 3. Tambahkan Vercel KV / Upstash Redis.
-4. Pastikan env `KV_REST_API_URL` dan `KV_REST_API_TOKEN` masuk ke project.
+4. Pastikan env Redis/KV masuk ke project.
 5. Tambahkan env Telegram bot.
 6. Deploy.
 
@@ -41,8 +41,7 @@ Langkah singkat:
 Kalau data lokal di `data/otp-store.json` mau dibawa ke Vercel:
 
 ```powershell
-$env:KV_REST_API_URL="ISI_KV_URL"
-$env:KV_REST_API_TOKEN="ISI_KV_TOKEN"
+$env:Cordex_REDIS_URL="ISI_REDIS_URL"
 npm run migrate:kv
 ```
 

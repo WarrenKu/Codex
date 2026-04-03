@@ -9,6 +9,7 @@ const TELEGRAM_BOT_USERNAME = process.env.TELEGRAM_BOT_USERNAME || "";
 const TELEGRAM_BOT_ID = process.env.TELEGRAM_BOT_ID || "";
 const KV_REST_API_URL = process.env.KV_REST_API_URL || "";
 const KV_REST_API_TOKEN = process.env.KV_REST_API_TOKEN || "";
+const REDIS_URL = process.env.Cordex_REDIS_URL || process.env.REDIS_URL || "redis://default:3VCLJyqEGp4uhpJrdF4KAOOtEWvmlkzT@redis-13225.crce214.us-east-1-3.ec2.cloud.redislabs.com:13225";
 const KV_STORE_KEY = process.env.KV_STORE_KEY || "otp-store";
 const INDEX_FILE = path.join(__dirname, "index.html");
 const DATA_DIR = path.join(__dirname, "data");
@@ -23,9 +24,10 @@ const EMPTY_STORE = {
   consoleLogs: []
 };
 let writeQueue = Promise.resolve();
+let redisClientPromise = null;
 
 function useRemoteStore() {
-  return !!(KV_REST_API_URL && KV_REST_API_TOKEN);
+  return !!((KV_REST_API_URL && KV_REST_API_TOKEN) || REDIS_URL);
 }
 
 async function ensureStore() {
@@ -60,6 +62,24 @@ async function kvCommand(command) {
     throw new Error(result.error);
   }
   return result;
+}
+
+async function getRedisClient() {
+  if (!REDIS_URL) {
+    throw new Error("REDIS_URL belum diatur.");
+  }
+  if (!redisClientPromise) {
+    redisClientPromise = (async () => {
+      const { createClient } = require("redis");
+      const client = createClient({ url: REDIS_URL });
+      client.on("error", (error) => {
+        console.error("Redis client error:", error.message);
+      });
+      await client.connect();
+      return client;
+    })();
+  }
+  return redisClientPromise;
 }
 
 function normalizeStore(store) {
@@ -146,8 +166,14 @@ function createSessionToken() {
 
 async function readStore() {
   if (useRemoteStore()) {
-    const result = await kvCommand(["GET", KV_STORE_KEY]);
-    const raw = typeof result?.result === "string" ? result.result : "";
+    let raw = "";
+    if (KV_REST_API_URL && KV_REST_API_TOKEN) {
+      const result = await kvCommand(["GET", KV_STORE_KEY]);
+      raw = typeof result?.result === "string" ? result.result : "";
+    } else {
+      const client = await getRedisClient();
+      raw = await client.get(KV_STORE_KEY) || "";
+    }
     if (!raw.trim()) {
       return normalizeStore(EMPTY_STORE);
     }
@@ -175,7 +201,13 @@ async function readStore() {
 async function writeStore(store) {
   const task = async () => {
     if (useRemoteStore()) {
-      await kvCommand(["SET", KV_STORE_KEY, JSON.stringify(store)]);
+      const payload = JSON.stringify(store);
+      if (KV_REST_API_URL && KV_REST_API_TOKEN) {
+        await kvCommand(["SET", KV_STORE_KEY, payload]);
+      } else {
+        const client = await getRedisClient();
+        await client.set(KV_STORE_KEY, payload);
+      }
       return;
     }
 
