@@ -1,0 +1,5760 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Register OTP</title>
+  <style>
+    :root {
+      --bg1: #07111f;
+      --bg2: #14385f;
+      --card: rgba(8, 15, 25, 0.84);
+      --line: rgba(147, 200, 255, 0.18);
+      --text: #eff6ff;
+      --muted: #99adc8;
+      --primary: #33c1ff;
+      --primary2: #2374ff;
+      --success: #6ff0b0;
+      --danger: #ff8f8f;
+      --shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(51, 193, 255, 0.18), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(35, 116, 255, 0.14), transparent 26%),
+        linear-gradient(140deg, var(--bg1), var(--bg2));
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    body.body-locked {
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    .shell {
+      width: min(1120px, 100%);
+      min-height: 740px;
+      display: grid;
+      grid-template-columns: 1.02fr 1fr;
+      background: rgba(5, 10, 18, 0.55);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 30px;
+      overflow: hidden;
+      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow);
+      animation: shellReveal .8s cubic-bezier(.2, .8, .2, 1);
+      position: relative;
+    }
+    .shell.leaving-auth {
+      animation: authShellExit .45s cubic-bezier(.2, .8, .2, 1) forwards;
+      pointer-events: none;
+    }
+
+    .hero {
+      padding: 52px 46px;
+      border-right: 1px solid rgba(255,255,255,0.06);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.04), transparent 45%),
+        linear-gradient(145deg, rgba(51, 193, 255, 0.08), rgba(35, 116, 255, 0.03));
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 22px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before,
+    .hero::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      filter: blur(8px);
+      pointer-events: none;
+    }
+
+    .hero::before {
+      width: 220px;
+      height: 220px;
+      top: -60px;
+      left: -50px;
+      background: radial-gradient(circle, rgba(80, 198, 255, 0.34), rgba(80, 198, 255, 0));
+      animation: heroOrbOne 12s ease-in-out infinite;
+    }
+
+    .hero::after {
+      width: 280px;
+      height: 280px;
+      right: -90px;
+      bottom: -100px;
+      background: radial-gradient(circle, rgba(35, 116, 255, 0.3), rgba(35, 116, 255, 0));
+      animation: heroOrbTwo 14s ease-in-out infinite;
+    }
+
+    .badge {
+      display: inline-flex;
+      width: fit-content;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(51, 193, 255, 0.12);
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: #cceeff;
+      animation: badgePulse 3.4s ease-in-out infinite;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(34px, 5vw, 56px);
+      line-height: 1.04;
+      max-width: 11ch;
+      animation: fadeSlideUp .8s ease both;
+    }
+
+    .hero p, .hero li {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 16px;
+    }
+
+    .hero p {
+      animation: fadeSlideUp .8s ease .1s both;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero ul { margin: 0; padding-left: 18px; }
+    .hero ul {
+      animation: fadeSlideUp .8s ease .2s both;
+      position: relative;
+      z-index: 1;
+    }
+
+    .forms {
+      padding: 28px;
+      background: rgba(8, 13, 24, 0.84);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      min-height: 0;
+      position: relative;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 6px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.05);
+      animation: fadeSlideUp .72s ease .08s both;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tabs::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(115deg, transparent 22%, rgba(255,255,255,0.12) 50%, transparent 78%);
+      transform: translateX(-120%);
+      animation: tabsSweep 6s linear infinite;
+      pointer-events: none;
+    }
+
+    .tab-btn {
+      border: none;
+      border-radius: 14px;
+      background: transparent;
+      color: var(--text);
+      padding: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.25s ease;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      box-shadow: 0 14px 32px rgba(35, 116, 255, 0.28);
+    }
+
+    .stage {
+      position: relative;
+      min-height: 620px;
+      overflow: hidden;
+      flex: 1;
+      min-height: 0;
+      isolation: isolate;
+    }
+
+    .stage::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(rgba(255,255,255,0.024) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.024) 1px, transparent 1px);
+      background-size: 26px 26px;
+      opacity: .28;
+      mask-image: linear-gradient(180deg, rgba(0,0,0,.78), transparent 100%);
+      animation: stageGridDrift 18s linear infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .panel {
+      position: absolute;
+      inset: 0;
+      padding: 24px;
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(42px);
+      transition: opacity 0.32s ease, transform 0.44s ease;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 18px 44px rgba(0,0,0,.2);
+      z-index: 1;
+    }
+
+    .panel.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(0);
+      animation: panelWake .55s cubic-bezier(.2, .8, .2, 1);
+    }
+
+    .panel::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    .panel::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.14);
+      border-radius: 999px;
+    }
+
+    .panel::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .panel h2 { margin: 0 0 8px; font-size: 28px; }
+    .desc { margin: 0 0 20px; color: var(--muted); line-height: 1.65; }
+    .auth-skip-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 700;
+      letter-spacing: .02em;
+      transition: color .18s ease, transform .18s ease;
+      animation: fadeSlideUp .72s ease .18s both;
+    }
+    .auth-skip-link:hover {
+      color: #8fd6ff;
+      transform: translateX(2px);
+    }
+    .auth-skip-link.leaving {
+      animation: skipLaunch .34s cubic-bezier(.2, .8, .2, 1) forwards;
+      pointer-events: none;
+    }
+    .field-group { display: grid; gap: 14px; }
+    .panel.active .field-group,
+    .panel.active .action-anchor,
+    .panel.active .message {
+      animation: fadeSlideUp .68s ease both;
+    }
+
+    .panel.active .field-group { animation-delay: .08s; }
+    .panel.active .action-anchor { animation-delay: .16s; }
+    .panel.active .message { animation-delay: .22s; }
+    .field { display: grid; gap: 8px; }
+    .field label { font-size: 14px; font-weight: 600; color: #d7e7fb; }
+
+    .field input {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      border-radius: 16px;
+      padding: 14px 16px;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+    }
+
+    .field textarea {
+      width: 100%;
+      min-height: 150px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      border-radius: 16px;
+      padding: 14px 16px;
+      font-size: 15px;
+      line-height: 1.7;
+      outline: none;
+      transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+      font-family: inherit;
+    }
+
+    .field input:focus,
+    .field textarea:focus {
+      border-color: rgba(51, 193, 255, 0.88);
+      background: rgba(255,255,255,0.08);
+      transform: translateY(-1px);
+    }
+
+    .action-anchor { position: relative; margin-top: 16px; }
+    .action-row { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    button.primary, button.secondary {
+      border: none;
+      border-radius: 16px;
+      padding: 14px 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    }
+
+    button.primary:hover, button.secondary:hover { transform: translateY(-2px); }
+
+    button.primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      color: white;
+      min-width: 180px;
+      flex: 1;
+      box-shadow: 0 16px 30px rgba(35, 116, 255, 0.28);
+    }
+
+    button.secondary {
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .message { min-height: 24px; margin-top: 12px; font-size: 14px; color: var(--muted); }
+    .message.success { color: var(--success); }
+    .message.error { color: var(--danger); }
+
+    .otp-drop {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transform: translateY(26px);
+      transition: max-height 0.5s ease, opacity 0.35s ease, transform 0.35s ease, margin-top 0.35s ease;
+      margin-top: 0;
+    }
+
+    .otp-drop.show {
+      max-height: 260px;
+      opacity: 1;
+      transform: translateY(0);
+      margin-top: 14px;
+    }
+
+    @keyframes shellReveal {
+      0% {
+        opacity: 0;
+        transform: translateY(22px) scale(.985);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes fadeSlideUp {
+      0% {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes panelWake {
+      0% {
+        opacity: 0;
+        transform: translateX(32px) scale(.988);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+      }
+    }
+
+    @keyframes badgePulse {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(51, 193, 255, 0);
+        transform: translateY(0);
+      }
+      50% {
+        box-shadow: 0 0 0 10px rgba(51, 193, 255, 0.04);
+        transform: translateY(-1px);
+      }
+    }
+
+    @keyframes heroOrbOne {
+      0%, 100% {
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+      50% {
+        transform: translate3d(26px, 18px, 0) scale(1.08);
+      }
+    }
+
+    @keyframes heroOrbTwo {
+      0%, 100% {
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+      50% {
+        transform: translate3d(-22px, -18px, 0) scale(1.06);
+      }
+    }
+
+    @keyframes tabsSweep {
+      0% {
+        transform: translateX(-120%);
+      }
+      100% {
+        transform: translateX(120%);
+      }
+    }
+
+    @keyframes stageGridDrift {
+      0% {
+        transform: translate3d(0, 0, 0);
+      }
+      100% {
+        transform: translate3d(-26px, -26px, 0);
+      }
+    }
+
+    @keyframes skipLaunch {
+      0% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateX(22px) scale(.96);
+      }
+    }
+
+    @keyframes authShellExit {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-18px) scale(.985);
+        filter: blur(10px);
+      }
+    }
+
+    @keyframes publicHomeReveal {
+      0% {
+        opacity: 0;
+        transform: translateY(24px) scale(.985);
+        filter: blur(10px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+      }
+    }
+
+    .otp-card {
+      padding: 18px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(51, 193, 255, 0.16);
+      animation: otpRise 0.45s cubic-bezier(.2,.78,.2,1);
+      transform-origin: top center;
+    }
+
+    .otp-card h3 { margin: 0 0 8px; font-size: 18px; }
+    .otp-card p { margin: 0; color: var(--muted); line-height: 1.6; font-size: 14px; }
+    .check-row { display: flex; align-items: center; gap: 10px; margin-top: 14px; color: #d7e7fb; font-size: 14px; }
+    .check-row {
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .check-row input { width: 18px; height: 18px; accent-color: var(--primary); }
+
+    .loading-popup, .success-popup {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(2, 6, 12, 0.62);
+      backdrop-filter: blur(8px);
+      padding: 18px;
+      z-index: 50;
+    }
+
+    .home-screen {
+      display: none;
+      width: min(1180px, 100%);
+      min-height: calc(100vh - 48px);
+      border-radius: 30px;
+      overflow: visible;
+      background:
+        radial-gradient(circle at top left, rgba(51, 193, 255, 0.16), transparent 24%),
+        linear-gradient(145deg, #081221, #102846);
+      border: 1px solid rgba(255,255,255,0.06);
+      box-shadow: var(--shadow);
+    }
+
+    .home-screen.show {
+      display: block;
+    }
+    .home-screen.enter-public {
+      animation: publicHomeReveal .56s cubic-bezier(.2, .8, .2, 1);
+    }
+
+    .home-nav {
+      position: sticky;
+      top: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      padding: 22px 28px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: rgba(5, 11, 20, 0.55);
+      backdrop-filter: blur(14px);
+      z-index: 120;
+      overflow: visible;
+    }
+
+    .home-nav-main {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      width: 52px;
+      height: 52px;
+      border: 1px solid rgba(93, 173, 255, 0.2);
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)),
+        rgba(4, 12, 22, 0.9);
+      color: #d7ecff;
+      border-radius: 18px;
+      cursor: pointer;
+      place-items: center;
+      flex: 0 0 52px;
+    }
+
+    .mobile-menu-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    .mobile-menu-panel {
+      display: none;
+    }
+
+    .brand {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .home-links {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      color: #d8e7fb;
+      font-weight: 600;
+      flex-wrap: wrap;
+    }
+
+    .home-links a {
+      color: inherit;
+      text-decoration: none;
+      position: relative;
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+    .home-links a.nav-login-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(59, 174, 255, .14);
+      border: 1px solid rgba(59, 174, 255, .38);
+      color: #f7fbff;
+    }
+
+    .home-links a:hover {
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    .logout-btn {
+      background: linear-gradient(135deg, #ff7d7d, #ff5454);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      padding: 12px 18px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .home-body {
+      padding: 42px 28px;
+      display: grid;
+      gap: 22px;
+    }
+
+    .home-section-anchor {
+      scroll-margin-top: 108px;
+    }
+
+    .home-card {
+      padding: 28px;
+      border-radius: 24px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .nav-search {
+      position: relative;
+      width: 52px;
+      min-width: 52px;
+      margin-left: auto;
+      transition: width 0.3s ease;
+      z-index: 180;
+    }
+
+    .nav-search.expanded {
+      width: min(340px, 100%);
+    }
+
+    .search-toggle-btn {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 52px;
+      height: 52px;
+      border: 1px solid rgba(93, 173, 255, 0.2);
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)),
+        rgba(4, 12, 22, 0.9);
+      color: #d7ecff;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      z-index: 3;
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .search-toggle-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(51, 193, 255, 0.52);
+    }
+
+    .search-toggle-btn svg,
+    .search-icon svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    .search-ghost-label {
+      position: absolute;
+      left: 56px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #7da9ca;
+      font-size: 14px;
+      font-weight: 700;
+      pointer-events: none;
+      transition: transform 0.28s ease, opacity 0.28s ease;
+      white-space: nowrap;
+    }
+
+    .search-rotator-word.swap {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    .search-ghost-label.hidden {
+      opacity: 0;
+      transform: translateY(-50%);
+    }
+
+    .search-input-wrap {
+      position: relative;
+      display: grid;
+      gap: 10px;
+    }
+
+    .search-input-shell {
+      position: relative;
+      min-height: 52px;
+    }
+
+    .search-input {
+      width: 100%;
+      opacity: 0;
+      border: 1px solid rgba(93, 173, 255, 0.2);
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)),
+        rgba(4, 12, 22, 0.9);
+      color: var(--text);
+      border-radius: 18px;
+      padding: 15px 18px 15px 62px;
+      font-size: 15px;
+      outline: none;
+      pointer-events: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .nav-search.expanded .search-input {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .search-input:focus {
+      border-color: rgba(51, 193, 255, 0.88);
+      box-shadow: 0 18px 42px rgba(11, 46, 86, 0.26);
+      transform: translateY(-1px);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      color: #a9d8f8;
+      pointer-events: none;
+      z-index: 2;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .nav-search.expanded .search-icon {
+      opacity: 1;
+    }
+
+    .search-meta {
+      display: none;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .search-chip-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .search-chip {
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      color: #d8eeff;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .search-chip:hover {
+      transform: translateY(-1px);
+      background: rgba(51, 193, 255, 0.12);
+    }
+
+    .search-results {
+      position: absolute;
+      top: calc(100% + 12px);
+      left: 0;
+      width: min(440px, calc(100vw - 32px));
+      padding: 12px;
+      border-radius: 22px;
+      background: rgba(6, 13, 24, 0.96);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
+      display: none;
+      z-index: 220;
+      overflow: hidden;
+      touch-action: pan-y;
+    }
+
+    .search-results.show {
+      display: block;
+    }
+
+    .search-results-list {
+      display: grid;
+      gap: 8px;
+      max-height: 360px;
+      overflow-y: auto;
+      padding-right: 4px;
+      align-content: start;
+      overscroll-behavior: contain;
+      pointer-events: auto;
+    }
+
+    .search-results-list::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    .search-results-list::-webkit-scrollbar-thumb {
+      border-radius: 999px;
+      background: rgba(81, 186, 255, 0.82);
+    }
+
+    .search-result-item {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      border-radius: 18px;
+      padding: 14px 15px;
+      display: grid;
+      gap: 10px;
+      cursor: pointer;
+      text-align: left;
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+      animation: searchDropIn 0.45s ease both;
+    }
+
+    .search-result-item:hover,
+    .search-result-item.active {
+      transform: translateY(-2px);
+      border-color: rgba(51, 193, 255, 0.28);
+      background: rgba(51, 193, 255, 0.1);
+    }
+
+    .search-result-main {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      min-width: 0;
+    }
+
+    .search-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #dcecff;
+      font-size: 12px;
+      font-weight: 700;
+      min-width: 84px;
+      padding-top: 3px;
+    }
+
+    .status-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      box-shadow: 0 0 0 4px rgba(255,255,255,0.04);
+      flex: 0 0 12px;
+    }
+
+    .status-dot.online {
+      background: #57e18a;
+      box-shadow: 0 0 0 4px rgba(87, 225, 138, 0.12);
+    }
+
+    .status-dot.offline {
+      background: #ff6f6f;
+      box-shadow: 0 0 0 4px rgba(255, 111, 111, 0.12);
+    }
+
+    .status-dot.article {
+      background: #ffc85a;
+      box-shadow: 0 0 0 4px rgba(255, 200, 90, 0.14);
+    }
+
+    .search-result-profile {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .search-result-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(51, 193, 255, 0.24), rgba(35, 116, 255, 0.3));
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 16px;
+      color: #f5fbff;
+      flex: 0 0 40px;
+    }
+
+    .search-result-copy {
+      min-width: 0;
+    }
+
+    .search-result-copy strong,
+    .search-result-copy span {
+      display: block;
+      text-align: left;
+    }
+
+    .search-result-copy strong {
+      font-size: 15px;
+      line-height: 1.25;
+    }
+
+    .search-result-copy span {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 2px;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
+
+    .search-result-footer {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 12px;
+      padding-top: 2px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .search-result-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      color: #d6ebff;
+      font-weight: 700;
+    }
+
+    .search-result-badge.article {
+      background: rgba(255, 204, 102, 0.1);
+      color: #ffe3b0;
+    }
+
+    .search-result-meta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .search-empty {
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.04);
+      border: 1px dashed rgba(255,255,255,0.12);
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .search-preview {
+      display: none;
+    }
+
+    .search-preview-card {
+      display: grid;
+      gap: 18px;
+      min-height: 0;
+      padding: 18px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.22s ease, transform 0.22s ease;
+    }
+
+    .search-preview-card.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .search-preview-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .search-preview-profile {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .search-preview-avatar {
+      width: 70px;
+      height: 70px;
+      border-radius: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(145deg, rgba(51, 193, 255, 0.22), rgba(35, 116, 255, 0.34));
+      font-size: 26px;
+      font-weight: 900;
+    }
+
+    .search-preview-title {
+      min-width: 0;
+    }
+
+    .search-preview-title strong,
+    .search-preview-title span {
+      display: block;
+    }
+
+    .search-preview-title strong {
+      font-size: 23px;
+    }
+
+    .search-preview-title span {
+      color: var(--muted);
+      margin-top: 5px;
+      word-break: break-word;
+    }
+
+    .search-preview-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .search-preview-desc {
+      margin: 0;
+      color: #d8e7fb;
+      line-height: 1.8;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .search-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .search-preview-item {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      display: grid;
+      gap: 8px;
+    }
+
+    .search-preview-item.full {
+      grid-column: 1 / -1;
+    }
+
+    .search-preview-label {
+      color: #8fb3d2;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .search-preview-value {
+      color: var(--text);
+      font-size: 16px;
+      font-weight: 700;
+      word-break: break-word;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      gap: 22px;
+    }
+
+    .stat-number {
+      font-size: clamp(42px, 6vw, 68px);
+      font-weight: 900;
+      line-height: 1;
+      margin: 14px 0 8px;
+    }
+
+    .graph-wrap {
+      display: grid;
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .graph-row {
+      display: grid;
+      grid-template-columns: 84px 1fr 42px;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .graph-bar {
+      height: 16px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .graph-fill {
+      height: 100%;
+      width: 0;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      transition: width 0.5s ease;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .role-select-wrap {
+      margin-top: 8px;
+      max-width: 260px;
+    }
+
+    .role-select-wrap select {
+      width: 100%;
+      border: 1px solid rgba(51, 193, 255, 0.18);
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)),
+        rgba(8, 16, 28, 0.92);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-weight: 700;
+      outline: none;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 10px 24px rgba(0,0,0,0.14);
+      appearance: none;
+    }
+
+    .role-select-wrap select option,
+    .inline-select select option {
+      background: #0d1c30;
+      color: #eef6ff;
+    }
+
+    .graph-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .user-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+      max-height: 530px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding-right: 8px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(81, 186, 255, 0.86) rgba(255,255,255,0.06);
+      scroll-behavior: smooth;
+    }
+
+    .user-list::-webkit-scrollbar {
+      width: 12px;
+    }
+
+    .user-list::-webkit-scrollbar-track {
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.08));
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .user-list::-webkit-scrollbar-thumb {
+      border-radius: 999px;
+      background:
+        linear-gradient(180deg, rgba(51, 193, 255, 0.98), rgba(35, 116, 255, 0.92));
+      border: 2px solid rgba(8, 16, 28, 0.72);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 0 18px rgba(51, 193, 255, 0.18);
+    }
+
+    .user-list::-webkit-scrollbar-thumb:hover {
+      background:
+        linear-gradient(180deg, rgba(103, 220, 255, 1), rgba(50, 133, 255, 0.96));
+    }
+
+    .console-card {
+      margin-top: 22px;
+      padding: 0;
+      overflow: hidden;
+      background: rgba(6, 11, 18, 0.98);
+      border: 1px solid rgba(96, 149, 202, 0.2);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 20px 45px rgba(0,0,0,0.22);
+    }
+
+    .console-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+    }
+
+    .console-dots {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .console-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+    }
+
+    .console-dot.red { background: #ff6a6a; }
+    .console-dot.yellow { background: #ffcf5a; }
+    .console-dot.green { background: #5be38d; }
+
+    .console-title {
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 13px;
+      color: #d1f3ff;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .console-screen {
+      min-height: 280px;
+      max-height: 340px;
+      overflow-y: auto;
+      padding: 18px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.015), transparent 28%),
+        #081018;
+      font-family: Consolas, "Courier New", monospace;
+    }
+
+    .console-line {
+      display: grid;
+      grid-template-columns: 82px 72px 1fr;
+      gap: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+      color: #dbeeff;
+      padding: 3px 0;
+      word-break: break-word;
+    }
+
+    .console-time { color: #73a2c7; }
+    .console-level { text-transform: uppercase; }
+    .console-level.info { color: #8fd5ff; }
+    .console-level.success { color: #73efb6; }
+    .console-level.warn { color: #ffd07f; }
+    .console-level.error { color: #ff9595; }
+    .console-level.cmd { color: #9cc6ff; }
+    .console-level.output { color: #e8f2ff; }
+
+    .console-form {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 10px;
+      padding: 14px 18px 18px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.02);
+      align-items: center;
+    }
+
+    .console-prompt {
+      font-family: Consolas, "Courier New", monospace;
+      color: #63da96;
+      font-weight: 700;
+    }
+
+    .console-input {
+      width: 100%;
+      border: 1px solid rgba(103, 157, 214, 0.18);
+      background: rgba(0,0,0,0.28);
+      color: #eff7ff;
+      border-radius: 12px;
+      padding: 12px 14px;
+      outline: none;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 13px;
+    }
+
+    .console-help {
+      padding: 0 18px 16px;
+      color: #86a7c4;
+      font-size: 12px;
+      font-family: Consolas, "Courier New", monospace;
+    }
+
+    .console-hint-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 0 18px 8px;
+    }
+
+    .console-chip {
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 11px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.05);
+      color: #bfe6ff;
+      border: 1px solid rgba(255,255,255,0.06);
+      cursor: pointer;
+    }
+
+    .user-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: center;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      animation: otpRise 0.35s ease;
+    }
+
+    .user-item strong {
+      display: block;
+      font-size: 17px;
+      margin-bottom: 4px;
+    }
+
+    .user-item span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .user-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .mini-btn {
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 9px 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .mini-btn.danger {
+      background: rgba(255, 95, 95, 0.12);
+      color: #ffd1d1;
+      border-color: rgba(255, 95, 95, 0.2);
+    }
+
+    .mini-btn.warn {
+      background: rgba(255, 190, 77, 0.12);
+      color: #ffe1a8;
+      border-color: rgba(255, 190, 77, 0.2);
+    }
+
+    .mini-btn.info {
+      background: rgba(51, 193, 255, 0.12);
+      color: #d4f2ff;
+      border-color: rgba(51, 193, 255, 0.2);
+    }
+
+    .owner-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .profile-panel {
+      display: grid;
+      gap: 22px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .profile-panel.flash {
+      animation: profileReveal 1s cubic-bezier(.18,.82,.18,1);
+    }
+
+    .search-view-panel {
+      display: grid;
+      gap: 22px;
+    }
+
+    .search-account-layout {
+      display: grid;
+      gap: 26px;
+    }
+
+    .search-account-top {
+      display: grid;
+      grid-template-columns: 148px minmax(0, 1fr);
+      gap: 28px;
+      align-items: start;
+    }
+
+    .search-account-hero {
+      display: grid;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    .search-account-title {
+      display: grid;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .search-account-title h2 {
+      margin: 0;
+      font-size: clamp(30px, 4vw, 42px);
+      line-height: 1.02;
+      word-break: break-word;
+    }
+
+    .search-account-handle {
+      color: #90b5d5;
+      font-size: 15px;
+      font-weight: 700;
+      word-break: break-word;
+    }
+
+    .search-account-pill-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .search-account-bio {
+      padding: 18px 20px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      display: grid;
+      gap: 10px;
+    }
+
+    .search-account-bio p {
+      margin: 0;
+      color: #ebf5ff;
+      line-height: 1.75;
+      font-size: 15px;
+      overflow-wrap: anywhere;
+    }
+
+    .search-view-divider {
+      height: 1px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.04), rgba(51, 193, 255, 0.34), rgba(255,255,255,0.04));
+    }
+
+    .search-article-hero {
+      display: grid;
+      gap: 18px;
+    }
+
+    .search-article-badge {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255, 204, 102, 0.1);
+      border: 1px solid rgba(255, 204, 102, 0.18);
+      color: #ffe3b0;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .search-article-body {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: 1.1fr 0.9fr;
+    }
+
+    .search-article-copy,
+    .search-article-side {
+      padding: 20px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      display: grid;
+      gap: 12px;
+    }
+
+    .search-article-copy p,
+    .search-article-side p {
+      margin: 0;
+      color: #d9e8fb;
+      line-height: 1.8;
+    }
+
+    #home-main-section.flash {
+      animation: profileReveal 0.9s cubic-bezier(.18,.82,.18,1) reverse;
+    }
+
+    .profile-top {
+      display: grid;
+      grid-template-columns: 170px 1fr;
+      gap: 26px;
+      align-items: center;
+    }
+
+    .profile-avatar {
+      position: relative;
+      width: 156px;
+      height: 156px;
+      border-radius: 32px;
+      background:
+        radial-gradient(circle at 28% 25%, rgba(255,255,255,0.22), transparent 28%),
+        linear-gradient(145deg, rgba(51, 193, 255, 0.3), rgba(35, 116, 255, 0.16)),
+        rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 28px 70px rgba(0,0,0,0.24);
+      display: grid;
+      place-items: center;
+    }
+
+    .profile-avatar span {
+      font-size: 52px;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      color: #eff8ff;
+    }
+
+    .profile-edit-badge {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      color: white;
+      font-weight: 900;
+      box-shadow: 0 18px 36px rgba(35, 116, 255, 0.28);
+    }
+
+    .profile-head-copy h2 {
+      margin: 0 0 8px;
+      font-size: clamp(28px, 4vw, 40px);
+    }
+
+    .profile-head-copy p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .profile-meta-row {
+      margin-top: 20px;
+      margin-bottom: 18px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+
+    .profile-role-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(51, 193, 255, 0.12);
+      border: 1px solid rgba(51, 193, 255, 0.18);
+      color: #dff4ff;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 12px;
+      flex: 0 0 auto;
+    }
+
+    .profile-inline-group {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      flex-wrap: wrap;
+      flex: 0 1 auto;
+      min-width: 0;
+    }
+
+    .profile-nickname {
+      margin-top: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.06);
+      width: auto;
+      max-width: fit-content;
+    }
+
+    .profile-nickname strong {
+      font-size: 15px;
+      font-weight: 800;
+      line-height: 1.2;
+      word-break: break-word;
+    }
+
+    .profile-name-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .profile-bio-card {
+      display: grid;
+      gap: 12px;
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      min-height: 138px;
+      margin-top: 6px;
+    }
+
+    .profile-bio-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .profile-bio-title {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #8bb4d8;
+    }
+
+    .icon-edit-btn {
+      width: 42px;
+      height: 42px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.06);
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      color: #ebf7ff;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .icon-edit-btn:hover {
+      transform: translateY(-1px);
+      background: rgba(51, 193, 255, 0.14);
+    }
+
+    .icon-edit-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    .profile-bio-text {
+      color: #edf6ff;
+      line-height: 1.7;
+      font-size: 15px;
+      overflow-wrap: anywhere;
+    }
+
+    .profile-bio-text strong {
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    .profile-bio-text h1 {
+      margin: 0 0 10px;
+      font-size: clamp(22px, 4vw, 32px);
+      line-height: 1.1;
+      color: #ffffff;
+    }
+
+    .profile-bio-text em {
+      font-style: italic;
+    }
+
+    .profile-bio-text u {
+      text-underline-offset: 3px;
+    }
+
+    .profile-bio-text a {
+      color: #71cfff;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .profile-bio-text p {
+      margin: 0;
+    }
+
+    .profile-bio-text p + p {
+      margin-top: 10px;
+    }
+
+    .profile-edit-help {
+      margin-top: 10px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      display: none;
+      gap: 8px;
+    }
+
+    .profile-edit-help.show {
+      display: grid;
+    }
+
+    .profile-edit-help code {
+      background: rgba(255,255,255,0.06);
+      border-radius: 8px;
+      padding: 2px 6px;
+    }
+
+    .profile-edit-counter {
+      margin-top: 10px;
+      display: none;
+      justify-content: flex-end;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 800;
+      color: #8fb4d3;
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+
+    .profile-edit-counter.show {
+      display: flex;
+      animation: navDropIn 0.2s ease;
+    }
+
+    .profile-edit-counter.warn {
+      color: #ffc85a;
+    }
+
+    .profile-edit-counter.danger {
+      color: #ff8f8f;
+      transform: scale(1.02);
+    }
+
+    .link-confirm-card {
+      width: min(380px, 100%);
+      padding: 26px;
+      border-radius: 24px;
+      background: rgba(7, 14, 25, 0.97);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 14px;
+    }
+
+    .link-preview {
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      color: #79d0ff;
+      line-height: 1.6;
+      word-break: break-all;
+    }
+
+    .profile-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .profile-item {
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      display: grid;
+      gap: 8px;
+      min-height: 138px;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .profile-item.full {
+      grid-column: 1 / -1;
+    }
+
+    .profile-label {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #8bb4d8;
+    }
+
+    .profile-value {
+      font-size: 20px;
+      font-weight: 800;
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    .profile-sub {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .profile-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: auto;
+    }
+
+    .edit-chip {
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1;
+      cursor: pointer;
+      width: fit-content;
+      white-space: nowrap;
+    }
+
+    .masked-pass {
+      letter-spacing: 0.08em;
+    }
+
+    .ghost-btn {
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .page-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      z-index: 45;
+      backdrop-filter: blur(18px) saturate(120%);
+      background:
+        radial-gradient(circle at top, rgba(51, 193, 255, 0.08), transparent 36%),
+        rgba(7, 14, 25, 0.34);
+    }
+
+    .page-overlay.show {
+      display: block;
+      animation: fadeIn 0.28s ease;
+    }
+
+    .skeleton-sheet {
+      position: absolute;
+      inset: 0;
+      display: none;
+      z-index: 2;
+      pointer-events: none;
+      padding: 26px;
+      background: rgba(8, 15, 25, 0.42);
+      backdrop-filter: blur(14px);
+    }
+
+    .skeleton-sheet.show {
+      display: grid;
+      gap: 14px;
+      animation: homeReveal 0.42s ease;
+    }
+
+    .skeleton-line {
+      height: 18px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.12), rgba(255,255,255,0.05));
+      background-size: 200% 100%;
+      animation: shimmer 1.25s linear infinite;
+    }
+
+    .skeleton-line.big { height: 56px; }
+    .skeleton-line.med { width: 72%; }
+    .skeleton-line.small { width: 46%; }
+
+    .toast-stack {
+      position: fixed;
+      right: 18px;
+      top: 92px;
+      width: min(360px, calc(100vw - 24px));
+      display: grid;
+      gap: 12px;
+      z-index: 70;
+    }
+
+    .notify-box {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: center;
+      gap: 10px;
+      z-index: 95;
+      width: min(92vw, 340px);
+      pointer-events: none;
+    }
+
+    .notify {
+      background: rgba(0, 0, 0, 0.92);
+      padding: 12px 22px 16px;
+      border-radius: 40px;
+      display: flex;
+      flex-direction: column;
+      min-width: 220px;
+      max-width: 320px;
+      width: 100%;
+      box-shadow: 0 15px 40px rgba(0,0,0,.6);
+      animation: islandEnter .45s cubic-bezier(.34,1.56,.64,1);
+      transition: .3s;
+      user-select: none;
+      pointer-events: auto;
+      touch-action: pan-y;
+    }
+
+    .notify-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .notify-icon {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+    }
+
+    .notify-icon.success { background:#00ff95; }
+    .notify-icon.error { background:#ff3c3c; }
+    .notify-icon.info { background:#4cc9f0; }
+
+    .notify-text { font-size: 14px; }
+
+    .notify-sub {
+      font-size: 12px;
+      opacity: .6;
+      margin-top: 2px;
+    }
+
+    .notify-progress {
+      width: 100%;
+      height: 3px;
+      background: rgba(255,255,255,.1);
+      border-radius: 10px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .notify-bar {
+      height: 100%;
+      width: 100%;
+      background: #4cc9f0;
+      animation: timer linear forwards;
+    }
+
+    .notify.fade {
+      opacity: 0;
+      transform: translateY(-15px) scale(.9);
+    }
+
+    .notify.swipe {
+      opacity: 0;
+      transform: translateX(200px);
+    }
+
+    .toast {
+      padding: 16px 18px;
+      border-radius: 20px;
+      background: rgba(8, 16, 28, 0.92);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
+      transform: translateX(0);
+      transition: transform 0.25s ease, opacity 0.25s ease;
+      touch-action: pan-y;
+      animation: toastIn 0.35s cubic-bezier(.2,.8,.2,1);
+    }
+
+    .toast.swiping {
+      transition: none;
+    }
+
+    .toast-title {
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .toast-body {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .toast-time {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #d5ebff;
+    }
+
+    .admin-modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(2, 6, 12, 0.62);
+      backdrop-filter: blur(8px);
+      padding: 18px;
+      z-index: 80;
+    }
+
+    .admin-modal.show {
+      display: flex;
+      animation: fadeIn 0.22s ease;
+    }
+
+    .admin-modal-card {
+      width: min(420px, 100%);
+      padding: 26px;
+      border-radius: 24px;
+      background: rgba(7, 14, 25, 0.97);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: var(--shadow);
+    }
+
+    .telegram-bridge-card {
+      width: min(520px, 100%);
+      padding: 24px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(8, 15, 25, 0.98), rgba(9, 19, 34, 0.96));
+      border: 1px solid rgba(80, 198, 255, 0.18);
+      box-shadow: 0 26px 54px rgba(0, 0, 0, 0.34);
+      display: grid;
+      gap: 16px;
+    }
+
+    .telegram-bridge-meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .telegram-bridge-item {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .telegram-bridge-item .profile-label {
+      margin-bottom: 8px;
+    }
+
+    .telegram-bridge-value {
+      color: #eef7ff;
+      font-size: 18px;
+      font-weight: 800;
+      word-break: break-word;
+    }
+
+    .telegram-bridge-status {
+      min-height: 22px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .admin-modal-card h3 {
+      margin: 0 0 8px;
+    }
+
+    .inline-time {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .inline-time input, .inline-select select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 13px 14px;
+      font-size: 15px;
+      outline: none;
+    }
+
+    .inline-select {
+      margin-top: 12px;
+    }
+
+    .checklist-box {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+      max-height: 240px;
+      overflow-y: auto;
+    }
+
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .checklist-item input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+    }
+
+    .screen-lock {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(3, 8, 14, 0.84);
+      backdrop-filter: blur(18px);
+      z-index: 400;
+      padding: 18px;
+    }
+
+    .screen-lock.show {
+      display: flex;
+      animation: fadeIn 0.18s ease;
+    }
+
+    @keyframes shimmer {
+      from { background-position: 200% 0; }
+      to { background-position: -200% 0; }
+    }
+    @keyframes homeReveal {
+      from {
+        opacity: 0;
+        transform: scale(1.02);
+        filter: blur(10px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+        filter: blur(0);
+      }
+    }
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateX(42px) scale(0.96);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+      }
+    }
+    @keyframes islandEnter {
+      0% { transform: scale(.5); opacity: 0; }
+      60% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes timer {
+      from { width: 100%; }
+      to { width: 0%; }
+    }
+
+    .loading-popup.show, .success-popup.show { display: flex; animation: fadeIn 0.2s ease; }
+
+    .modal-card {
+      width: min(360px, 100%);
+      padding: 28px;
+      border-radius: 26px;
+      background: rgba(7, 14, 25, 0.96);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .spinner {
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 18px;
+      border-radius: 50%;
+      border: 4px solid rgba(255,255,255,0.12);
+      border-top-color: var(--primary);
+      animation: spin 0.85s linear infinite;
+    }
+
+    .loading-status { min-height: 22px; margin-top: 10px; font-size: 14px; color: #cce6ff; }
+
+    .check-badge {
+      width: 76px;
+      height: 76px;
+      margin: 0 auto 16px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.28), rgba(111, 240, 176, 0.23));
+      border: 1px solid rgba(111, 240, 176, 0.28);
+      box-shadow: 0 18px 36px rgba(111, 240, 176, 0.16);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .check-badge.error {
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.22), rgba(255, 108, 108, 0.22));
+      border: 1px solid rgba(255, 108, 108, 0.32);
+      box-shadow: 0 18px 36px rgba(255, 108, 108, 0.18);
+    }
+
+    .check-badge::after {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      border-radius: 50%;
+      background: rgba(111, 240, 176, 0.12);
+    }
+
+    .checkmark {
+      width: 26px;
+      height: 14px;
+      border-left: 5px solid #e4fff2;
+      border-bottom: 5px solid #e4fff2;
+      transform: rotate(-45deg);
+      position: relative;
+      z-index: 1;
+      animation: checkIn 0.35s ease 0.12s both;
+    }
+
+    .crossmark {
+      position: relative;
+      width: 28px;
+      height: 28px;
+      z-index: 1;
+      animation: checkIn 0.35s ease 0.12s both;
+    }
+
+    .crossmark::before,
+    .crossmark::after {
+      content: "";
+      position: absolute;
+      left: 12px;
+      top: 0;
+      width: 5px;
+      height: 28px;
+      border-radius: 999px;
+      background: #fff0f0;
+    }
+
+    .crossmark::before {
+      transform: rotate(45deg);
+    }
+
+    .crossmark::after {
+      transform: rotate(-45deg);
+    }
+
+    .hint { color: var(--muted); font-size: 13px; line-height: 1.55; margin-top: 8px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes otpRise { from { opacity: 0; transform: translateY(34px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @keyframes searchDropIn {
+      from {
+        opacity: 0;
+        transform: translateY(18px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    @keyframes navDropIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    @keyframes checkIn { from { opacity: 0; transform: rotate(-45deg) scale(0.6); } to { opacity: 1; transform: rotate(-45deg) scale(1); } }
+    @keyframes profileReveal {
+      0% {
+        opacity: 0.42;
+        transform: translateY(58px) scale(0.98);
+        filter: blur(16px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+      }
+    }
+
+    @media (max-width: 920px) {
+      .shell { grid-template-columns: 1fr; }
+      .hero { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
+      .stage { min-height: auto; overflow: visible; }
+      .panel {
+        position: relative;
+        inset: auto;
+        min-height: auto;
+        display: none;
+        opacity: 1;
+        pointer-events: auto;
+        transform: none;
+        overflow: visible;
+      }
+      .panel.active {
+        display: block;
+      }
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      .search-preview-grid,
+      .search-results {
+        grid-template-columns: 1fr;
+      }
+      .home-nav {
+        align-items: center;
+        gap: 14px;
+        flex-direction: row;
+        flex-wrap: wrap;
+        position: relative;
+      }
+      .home-nav-main {
+        width: 100%;
+        align-items: center;
+        gap: 12px;
+        justify-content: space-between;
+      }
+      .home-links,
+      .home-nav > .logout-btn {
+        display: none;
+      }
+      .nav-search {
+        flex: 1;
+        width: auto;
+        min-width: 0;
+        margin-left: 0;
+        position: static;
+      }
+      .search-input-wrap {
+        position: static;
+      }
+      .mobile-menu-btn {
+        display: grid;
+      }
+      .mobile-menu-panel {
+        width: 100%;
+        display: none;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 14px;
+        border-radius: 18px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.06);
+      }
+      .mobile-menu-panel.show {
+        display: grid;
+        animation: navDropIn 0.24s ease;
+      }
+      .mobile-menu-panel a,
+      .mobile-menu-panel button {
+        width: 100%;
+      }
+      .mobile-menu-links {
+        display: grid;
+        gap: 8px;
+      }
+      .mobile-menu-link {
+        color: #e6f2ff;
+        text-decoration: none;
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.06);
+        font-weight: 700;
+      }
+      .profile-top,
+      .profile-grid,
+      .search-article-body {
+        grid-template-columns: 1fr;
+      }
+      .search-account-top {
+        grid-template-columns: 1fr;
+      }
+      .profile-meta-row {
+        align-items: flex-start;
+      }
+      .profile-inline-group {
+        min-width: 0;
+        width: 100%;
+      }
+      .profile-name-row {
+        width: 100%;
+        align-items: stretch;
+        flex-direction: column;
+      }
+      .profile-nickname {
+        width: auto;
+        max-width: 100%;
+        justify-content: flex-start;
+      }
+      .profile-avatar {
+        width: 132px;
+        height: 132px;
+      }
+      .user-item {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .search-result-main,
+      .search-preview-header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+      .search-results {
+        width: auto;
+        max-width: none;
+        left: 0;
+        right: 0;
+        top: calc(100% + 1px);
+        padding: 10px;
+        border-radius: 18px;
+      }
+      .search-result-profile {
+        width: 100%;
+        justify-content: flex-start;
+      }
+      .search-result-copy strong,
+      .search-result-copy span {
+        text-align: left;
+      }
+      .user-list {
+        max-height: 500px;
+      }
+      .user-actions {
+        justify-content: flex-start;
+      }
+      .console-line {
+        grid-template-columns: 70px 58px 1fr;
+        gap: 8px;
+        font-size: 12px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 12px;
+      }
+      .shell,
+      .home-screen {
+        border-radius: 22px;
+      }
+      .hero,
+      .forms,
+      .home-body {
+        padding: 18px;
+      }
+      .panel,
+      .home-card {
+        padding: 18px;
+        border-radius: 20px;
+      }
+      .hero h1,
+      .panel h2 {
+        font-size: 28px;
+      }
+      .search-preview-title strong {
+        font-size: 26px;
+      }
+      .action-row {
+        flex-direction: column;
+      }
+      button.primary,
+      button.secondary,
+      .ghost-btn,
+      .logout-btn {
+        width: 100%;
+      }
+      .home-nav {
+        padding: 16px;
+      }
+      .home-nav-main {
+        gap: 10px;
+      }
+      .brand {
+        font-size: 18px;
+      }
+      .nav-search.expanded {
+        width: 100%;
+      }
+      .nav-search {
+        min-width: 0;
+      }
+      .search-results {
+        width: auto;
+        left: 0;
+        right: 0;
+        padding: 10px;
+        top: calc(100% + 1px);
+        border-radius: 16px;
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.26);
+      }
+      .search-results-list {
+        max-height: 300px;
+      }
+      .search-result-footer {
+        display: none;
+      }
+      .search-status {
+        min-width: 0;
+        padding-top: 0;
+      }
+      .search-result-item {
+        padding: 12px 13px;
+        border-radius: 16px;
+      }
+      .console-form {
+        grid-template-columns: 1fr;
+      }
+      .console-prompt {
+        display: none;
+      }
+      .console-screen {
+        min-height: 220px;
+        max-height: 280px;
+      }
+      .user-list {
+        max-height: 460px;
+        padding-right: 4px;
+      }
+      .toast-stack {
+        right: 12px;
+        top: auto;
+        bottom: 18px;
+      }
+      .profile-head-copy h2 {
+        font-size: 28px;
+      }
+      .profile-role-badge,
+      .profile-nickname {
+        width: auto;
+        max-width: 100%;
+      }
+      .search-input {
+        font-size: 15px;
+        padding-left: 52px;
+      }
+      .search-rotator-word {
+        font-size: 13px;
+      }
+      .search-account-title h2 {
+        font-size: 30px;
+      }
+      .telegram-bridge-meta {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero">
+      <span class="badge">OTP Telegram Flow</span>
+      <h1>Confirm dulu, lalu panel OTP turun dari bawah tombol.</h1>
+      <p>OTP tidak ditampilkan ke layar. User harus ketik sendiri kode dari Telegram, baik di register maupun login.</p>
+      <ul>
+        <li>Register baru jadi akun aktif kalau OTP register valid.</li>
+        <li>Login kirim OTP baru ke Telegram dan tampilkan panel input OTP dari bawah tombol.</li>
+        <li>Jika login berhasil, popup centang hijau akan muncul.</li>
+      </ul>
+    </section>
+
+    <section class="forms">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="login">Login</button>
+        <button class="tab-btn" data-tab="register">Register</button>
+      </div>
+
+      <div class="stage">
+        <div class="panel active" id="login-panel">
+          <h2>Login User</h2>
+          <p class="desc">Masukkan user dan password, lalu tekan confirm. Setelah itu input OTP dan tombol confirm OTP akan turun dari bawah tombol utama.</p>
+          <form id="login-form">
+            <div class="field-group">
+              <div class="field">
+                <label for="login-user">User</label>
+                <input id="login-user" name="user" type="text" placeholder="Masukkan username" required>
+              </div>
+              <div class="field">
+                <label for="login-pass">Password</label>
+                <input id="login-pass" name="password" type="password" placeholder="Masukkan password" required>
+              </div>
+            </div>
+
+            <div class="action-anchor">
+              <div class="action-row">
+                <button type="submit" class="primary">Confirm</button>
+              </div>
+              <div class="otp-drop" id="login-otp-drop">
+                <div class="otp-card">
+                  <h3>Masukkan kode OTP</h3>
+                  <p>Masukkan kode OTP yang dikirim melalui Telegram.</p>
+                  <div class="field-group" style="margin-top:14px;">
+                    <div class="field">
+                      <label for="login-otp">OTP</label>
+                      <input id="login-otp" type="text" placeholder="Masukkan kode OTP">
+                    </div>
+                  </div>
+                  <label class="check-row">
+                    <input type="checkbox" id="trust-device">
+                    <span>Percayain perangkat ini</span>
+                  </label>
+                  <div class="action-row" style="margin-top:14px;">
+                    <button type="button" class="primary" id="verify-login-btn">Confirm OTP</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="message" id="login-message"></div>
+          </form>
+        </div>
+
+        <div class="panel" id="register-panel">
+          <h2>Register User</h2>
+          <p class="desc">Masukkan data register, lalu tekan confirm. Panel OTP register akan muncul dari bawah tombol confirm dan akun baru aktif setelah OTP valid.</p>
+          <form id="register-form">
+            <div class="field-group">
+              <div class="field">
+                <label for="reg-user">User</label>
+                <input id="reg-user" name="user" type="text" placeholder="Masukkan username" required>
+              </div>
+              <div class="field">
+                <label for="reg-pass">Password</label>
+                <input id="reg-pass" name="password" type="password" placeholder="Masukkan password" required>
+              </div>
+              <div class="field">
+                <label for="reg-confirm-pass">Confirm Pass</label>
+                <input id="reg-confirm-pass" name="confirmPassword" type="password" placeholder="Ulangi password" required>
+              </div>
+              <div class="field">
+                <label for="reg-telegram">ID / Username Telegram</label>
+                <input id="reg-telegram" name="telegram" type="text" placeholder="Contoh: 7722649397 atau @comu1" required>
+              </div>
+            </div>
+
+            <div class="action-anchor">
+              <div class="action-row">
+                <button type="button" class="secondary" id="test-send">Test Kirim</button>
+                <button type="submit" class="primary">Confirm</button>
+              </div>
+              <div class="otp-drop" id="register-otp-drop">
+                <div class="otp-card">
+                  <h3>Masukkan kode OTP</h3>
+                  <p>Masukkan kode OTP register yang dikirim melalui Telegram.</p>
+                  <div class="field-group" style="margin-top:14px;">
+                    <div class="field">
+                      <label for="register-otp">OTP</label>
+                      <input id="register-otp" type="text" placeholder="Masukkan kode OTP">
+                    </div>
+                  </div>
+                  <div class="action-row" style="margin-top:14px;">
+                    <button type="button" class="primary" id="verify-register-btn">Confirm OTP</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="message" id="register-message"></div>
+          </form>
+        </div>
+      </div>
+      <a href="/" class="auth-skip-link" id="skip-login-link">skip &gt;</a>
+    </section>
+  </div>
+
+  <div class="home-screen" id="home-screen">
+    <nav class="home-nav">
+      <div class="home-nav-main">
+        <div class="brand">SitusXWb</div>
+        <div class="home-links">
+          <a href="#" id="home-nav-link">home</a>
+          <a href="#">info</a>
+          <a href="#">contact</a>
+          <a href="#" id="home-user-link">user</a>
+        </div>
+        <div class="nav-search">
+          <div class="search-input-wrap">
+            <div class="search-input-shell">
+              <button type="button" class="search-toggle-btn" id="search-toggle-btn" aria-label="Buka pencarian">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M10 4a6 6 0 1 0 3.874 10.582l4.272 4.272 1.414-1.414-4.272-4.272A6 6 0 0 0 10 4m0 2a4 4 0 1 1 0 8a4 4 0 0 1 0-8"/>
+                </svg>
+              </button>
+              <div class="search-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="M10 4a6 6 0 1 0 3.874 10.582l4.272 4.272 1.414-1.414-4.272-4.272A6 6 0 0 0 10 4m0 2a4 4 0 1 1 0 8a4 4 0 0 1 0-8"/>
+                </svg>
+              </div>
+              <div class="search-ghost-label" id="search-rotator-word">Search</div>
+              <input id="search-input" class="search-input" type="text" placeholder="Cari artikel atau username" autocomplete="off">
+            </div>
+            <div class="search-meta">
+              <div id="search-meta-text">Hasil akan muncul realtime saat kamu mengetik.</div>
+              <div class="search-chip-row">
+                <button type="button" class="search-chip" data-search-chip="azee">azee</button>
+                <button type="button" class="search-chip" data-search-chip="user:azee">user:azee</button>
+                <button type="button" class="search-chip" data-search-chip="profile">profile</button>
+              </div>
+            </div>
+            <div class="search-results" id="search-results">
+              <div class="search-results-list" id="search-results-list"></div>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Buka menu">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
+          </svg>
+        </button>
+      </div>
+      <button class="logout-btn" id="logout-btn">LOG OUT</button>
+      <div class="mobile-menu-panel" id="mobile-menu-panel">
+        <div class="mobile-menu-links">
+          <a href="#" class="mobile-menu-link" id="mobile-home-link">home</a>
+          <a href="#" class="mobile-menu-link">info</a>
+          <a href="#" class="mobile-menu-link">contact</a>
+          <a href="#" class="mobile-menu-link" id="mobile-user-link">user</a>
+        </div>
+        <button class="logout-btn" id="mobile-logout-btn">LOG OUT</button>
+      </div>
+    </nav>
+
+    <section class="home-body">
+      <div id="home-main-section" class="home-section-anchor">
+        <div class="home-card" id="visitor-home-card">
+          <h1 id="home-title" style="margin:0 0 10px;">Hai, user</h1>
+          <p class="hint" id="visitor-home-desc" style="font-size:15px; margin:0;">Kamu sudah masuk ke halaman utama visitor. Jika perangkat ini dipercaya dan IP masih sama, login berikutnya bisa langsung otomatis masuk tanpa OTP.</p>
+        </div>
+      <div id="owner-dashboard" style="display:none;">
+      <div class="stats-grid">
+        <div class="home-card">
+          <div class="hint" style="margin:0;">User Total</div>
+          <div class="stat-number" id="total-users">0</div>
+          <p class="hint" style="font-size:15px; margin:0;">Dashboard ini mendeteksi role `owner` dan `visitor` secara realtime dari database JSON.</p>
+        </div>
+
+        <div class="home-card">
+          <div class="graph-head">
+            <h3 style="margin:0;">Grafik Data</h3>
+            <button class="mini-btn danger" id="delete-role-btn" type="button">Delete Role</button>
+          </div>
+          <div class="graph-wrap" id="graph-wrap"></div>
+        </div>
+      </div>
+
+      <div class="home-card">
+        <div class="owner-topbar">
+          <div>
+        <h1 id="owner-home-title" style="margin:0 0 10px;">Hai, owner</h1>
+        <p class="hint" style="font-size:15px; margin:0 0 18px;">Dashboard owner aktif. Data role, user total, dan terakhir login ditampilkan realtime dari database JSON.</p>
+          </div>
+          <button class="ghost-btn" id="add-user-btn">Add User</button>
+        </div>
+        <div class="filter-row">
+          <div class="role-select-wrap">
+            <select id="role-filter-select"></select>
+          </div>
+        </div>
+        <div class="user-list" id="role-user-list"></div>
+        <div class="home-card console-card">
+          <div class="console-head">
+            <div class="console-dots">
+              <span class="console-dot red"></span>
+              <span class="console-dot yellow"></span>
+              <span class="console-dot green"></span>
+            </div>
+            <div class="console-title">System Log Console</div>
+          </div>
+          <div class="console-screen" id="console-screen"></div>
+          <form class="console-form" id="console-form">
+            <span class="console-prompt">admin&gt;</span>
+            <input id="console-input" class="console-input" type="text" placeholder="Ketik command: help, users, roles, check user nama, set-role user role" autocomplete="off" list="console-suggest">
+            <datalist id="console-suggest"></datalist>
+            <button type="submit" class="mini-btn info">Run</button>
+          </form>
+          <div class="console-hint-row" id="console-hint-row"></div>
+          <div class="console-help">Command: help, clear, users, roles, check user &lt;nama&gt;, set-role &lt;user&gt; &lt;role&gt;, block, unblock, delete, undelete, delete-perm, hold, release-hold, edit user, notify test/global/role:nama/user:nama | text | durasi | color | block, export log txt/json</div>
+        </div>
+      </div>
+      </div>
+      </div>
+
+      <div class="home-card profile-panel home-section-anchor" id="search-view-panel" style="display:none;"></div>
+
+      <div class="home-card profile-panel home-section-anchor" id="profile-panel" style="display:none;">
+        <div class="profile-top">
+          <div class="profile-avatar">
+            <span id="profile-avatar-text">U</span>
+            <div class="profile-edit-badge">✎</div>
+          </div>
+          <div class="profile-head-copy">
+            <h2>Profil Account</h2>
+            <p>Di sini user bisa lihat data account, nama panggilan, username, tanggal buat account, telegram, dan password yang hanya dibuka sebagian.</p>
+            <div class="profile-meta-row">
+              <div class="profile-inline-group">
+                <div class="profile-name-row">
+                  <div class="profile-nickname">
+                    <strong id="profile-display-name">User</strong>
+                    <button type="button" class="edit-chip" id="edit-display-name-btn">Edit Nama</button>
+                  </div>
+                  <div class="profile-role-badge">Role: <span id="profile-role-value">visitor</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="profile-bio-card">
+              <div class="profile-bio-head">
+                <div class="profile-bio-title">Deskripsi User</div>
+                <button type="button" class="icon-edit-btn" id="edit-bio-btn" aria-label="Edit deskripsi">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M3 17.25V21h3.75L17.8 9.94l-3.75-3.75L3 17.25zm17.71-10.04a1.003 1.003 0 0 0 0-1.42l-2.5-2.5a1.003 1.003 0 0 0-1.42 0l-1.96 1.96 3.75 3.75 2.13-1.79z"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="profile-bio-text" id="profile-bio-text">Belum ada deskripsi user.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-grid">
+          <div class="profile-item">
+            <div class="profile-label">Username</div>
+            <div class="profile-value" id="profile-user-value">-</div>
+            <div class="profile-sub" id="profile-user-history">Belum ada username sebelumnya.</div>
+            <div class="profile-actions">
+              <button type="button" class="edit-chip" id="edit-user-btn">Edit User</button>
+            </div>
+          </div>
+
+          <div class="profile-item">
+            <div class="profile-label">Tanggal Account</div>
+            <div class="profile-value" id="profile-created-at">-</div>
+            <div class="profile-sub">Field ini hanya read only.</div>
+          </div>
+
+          <div class="profile-item">
+            <div class="profile-label">Telegram</div>
+            <div class="profile-value" id="profile-telegram">-</div>
+            <div class="profile-sub" id="profile-telegram-sub">Jika username tidak terdeteksi, sistem pakai ID Telegram.</div>
+          </div>
+
+          <div class="profile-item">
+            <div class="profile-label">Password</div>
+            <div class="profile-value masked-pass" id="profile-password">********</div>
+            <div class="profile-sub">Password disembunyikan dulu. Saat dibuka hanya terbaca sebagian.</div>
+            <div class="profile-actions">
+              <button type="button" class="edit-chip" id="toggle-pass-btn">Lihat Sebagian</button>
+              <button type="button" class="edit-chip" id="edit-pass-btn">Edit Password</button>
+            </div>
+          </div>
+
+          <div class="profile-item full">
+            <div class="profile-label">Logout</div>
+            <div class="profile-value">Keluar dari account</div>
+            <div class="profile-sub">Tombol ini sama seperti logout utama. Trusted device juga ikut direset.</div>
+            <div class="profile-actions">
+              <button type="button" class="logout-btn" id="profile-logout-btn">LOG OUT</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="page-overlay" id="page-overlay"></div>
+  <div class="skeleton-sheet" id="skeleton-sheet">
+    <div class="skeleton-line big"></div>
+    <div class="skeleton-line med"></div>
+    <div class="skeleton-line small"></div>
+    <div class="skeleton-line big"></div>
+  </div>
+
+  <div class="toast-stack" id="toast-stack"></div>
+  <div class="notify-box" id="notify-box"></div>
+
+  <div class="loading-popup" id="loading-popup">
+    <div class="modal-card">
+      <div class="spinner"></div>
+      <h3>Memproses...</h3>
+      <div class="loading-status" id="loading-status">Proses membuat data...</div>
+      <p class="hint">Mohon tunggu, sistem sedang mengirim OTP dan memeriksa data.</p>
+    </div>
+  </div>
+
+  <div class="success-popup" id="success-popup">
+    <div class="modal-card">
+      <div class="check-badge" id="status-badge"><div class="checkmark" id="status-icon"></div></div>
+      <h3 id="success-title">Berhasil</h3>
+      <p class="hint" id="success-text">Proses berhasil.</p>
+      <div class="action-row" style="margin-top:16px;">
+        <button type="button" class="primary" id="close-success">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-modal" id="add-user-modal">
+    <div class="admin-modal-card">
+      <h3>Add User Instan</h3>
+      <p class="hint" style="margin:0 0 16px;">Tambah user baru langsung aktif tanpa OTP.</p>
+      <div class="field-group">
+        <div class="field">
+          <label for="admin-add-user">Username</label>
+          <input id="admin-add-user" type="text" placeholder="Masukkan username">
+        </div>
+        <div class="field">
+          <label for="admin-add-pass">Password</label>
+          <input id="admin-add-pass" type="text" placeholder="Masukkan password">
+        </div>
+        <div class="field">
+          <label for="admin-add-tele">Telegram</label>
+          <input id="admin-add-tele" type="text" placeholder="Masukkan Telegram">
+        </div>
+      </div>
+      <div class="inline-select">
+        <select id="admin-add-role">
+          <option value="visitor">visitor</option>
+          <option value="owner">owner</option>
+          <option value="costume">costume</option>
+        </select>
+      </div>
+      <div class="field" id="custom-role-wrap" style="display:none; margin-top:12px;">
+        <label for="admin-custom-role">Costume Role</label>
+        <input id="admin-custom-role" type="text" placeholder="contoh: moderator">
+      </div>
+      <div class="action-row" style="margin-top:16px;">
+        <button type="button" class="secondary" id="close-add-user">Tutup</button>
+        <button type="button" class="primary" id="submit-add-user">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-modal" id="hold-modal">
+    <div class="admin-modal-card">
+      <h3>Tahan User</h3>
+      <p class="hint" id="hold-user-caption" style="margin:0 0 16px;">Atur durasi tahan user.</p>
+      <div class="inline-time">
+        <input id="hold-hours" type="number" min="0" placeholder="00">
+        <input id="hold-minutes" type="number" min="0" max="59" placeholder="00">
+        <input id="hold-seconds" type="number" min="1" max="59" placeholder="00">
+      </div>
+      <div class="action-row" style="margin-top:16px;">
+        <button type="button" class="secondary" id="close-hold-modal">Tutup</button>
+        <button type="button" class="secondary" id="release-hold-btn">Stop Tahan</button>
+        <button type="button" class="primary" id="submit-hold-btn">Tahan</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-modal" id="set-role-modal">
+    <div class="admin-modal-card">
+      <h3>Set Role User</h3>
+      <p class="hint" id="set-role-caption" style="margin:0 0 16px;">Pilih role tujuan untuk user ini.</p>
+      <div class="inline-select">
+        <select id="set-role-select"></select>
+      </div>
+      <div class="action-row" style="margin-top:16px;">
+        <button type="button" class="secondary" id="close-set-role-modal">Batal</button>
+        <button type="button" class="primary" id="confirm-set-role-btn">Pindahkan Role</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-modal" id="delete-modal">
+    <div class="admin-modal-card">
+      <h3>Konfirmasi Delete</h3>
+      <p class="hint" id="delete-user-caption" style="margin:0 0 16px;">Apakah anda yakin untuk mendelete user ini?</p>
+      <div class="action-row">
+        <button type="button" class="secondary" id="close-delete-modal">Batal</button>
+        <button type="button" class="secondary" id="confirm-undelete-btn">Undelete</button>
+        <button type="button" class="primary" id="confirm-delete-btn">Ya, Delete</button>
+        <button type="button" class="mini-btn danger" id="confirm-delete-perm-btn">Delete Perm</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-modal" id="delete-role-modal">
+    <div class="admin-modal-card">
+      <h3>Delete Role</h3>
+      <p class="hint" style="margin:0 0 12px;">Centang role custom yang ingin dihapus.</p>
+      <div class="checklist-box" id="delete-role-checklist"></div>
+      <div class="action-row" style="margin-top:16px;">
+        <button type="button" class="secondary" id="close-delete-role-modal">Batal</button>
+        <button type="button" class="primary" id="confirm-delete-role-btn">Delete Role</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-modal" id="profile-edit-modal">
+    <div class="admin-modal-card">
+      <h3 id="profile-edit-title">Edit Profil</h3>
+      <p class="hint" id="profile-edit-caption" style="margin:0 0 16px;">Masukkan data baru.</p>
+      <div class="field">
+        <label for="profile-edit-input">Nilai Baru</label>
+        <input id="profile-edit-input" type="text" placeholder="Masukkan nilai baru">
+        <textarea id="profile-edit-textarea" placeholder="Masukkan nilai baru" style="display:none;"></textarea>
+        <div class="profile-edit-help" id="profile-edit-help">
+          <div class="hint" style="margin:0;">Format deskripsi: <code>&lt;b&gt;tebal&lt;/&gt;</code>, <code>&lt;i&gt;miring&lt;/&gt;</code>, <code>&lt;u&gt;garis bawah&lt;/&gt;</code>.</div>
+          <div class="hint" style="margin:0;">Link: <code>&lt;a l=https://contoh.com&gt;teks link&lt;link&gt;</code></div>
+        </div>
+        <div class="profile-edit-counter" id="profile-edit-counter">100/100</div>
+      </div>
+      <div class="action-row" style="margin-top:16px;">
+        <button type="button" class="secondary" id="close-profile-edit-modal">Batal</button>
+        <button type="button" class="primary" id="submit-profile-edit-btn">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen-lock" id="screen-lock">
+    <div class="modal-card">
+      <div class="spinner"></div>
+      <h3 id="screen-lock-title">Account anda ditahan</h3>
+      <p class="hint" id="screen-lock-text">Sedang dalam proses.</p>
+    </div>
+  </div>
+
+  <div class="admin-modal" id="link-confirm-modal">
+    <div class="link-confirm-card">
+      <h3 style="margin:0;">Buka Link</h3>
+      <div class="link-preview" id="link-preview-text">https://contoh.com</div>
+      <p class="hint" style="margin:0;">Kami ga bertanggung jawab atas hal ini!</p>
+      <div class="action-row" style="margin-top:4px;">
+        <button type="button" class="secondary" id="close-link-confirm">Cancel</button>
+        <button type="button" class="primary" id="confirm-link-open">Gaskun</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-modal" id="telegram-bridge-modal">
+    <div class="telegram-bridge-card">
+      <h3 style="margin:0;">Pengalihan Telegram</h3>
+      <p class="hint" style="margin:0;">Bot belum mendeteksi chat kamu. Buka bot dulu, tekan <strong>Confirm</strong>, lalu sistem akan cek start dan kirim OTP beserta ID Telegram kamu.</p>
+      <div class="telegram-bridge-meta">
+        <div class="telegram-bridge-item">
+          <div class="profile-label">Nama Bot</div>
+          <div class="telegram-bridge-value" id="telegram-bridge-bot-name">@bot</div>
+        </div>
+        <div class="telegram-bridge-item">
+          <div class="profile-label">ID Bot</div>
+          <div class="telegram-bridge-value" id="telegram-bridge-bot-id">-</div>
+        </div>
+      </div>
+      <div class="telegram-bridge-status" id="telegram-bridge-status">Menunggu konfirmasi buka bot.</div>
+      <div class="action-row" style="margin-top:4px;">
+        <button type="button" class="secondary" id="close-telegram-bridge">Cancel</button>
+        <button type="button" class="primary" id="confirm-telegram-bridge">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const tabs = document.querySelectorAll(".tab-btn");
+    const loginPanel = document.getElementById("login-panel");
+    const registerPanel = document.getElementById("register-panel");
+    const loginForm = document.getElementById("login-form");
+    const registerForm = document.getElementById("register-form");
+    const loginOtpDrop = document.getElementById("login-otp-drop");
+    const registerOtpDrop = document.getElementById("register-otp-drop");
+    const loginMessage = document.getElementById("login-message");
+    const registerMessage = document.getElementById("register-message");
+    const verifyLoginBtn = document.getElementById("verify-login-btn");
+    const skipLoginLink = document.getElementById("skip-login-link");
+    const verifyRegisterBtn = document.getElementById("verify-register-btn");
+    const trustDevice = document.getElementById("trust-device");
+    const testSendBtn = document.getElementById("test-send");
+    const loadingPopup = document.getElementById("loading-popup");
+    const loadingStatus = document.getElementById("loading-status");
+    const successPopup = document.getElementById("success-popup");
+    const successTitle = document.getElementById("success-title");
+    const successText = document.getElementById("success-text");
+    const closeSuccess = document.getElementById("close-success");
+    const statusBadge = document.getElementById("status-badge");
+    const statusIcon = document.getElementById("status-icon");
+    const shell = document.querySelector(".shell");
+    const homeScreen = document.getElementById("home-screen");
+    const homeTitle = document.getElementById("home-title");
+    const ownerHomeTitle = document.getElementById("owner-home-title");
+    const visitorHomeDesc = document.getElementById("visitor-home-desc");
+    const homeNavLink = document.getElementById("home-nav-link");
+    const homeUserLink = document.getElementById("home-user-link");
+    const mobileHomeLink = document.getElementById("mobile-home-link");
+    const mobileUserLink = document.getElementById("mobile-user-link");
+    const mobileMenuBtn = document.getElementById("mobile-menu-btn");
+    const mobileMenuPanel = document.getElementById("mobile-menu-panel");
+    const logoutBtn = document.getElementById("logout-btn");
+    const mobileLogoutBtn = document.getElementById("mobile-logout-btn");
+    const profileLogoutBtn = document.getElementById("profile-logout-btn");
+    const totalUsers = document.getElementById("total-users");
+    const graphWrap = document.getElementById("graph-wrap");
+    const roleUserList = document.getElementById("role-user-list");
+    const roleFilterSelect = document.getElementById("role-filter-select");
+    const consoleScreen = document.getElementById("console-screen");
+    const consoleForm = document.getElementById("console-form");
+    const consoleInput = document.getElementById("console-input");
+    const consoleSuggest = document.getElementById("console-suggest");
+    const consoleHintRow = document.getElementById("console-hint-row");
+    const deleteRoleBtn = document.getElementById("delete-role-btn");
+    const visitorHomeCard = document.getElementById("visitor-home-card");
+    const searchToggleBtn = document.getElementById("search-toggle-btn");
+    const searchInput = document.getElementById("search-input");
+    const searchResults = document.getElementById("search-results");
+    const searchResultsList = document.getElementById("search-results-list");
+    const searchMetaText = document.getElementById("search-meta-text");
+    const navSearch = document.querySelector(".nav-search");
+    const searchRotatorWord = document.getElementById("search-rotator-word");
+    const ownerDashboard = document.getElementById("owner-dashboard");
+    const homeMainSection = document.getElementById("home-main-section");
+    const pageOverlay = document.getElementById("page-overlay");
+    const skeletonSheet = document.getElementById("skeleton-sheet");
+    const toastStack = document.getElementById("toast-stack");
+    const notifyBox = document.getElementById("notify-box");
+    const addUserBtn = document.getElementById("add-user-btn");
+    const addUserModal = document.getElementById("add-user-modal");
+    const closeAddUser = document.getElementById("close-add-user");
+    const submitAddUser = document.getElementById("submit-add-user");
+    const adminAddRole = document.getElementById("admin-add-role");
+    const customRoleWrap = document.getElementById("custom-role-wrap");
+    const holdModal = document.getElementById("hold-modal");
+    const holdUserCaption = document.getElementById("hold-user-caption");
+    const closeHoldModal = document.getElementById("close-hold-modal");
+    const submitHoldBtn = document.getElementById("submit-hold-btn");
+    const releaseHoldBtn = document.getElementById("release-hold-btn");
+    const setRoleModal = document.getElementById("set-role-modal");
+    const setRoleCaption = document.getElementById("set-role-caption");
+    const setRoleSelect = document.getElementById("set-role-select");
+    const closeSetRoleModal = document.getElementById("close-set-role-modal");
+    const confirmSetRoleBtn = document.getElementById("confirm-set-role-btn");
+    const deleteModal = document.getElementById("delete-modal");
+    const deleteUserCaption = document.getElementById("delete-user-caption");
+    const closeDeleteModal = document.getElementById("close-delete-modal");
+    const confirmUndeleteBtn = document.getElementById("confirm-undelete-btn");
+    const confirmDeleteBtn = document.getElementById("confirm-delete-btn");
+    const confirmDeletePermBtn = document.getElementById("confirm-delete-perm-btn");
+    const deleteRoleModal = document.getElementById("delete-role-modal");
+    const deleteRoleChecklist = document.getElementById("delete-role-checklist");
+    const closeDeleteRoleModal = document.getElementById("close-delete-role-modal");
+    const confirmDeleteRoleBtn = document.getElementById("confirm-delete-role-btn");
+    const screenLock = document.getElementById("screen-lock");
+    const screenLockTitle = document.getElementById("screen-lock-title");
+    const screenLockText = document.getElementById("screen-lock-text");
+    const searchViewPanel = document.getElementById("search-view-panel");
+    const profilePanel = document.getElementById("profile-panel");
+    const profileAvatarText = document.getElementById("profile-avatar-text");
+    const profileDisplayName = document.getElementById("profile-display-name");
+    const profileRoleValue = document.getElementById("profile-role-value");
+    const profileBioText = document.getElementById("profile-bio-text");
+    const profileUserValue = document.getElementById("profile-user-value");
+    const profileUserHistory = document.getElementById("profile-user-history");
+    const profileCreatedAt = document.getElementById("profile-created-at");
+    const profileTelegram = document.getElementById("profile-telegram");
+    const profileTelegramSub = document.getElementById("profile-telegram-sub");
+    const profilePassword = document.getElementById("profile-password");
+    const editDisplayNameBtn = document.getElementById("edit-display-name-btn");
+    const editBioBtn = document.getElementById("edit-bio-btn");
+    const editUserBtn = document.getElementById("edit-user-btn");
+    const editPassBtn = document.getElementById("edit-pass-btn");
+    const togglePassBtn = document.getElementById("toggle-pass-btn");
+    const profileEditModal = document.getElementById("profile-edit-modal");
+    const profileEditTitle = document.getElementById("profile-edit-title");
+    const profileEditCaption = document.getElementById("profile-edit-caption");
+    const profileEditInput = document.getElementById("profile-edit-input");
+    const profileEditTextarea = document.getElementById("profile-edit-textarea");
+    const profileEditHelp = document.getElementById("profile-edit-help");
+    const profileEditCounter = document.getElementById("profile-edit-counter");
+    const closeProfileEditModal = document.getElementById("close-profile-edit-modal");
+    const submitProfileEditBtn = document.getElementById("submit-profile-edit-btn");
+    const linkConfirmModal = document.getElementById("link-confirm-modal");
+    const linkPreviewText = document.getElementById("link-preview-text");
+    const closeLinkConfirm = document.getElementById("close-link-confirm");
+    const confirmLinkOpen = document.getElementById("confirm-link-open");
+    const telegramBridgeModal = document.getElementById("telegram-bridge-modal");
+    const telegramBridgeBotName = document.getElementById("telegram-bridge-bot-name");
+    const telegramBridgeBotId = document.getElementById("telegram-bridge-bot-id");
+    const telegramBridgeStatus = document.getElementById("telegram-bridge-status");
+    const closeTelegramBridge = document.getElementById("close-telegram-bridge");
+    const confirmTelegramBridge = document.getElementById("confirm-telegram-bridge");
+    let loadingTimer = null;
+    let activeRole = "visitor";
+    let dashboardTimer = null;
+    let consoleTimer = null;
+    let sessionPollTimer = null;
+    let slowFetchTimer = null;
+    let dashboardCache = { roles: {} };
+    let selectedHoldUser = "";
+    let selectedDeleteUser = "";
+    let selectedDeleteStatus = "active";
+    let selectedSetRoleUser = "";
+    let pendingConsoleCommand = null;
+    let lockCountdownTimer = null;
+    let forcedExitTimer = null;
+    let activeStateReason = "";
+    let activeHoldUntil = 0;
+    let profileCache = null;
+    let isPasswordPartialShown = false;
+    let editingProfileField = "";
+    let lastProfileLoadError = "";
+    let consoleHistory = [];
+    let consoleHistoryIndex = -1;
+    let pendingLinkUrl = "";
+    let searchTimer = null;
+    let searchRequestId = 0;
+    let searchResultsCache = [];
+    let selectedSearchResultId = "";
+    let isPublicMode = false;
+    let telegramBridgeToken = "";
+    let telegramBridgeMode = "";
+    let telegramBridgeUrl = "";
+    let telegramBridgePollTimer = null;
+
+    function createDeviceToken() {
+      const seed = `${Date.now()}-${Math.random().toString(36).slice(2)}-${navigator.userAgent}`;
+      return btoa(seed).replace(/=/g, "").slice(0, 48);
+    }
+
+    function getDeviceToken() {
+      let token = localStorage.getItem("device_token");
+      if (!token) {
+        token = createDeviceToken();
+        localStorage.setItem("device_token", token);
+      }
+      return token;
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function formatConsoleTime(ts) {
+      return new Date(ts || Date.now()).toLocaleTimeString("id-ID", {
+        hour12: false,
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+      });
+    }
+
+    function downloadTextFile(filename, content, mime = "text/plain;charset=utf-8") {
+      const blob = new Blob([content], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function getConsoleBaseCommands() {
+      return [
+        "help",
+        "clear",
+        "users",
+        "roles",
+        "check user ",
+        "set-role ",
+        "block ",
+        "unblock ",
+        "delete ",
+        "undelete ",
+        "delete-perm ",
+        "hold ",
+        "release-hold ",
+        "edit user ",
+        "notify test | hallo | 4 | info",
+        "notify global | hallo semua | 4 | info",
+        "notify role:owner | hallo owner | 5 | success | block",
+        "notify user:",
+        "export log txt",
+        "export log json"
+      ];
+    }
+
+    function getConsoleUsernames() {
+      const users = Object.values(dashboardCache.roles || {}).flat().map((item) => item.user);
+      return [...new Set(users)].sort();
+    }
+
+    function getConsoleRoles() {
+      return Object.keys(dashboardCache.roles || {}).sort();
+    }
+
+    function renderConsoleSuggestions() {
+      const roleNames = getConsoleRoles();
+      const userNames = getConsoleUsernames();
+      const values = [
+        ...getConsoleBaseCommands(),
+        ...userNames.map((name) => `check user ${name}`),
+        ...userNames.map((name) => `delete ${name}`),
+        ...userNames.map((name) => `undelete ${name}`),
+        ...userNames.map((name) => `delete-perm ${name}`),
+        ...userNames.map((name) => `block ${name}`),
+        ...userNames.map((name) => `unblock ${name}`),
+        ...userNames.map((name) => `release-hold ${name}`),
+        ...userNames.map((name) => `hold ${name} 60`),
+        ...userNames.flatMap((name) => roleNames.map((role) => `set-role ${name} ${role}`)),
+        ...userNames.map((name) => `edit user ${name} tele `),
+        ...userNames.map((name) => `edit user ${name} pass `),
+        ...userNames.map((name) => `edit user ${name} role visitor`),
+        ...userNames.map((name) => `notify user:${name} | hallo ${name} | 4 | info`),
+        ...roleNames.map((role) => `notify role:${role} | hallo ${role} | 4 | info`)
+      ];
+      const uniqueValues = [...new Set(values)];
+      consoleSuggest.innerHTML = uniqueValues.map((value) => `<option value="${escapeHtml(value)}"></option>`).join("");
+    }
+
+    function renderConsoleHintChips() {
+      const chips = ["help", "users", "roles", "notify test | hallo | 4 | info", "export log txt", "clear"];
+      consoleHintRow.innerHTML = chips.map((value) => `<button type="button" class="console-chip" data-console-chip="${escapeHtml(value)}">${escapeHtml(value)}</button>`).join("");
+      consoleHintRow.querySelectorAll("[data-console-chip]").forEach((button) => {
+        button.addEventListener("click", () => {
+          consoleInput.value = button.dataset.consoleChip;
+          consoleInput.focus();
+        });
+      });
+    }
+
+    function isDestructiveConsoleCommand(command) {
+      const normalized = String(command || "").trim().toLowerCase();
+      return /^delete\s+\S+/.test(normalized) || /^delete-perm\s+\S+/.test(normalized) || /^block\s+\S+/.test(normalized);
+    }
+
+    function queueConsoleConfirm(command) {
+      pendingConsoleCommand = command;
+      notify("Konfirmasi command", `Ketik y untuk lanjut atau n untuk batal: ${command}`, "error", "block");
+      appendLocalConsolePrompt(`confirm > ${command} [y/n]`);
+    }
+
+    function appendLocalConsolePrompt(message, level = "cmd") {
+      const line = document.createElement("div");
+      line.className = "console-line";
+      line.innerHTML = `
+        <span class="console-time">${escapeHtml(formatConsoleTime())}</span>
+        <span class="console-level ${escapeHtml(level)}">${escapeHtml(level)}</span>
+        <span>${escapeHtml(message)}</span>
+      `;
+      consoleScreen.appendChild(line);
+      consoleScreen.scrollTop = consoleScreen.scrollHeight;
+    }
+
+    function removeNotify(el) {
+      el.classList.add("fade");
+      setTimeout(() => el.remove(), 300);
+    }
+
+    function notify(text, sub = null, type = "info", mode = "normal") {
+      const MAX_NOTIF = 6;
+      const LIFE_TIME = 4000;
+
+      if (sub && ["success", "error", "info"].includes(sub)) {
+        mode = type;
+        type = sub;
+        sub = null;
+      }
+
+      if (notifyBox.children.length >= MAX_NOTIF) {
+        notifyBox.children[0].remove();
+      }
+
+      const el = document.createElement("div");
+      el.className = "notify";
+      el.dataset.mode = mode;
+      if (mode === "block") {
+        el.style.cursor = "not-allowed";
+      }
+
+      el.innerHTML = `
+        <div class="notify-row">
+          <div class="notify-icon ${escapeHtml(type)}"></div>
+          <div>
+            <div class="notify-text">${escapeHtml(text)}</div>
+            ${sub ? `<div class="notify-sub">${escapeHtml(sub)}</div>` : ""}
+          </div>
+        </div>
+        <div class="notify-progress">
+          <div class="notify-bar" style="animation-duration:${LIFE_TIME}ms"></div>
+        </div>
+      `;
+
+      notifyBox.appendChild(el);
+
+      const timer = mode === "block" ? null : setTimeout(() => removeNotify(el), LIFE_TIME);
+      let startX = 0;
+      let currentX = 0;
+      let dragging = false;
+
+      el.addEventListener("click", () => {
+        if (mode === "block") {
+          return;
+        }
+        if (timer) {
+          clearTimeout(timer);
+        }
+        el.classList.add("swipe");
+        setTimeout(() => el.remove(), 300);
+      });
+
+      el.addEventListener("pointerdown", (evt) => {
+        if (mode === "block") {
+          return;
+        }
+        dragging = true;
+        startX = evt.clientX;
+        el.style.transition = "none";
+      });
+
+      const onMove = (evt) => {
+        if (!dragging) {
+          return;
+        }
+        currentX = evt.clientX - startX;
+        el.style.transform = `translateX(${currentX}px)`;
+      };
+
+      const onUp = () => {
+        if (!dragging) {
+          return;
+        }
+        dragging = false;
+        el.style.transition = ".3s";
+        if (Math.abs(currentX) > 100) {
+          if (timer) {
+            clearTimeout(timer);
+          }
+          el.classList.add("swipe");
+          setTimeout(() => el.remove(), 300);
+        } else {
+          el.style.transform = "translateX(0)";
+        }
+      };
+
+      window.addEventListener("pointermove", onMove, { passive: true });
+      window.addEventListener("pointerup", onUp, { passive: true, once: true });
+    }
+
+    function clearBlockNotifications() {
+      notifyBox.querySelectorAll('.notify[data-mode="block"]').forEach((node) => node.remove());
+    }
+
+    function showAuth(options = {}) {
+      isPublicMode = false;
+      stopTelegramBridgePolling();
+      clearBlockNotifications();
+      hideScreenLock();
+      shell.classList.remove("leaving-auth");
+      shell.style.display = "grid";
+      homeScreen.classList.remove("enter-public");
+      homeScreen.classList.remove("show");
+      mobileMenuPanel.classList.remove("show");
+      visitorHomeCard.style.display = "block";
+      ownerDashboard.style.display = "none";
+      homeMainSection.style.display = "grid";
+      searchViewPanel.style.display = "none";
+      profilePanel.style.display = "none";
+      searchInput.value = "";
+      selectedSearchResultId = "";
+      renderSearchResults([], "");
+      setSearchExpanded(false);
+      if (options.routeToLogin) {
+        openLoginRoute(!!options.replaceRoute);
+      }
+      showSkeleton(false);
+    }
+
+    function showHome(user, role = "visitor", sessionToken = "") {
+      isPublicMode = false;
+      showSkeleton(true);
+      stopTelegramBridgePolling();
+      shell.classList.remove("leaving-auth");
+      shell.style.display = "none";
+      homeScreen.classList.remove("enter-public");
+      homeScreen.classList.add("show");
+      homeTitle.textContent = "Hai, " + user;
+      ownerHomeTitle.textContent = "Hai, " + user;
+      visitorHomeDesc.textContent = "Kamu sudah masuk ke halaman utama visitor. Jika perangkat ini dipercaya dan IP masih sama, login berikutnya bisa langsung otomatis masuk tanpa OTP.";
+      localStorage.setItem("trusted_user", user);
+      localStorage.setItem("trusted_role", role);
+      if (sessionToken) {
+        localStorage.setItem("session_token", sessionToken);
+      }
+      applyHomeAuthState();
+      homeMainSection.style.display = "grid";
+      searchViewPanel.style.display = "none";
+      profilePanel.style.display = "none";
+      if (!searchInput.value.trim()) {
+        renderSearchResults([], "");
+      }
+      clearInterval(dashboardTimer);
+      clearInterval(consoleTimer);
+      if (role === "owner") {
+        visitorHomeCard.style.display = "none";
+        ownerDashboard.style.display = "grid";
+        refreshDashboard();
+        refreshConsole();
+        dashboardTimer = setInterval(refreshDashboard, 15000);
+        consoleTimer = setInterval(refreshConsole, 5000);
+      } else {
+        visitorHomeCard.style.display = "block";
+        ownerDashboard.style.display = "none";
+      }
+      clearInterval(sessionPollTimer);
+      sessionPollTimer = setInterval(pollSessionStatus, 1000);
+      pollSessionStatus();
+      void syncViewWithRoute({ replace: true });
+      setTimeout(() => showSkeleton(false), 700);
+    }
+
+    function showPublicHome(options = {}) {
+      isPublicMode = true;
+      stopTelegramBridgePolling();
+      clearBlockNotifications();
+      hideScreenLock();
+      clearInterval(dashboardTimer);
+      clearInterval(consoleTimer);
+      clearInterval(sessionPollTimer);
+      shell.style.display = "none";
+      shell.classList.remove("leaving-auth");
+      homeScreen.classList.remove("enter-public");
+      homeScreen.classList.add("show");
+      if (options.animateEntry) {
+        void homeScreen.offsetWidth;
+        homeScreen.classList.add("enter-public");
+      }
+      homeTitle.textContent = "Hai, visitor";
+      ownerHomeTitle.textContent = "Hai, visitor";
+      visitorHomeDesc.textContent = "Halaman utama ini bisa dibuka tanpa login. Kamu tetap bisa cari artikel atau lihat profil user lewat link publik.";
+      visitorHomeCard.style.display = "block";
+      ownerDashboard.style.display = "none";
+      homeMainSection.style.display = "grid";
+      searchViewPanel.style.display = "none";
+      profilePanel.style.display = "none";
+      searchInput.value = "";
+      selectedSearchResultId = "";
+      renderSearchResults([], "");
+      setSearchExpanded(false);
+      applyHomeAuthState();
+      if (options.clearRoute) {
+        clearProfileRoute(!!options.replaceRoute);
+      }
+      void syncViewWithRoute({ replace: true });
+      showSkeleton(false);
+    }
+
+    function setPanel(name) {
+      tabs.forEach((tab) => tab.classList.toggle("active", tab.dataset.tab === name));
+      loginPanel.classList.toggle("active", name === "login");
+      registerPanel.classList.toggle("active", name === "register");
+    }
+
+    function setLoading(show, texts = []) {
+      clearInterval(loadingTimer);
+      if (!show) {
+        loadingPopup.classList.remove("show");
+        loadingStatus.textContent = "Proses membuat data...";
+        return;
+      }
+      loadingPopup.classList.add("show");
+      let index = 0;
+      loadingStatus.textContent = texts[0] || "Proses membuat data...";
+      if (texts.length > 1) {
+        loadingTimer = setInterval(() => {
+          index = (index + 1) % texts.length;
+          loadingStatus.textContent = texts[index];
+        }, 850);
+      }
+    }
+
+    function setMessage(target, text, type) {
+      target.textContent = text;
+      target.className = "message " + (type || "");
+    }
+
+    function showSuccess(title, text) {
+      statusBadge.classList.remove("error");
+      statusIcon.className = "checkmark";
+      successTitle.textContent = title;
+      successText.textContent = text;
+      successPopup.classList.add("show");
+    }
+
+    function showErrorPopup(title, text) {
+      statusBadge.classList.add("error");
+      statusIcon.className = "crossmark";
+      successTitle.textContent = title;
+      successText.textContent = text;
+      successPopup.classList.add("show");
+    }
+
+    function showSkeleton(show = true) {
+      pageOverlay.classList.toggle("show", show);
+      skeletonSheet.classList.toggle("show", show);
+    }
+
+    function startSlowFetchSkeleton(delay = 550) {
+      clearTimeout(slowFetchTimer);
+      slowFetchTimer = setTimeout(() => showSkeleton(true), delay);
+    }
+
+    function stopSlowFetchSkeleton() {
+      clearTimeout(slowFetchTimer);
+      showSkeleton(false);
+    }
+
+    function showScreenLock(title, text) {
+      document.body.classList.add("body-locked");
+      screenLockTitle.textContent = title;
+      screenLockText.textContent = text;
+      screenLock.classList.add("show");
+    }
+
+    function hideScreenLock() {
+      clearInterval(lockCountdownTimer);
+      clearTimeout(forcedExitTimer);
+      lockCountdownTimer = null;
+      forcedExitTimer = null;
+      activeStateReason = "";
+      activeHoldUntil = 0;
+      document.body.classList.remove("body-locked");
+      screenLock.classList.remove("show");
+    }
+
+    function forceBackToAuth(delay = 0) {
+      clearTimeout(forcedExitTimer);
+      forcedExitTimer = setTimeout(() => {
+        localStorage.removeItem("trusted_user");
+        localStorage.removeItem("trusted_role");
+        localStorage.removeItem("session_token");
+        trustDevice.checked = false;
+        clearInterval(dashboardTimer);
+        clearInterval(consoleTimer);
+        clearInterval(sessionPollTimer);
+        showSkeleton(false);
+        hideScreenLock();
+        showAuth();
+        setPanel("login");
+      }, delay);
+    }
+
+    function startHoldCountdown(holdUntil) {
+      clearInterval(lockCountdownTimer);
+      activeHoldUntil = Number(holdUntil || 0);
+      if (!activeHoldUntil) {
+        return;
+      }
+      const update = () => {
+        const secondsLeft = Math.max(0, Math.ceil((activeHoldUntil - Date.now()) / 1000));
+        screenLockText.textContent = `time:${secondsToClock(secondsLeft)}`;
+        if (secondsLeft <= 0) {
+          clearInterval(lockCountdownTimer);
+          lockCountdownTimer = null;
+        }
+      };
+      update();
+      lockCountdownTimer = setInterval(update, 250);
+    }
+
+    function closeModal(modal) {
+      modal.classList.remove("show");
+    }
+
+    function openModal(modal) {
+      modal.classList.add("show");
+    }
+
+    function stopTelegramBridgePolling() {
+      clearInterval(telegramBridgePollTimer);
+      telegramBridgePollTimer = null;
+    }
+
+    function closeTelegramBridgeModal() {
+      stopTelegramBridgePolling();
+      telegramBridgeToken = "";
+      telegramBridgeMode = "";
+      telegramBridgeUrl = "";
+      telegramBridgeStatus.textContent = "Menunggu konfirmasi buka bot.";
+      closeModal(telegramBridgeModal);
+    }
+
+    function openTelegramBridgeModal(data = {}, mode = "register") {
+      telegramBridgeToken = String(data.linkToken || data.token || "").trim();
+      telegramBridgeMode = mode;
+      telegramBridgeUrl = String(data.startUrl || "").trim();
+      telegramBridgeBotName.textContent = data.botName || "@bot";
+      telegramBridgeBotId.textContent = data.botId || "-";
+      telegramBridgeStatus.textContent = data.message || "Buka bot dulu lalu tekan Confirm.";
+      openModal(telegramBridgeModal);
+    }
+
+    function applyTelegramBridgeSuccess(result = {}) {
+      const message = result.message || "Bot Telegram berhasil terhubung.";
+      if (telegramBridgeMode === "register") {
+        document.getElementById("register-otp").value = "";
+        registerOtpDrop.classList.add("show");
+        setMessage(registerMessage, message, "success");
+      } else {
+        setMessage(registerMessage, message, "success");
+      }
+      showSuccess("Telegram Terhubung", message);
+      closeTelegramBridgeModal();
+    }
+
+    async function pollTelegramBridgeOnce() {
+      if (!telegramBridgeToken) {
+        return;
+      }
+      try {
+        const result = await sendJson("/api/telegram/link-status", { token: telegramBridgeToken });
+        if (result.linked) {
+          applyTelegramBridgeSuccess(result);
+          return;
+        }
+        if (result.waiting) {
+          telegramBridgeStatus.textContent = result.message || "Menunggu user start bot Telegram...";
+        }
+      } catch (error) {
+        telegramBridgeStatus.textContent = error.message || "Gagal mengecek bot Telegram.";
+      }
+    }
+
+    function startTelegramBridgePolling() {
+      if (!telegramBridgeToken) {
+        return;
+      }
+      stopTelegramBridgePolling();
+      telegramBridgeStatus.textContent = "Sedang cek apakah user sudah start bot...";
+      void pollTelegramBridgeOnce();
+      telegramBridgePollTimer = setInterval(() => {
+        void pollTelegramBridgeOnce();
+      }, 2500);
+    }
+
+    function secondsToClock(totalSeconds) {
+      const safe = Math.max(0, Math.floor(totalSeconds));
+      const h = String(Math.floor(safe / 3600)).padStart(2, "0");
+      const m = String(Math.floor((safe % 3600) / 60)).padStart(2, "0");
+      const s = String(safe % 60).padStart(2, "0");
+      return `${h}:${m}:${s}`;
+    }
+
+    function maskPasswordPartially(password = "") {
+      const text = String(password || "");
+      if (!text) {
+        return "********";
+      }
+      if (text.length <= 2) {
+        return `${text[0] || "*"}***`;
+      }
+      if (text.length <= 4) {
+        return `${text.slice(0, 1)}***${text.slice(-1)}`;
+      }
+      return `${text.slice(0, 2)}***${text.slice(-2)}`;
+    }
+
+    function isValidUsername(value = "") {
+      const user = String(value || "").trim();
+      return user.length >= 2 && user.length <= 10 && /^[A-Za-z0-9#._-]+$/.test(user);
+    }
+
+    function isValidPassword(value = "") {
+      const password = String(value || "");
+      return password.length >= 2 && password.length <= 8;
+    }
+
+    function normalizeExternalUrl(url = "") {
+      const raw = String(url || "").trim();
+      if (!raw) {
+        return "";
+      }
+      if (/^https?:\/\//i.test(raw)) {
+        return raw;
+      }
+      return `https://${raw}`;
+    }
+
+    function renderBioMarkup(raw = "") {
+      const source = String(raw || "").trim();
+      if (!source) {
+        return "<p>Belum ada deskripsi user.</p>";
+      }
+
+      let text = escapeHtml(source);
+
+      const tagMap = {
+        h1: ["<h1>", "</h1>"],
+        b: ["<strong>", "</strong>"],
+        i: ["<em>", "</em>"],
+        u: ["<u>", "</u>"]
+      };
+
+      text = text.replace(/&lt;a\s+l=([^&]+(?:&amp;[^&]+)*)&gt;([\s\S]*?)&lt;link&gt;/gi, (_, urlPart, labelPart) => {
+        const safeUrl = normalizeExternalUrl(urlPart.replaceAll("&amp;", "&"));
+        const safeLabel = labelPart || safeUrl;
+        return `<a href="#" data-safe-link="${escapeHtml(safeUrl)}">${safeLabel}</a>`;
+      });
+
+      const lines = text.split("\n");
+      const renderedLines = lines.map((line) => {
+        const stack = [];
+        let output = line;
+
+        output = output.replace(/&lt;(h1|b|i|u)&gt;/gi, (_, tag) => {
+          const key = String(tag).toLowerCase();
+          stack.push(key);
+          return tagMap[key][0];
+        });
+
+        output = output.replace(/&lt;\/&gt;/g, () => {
+          if (!stack.length) {
+            return "";
+          }
+          const closers = [];
+          while (stack.length) {
+            closers.push(tagMap[stack.pop()][1]);
+          }
+          return closers.join("");
+        });
+
+        if (stack.length) {
+          while (stack.length) {
+            output += tagMap[stack.pop()][1];
+          }
+        }
+
+        return output;
+      });
+
+      return renderedLines
+        .join("\n")
+        .split(/\n{2,}/)
+        .map((paragraph) => `<p>${paragraph.replace(/\n/g, "<br>")}</p>`)
+        .join("");
+    }
+
+    function updateBioCounter() {
+      const currentLength = String(profileEditTextarea.value || "").length;
+      const remaining = Math.max(0, 100 - currentLength);
+      profileEditCounter.textContent = `${remaining}/100`;
+      profileEditCounter.classList.toggle("show", editingProfileField === "bio");
+      profileEditCounter.classList.toggle("warn", remaining <= 50 && remaining > 20);
+      profileEditCounter.classList.toggle("danger", remaining <= 20);
+    }
+
+    function openLinkConfirm(url) {
+      pendingLinkUrl = normalizeExternalUrl(url);
+      if (!pendingLinkUrl) {
+        return;
+      }
+      linkPreviewText.textContent = pendingLinkUrl;
+      openModal(linkConfirmModal);
+    }
+
+    function getReadableAccountStatus(status = "active") {
+      if (status === "blocked") {
+        return "Blocked";
+      }
+      if (status === "held") {
+        return "Ditahan";
+      }
+      if (status === "deleted") {
+        return "Deleted";
+      }
+      return "Aktif";
+    }
+
+    function getOnlineLabel(item = {}) {
+      return item.online ? "Online" : "Offline";
+    }
+
+    function getStatusDot(item = {}) {
+      return item.online ? "online" : "offline";
+    }
+
+    function getSearchPreviewInitial(text = "") {
+      return String(text || "U").trim().slice(0, 1).toUpperCase() || "U";
+    }
+
+    function buildProfileUrl(user = "") {
+      const safeUser = String(user || "").trim();
+      return safeUser ? `/?/@${encodeURIComponent(safeUser)}` : "/";
+    }
+
+    function isLoginRoute() {
+      return (window.location.search || "") === "?/loh";
+    }
+
+    function isAuthenticated() {
+      return !!(localStorage.getItem("trusted_user") && localStorage.getItem("session_token"));
+    }
+
+    function getRouteProfileUser() {
+      const rawSearch = window.location.search || "";
+      const match = rawSearch.match(/^\?\/@(.+)$/);
+      if (!match) {
+        return "";
+      }
+      try {
+        return decodeURIComponent(match[1]).trim();
+      } catch {
+        return String(match[1] || "").trim();
+      }
+    }
+
+    function updatePageRoute(url, replace = false) {
+      const nextUrl = url || "/";
+      if (`${window.location.pathname}${window.location.search}` === nextUrl) {
+        return;
+      }
+      if (replace) {
+        history.replaceState(null, "", nextUrl);
+        return;
+      }
+      history.pushState(null, "", nextUrl);
+    }
+
+    function clearProfileRoute(replace = false) {
+      updatePageRoute("/", replace);
+    }
+
+    function openLoginRoute(replace = false) {
+      updatePageRoute("/?/loh", replace);
+    }
+
+    function applyHomeAuthState() {
+      const authed = isAuthenticated() && !isPublicMode;
+      homeUserLink.textContent = authed ? (localStorage.getItem("trusted_user") || "user") : "login";
+      mobileUserLink.textContent = authed ? (localStorage.getItem("trusted_user") || "user") : "login";
+      homeUserLink.classList.toggle("nav-login-link", !authed);
+      logoutBtn.style.display = authed ? "inline-flex" : "none";
+      mobileLogoutBtn.style.display = authed ? "inline-flex" : "none";
+    }
+
+    async function loadPublicProfile(targetUser) {
+      const result = await sendJson("/api/profile/public", {
+        targetUser
+      });
+      return result.profile;
+    }
+
+    async function openPublicProfileView(targetUser, options = {}) {
+      const safeUser = String(targetUser || "").trim().replace(/^@+/, "");
+      if (!safeUser) {
+        clearProfileRoute(!!options.replace);
+        goToHomeSection({ replaceRoute: true });
+        return false;
+      }
+      const profile = await loadPublicProfile(safeUser);
+      selectedSearchResultId = profile.id || `user-${profile.user}`;
+      renderSearchView(profile);
+      if (options.updateRoute !== false) {
+        updatePageRoute(buildProfileUrl(profile.user), !!options.replace);
+      }
+      return true;
+    }
+
+    async function syncViewWithRoute(options = {}) {
+      const routeUser = getRouteProfileUser();
+      if (!routeUser) {
+        if (options.fallbackHome) {
+          if (isAuthenticated() && !isPublicMode) {
+            goToHomeSection({ replaceRoute: true });
+          } else {
+            showPublicHome();
+          }
+        }
+        return false;
+      }
+      try {
+        await openPublicProfileView(routeUser, {
+          replace: !!options.replace,
+          updateRoute: false
+        });
+        return true;
+      } catch (error) {
+        notify("Profil Tidak Ditemukan", error.message, "error");
+        clearProfileRoute(true);
+        if (isAuthenticated() && !isPublicMode) {
+          goToHomeSection({ replaceRoute: true });
+        } else {
+          showPublicHome();
+        }
+        return false;
+      }
+    }
+
+    function setSearchExpanded(expanded) {
+      navSearch.classList.toggle("expanded", expanded);
+      updateSearchDropdownPosition();
+      if (!expanded) {
+        searchResults.classList.remove("show");
+        searchResultsList.scrollTop = 0;
+        if (!searchInput.value.trim()) {
+          selectedSearchResultId = "";
+        }
+      }
+    }
+
+    function updateSearchDropdownPosition() {
+      if (!navSearch.classList.contains("expanded")) {
+        return;
+      }
+      searchResults.style.top = "";
+      searchResults.style.left = "";
+      searchResults.style.width = "";
+    }
+
+    function renderSearchView(item) {
+      if (!item) {
+        searchViewPanel.style.display = "none";
+        searchViewPanel.innerHTML = "";
+        return;
+      }
+
+      if (item.type === "article") {
+        searchViewPanel.innerHTML = `
+          <div class="search-article-hero">
+            <div class="search-article-badge">Artikel Pilihan</div>
+            <div>
+              <h2 style="margin:0 0 10px;">${escapeHtml(item.title || "Artikel")}</h2>
+              <p class="desc" style="margin:0;">${escapeHtml(item.body || "Artikel tidak punya deskripsi tambahan.")}</p>
+            </div>
+          </div>
+          <div class="search-view-divider"></div>
+          <div class="search-article-body">
+            <div class="search-article-copy">
+              <div class="profile-label">Tentang Artikel</div>
+              <p>${escapeHtml(item.content || item.body || "-")}</p>
+            </div>
+            <div class="search-article-side">
+              <div class="profile-label">Artikel Ini Membahas</div>
+              <p>${escapeHtml(item.summary || "Profile account, aktivitas, dan gambaran singkat user.")}</p>
+              <div class="search-view-divider"></div>
+              <div class="profile-label">Slug</div>
+              <div class="profile-value">${escapeHtml(item.slug || "-")}</div>
+            </div>
+          </div>
+        `;
+        homeMainSection.style.display = "none";
+        profilePanel.style.display = "none";
+        searchViewPanel.style.display = "grid";
+        searchViewPanel.classList.remove("flash");
+        void searchViewPanel.offsetWidth;
+        searchViewPanel.classList.add("flash");
+        searchViewPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+
+      const onlineLabel = getOnlineLabel(item);
+      const accountLabel = getReadableAccountStatus(item.status);
+      searchViewPanel.innerHTML = `
+        <div class="search-account-layout">
+          <div class="search-account-top">
+          <div class="profile-avatar">
+            <span>${escapeHtml(getSearchPreviewInitial(item.displayName || item.user))}</span>
+          </div>
+          <div class="search-account-hero">
+            <div class="search-account-title">
+              <h2>${escapeHtml(item.displayName || item.user || "Account")}</h2>
+              <div class="search-account-handle">@${escapeHtml(item.user || "-")}</div>
+            </div>
+            <div class="search-account-pill-row">
+              <div class="profile-role-badge">Role: ${escapeHtml(item.role || "visitor")}</div>
+              <div class="search-preview-status">
+                <span class="status-dot ${getStatusDot(item)}"></span>
+                <span>${escapeHtml(onlineLabel)}</span>
+              </div>
+              <div class="profile-nickname">
+                <strong>${escapeHtml(accountLabel)}</strong>
+              </div>
+            </div>
+              <div class="search-account-bio">
+                <div class="profile-bio-title">Deskripsi</div>
+                <div class="profile-bio-text">${renderBioMarkup(item.bio || "Belum ada deskripsi user.")}</div>
+              </div>
+          </div>
+          </div>
+        <div class="search-view-divider"></div>
+        <div class="profile-grid">
+          <div class="profile-item">
+            <div class="profile-label">Username</div>
+            <div class="profile-value">${escapeHtml(item.user || "-")}</div>
+            <div class="profile-sub">Username account.</div>
+          </div>
+          <div class="profile-item">
+            <div class="profile-label">Tanggal Account</div>
+            <div class="profile-value">${escapeHtml(item.registeredAt || "-")}</div>
+            <div class="profile-sub">Tanggal pembuatan account.</div>
+          </div>
+          <div class="profile-item">
+            <div class="profile-label">Status</div>
+            <div class="profile-value">${escapeHtml(`${onlineLabel} • ${accountLabel}`)}</div>
+            <div class="profile-sub">Hijau online, merah offline.</div>
+          </div>
+          <div class="profile-item">
+            <div class="profile-label">Nama</div>
+            <div class="profile-value">${escapeHtml(item.displayName || item.user || "-")}</div>
+            <div class="profile-sub">Nama tampilan account.</div>
+          </div>
+        </div>
+        </div>
+      `;
+      homeMainSection.style.display = "none";
+      profilePanel.style.display = "none";
+      searchViewPanel.style.display = "grid";
+      searchViewPanel.classList.remove("flash");
+      void searchViewPanel.offsetWidth;
+      searchViewPanel.classList.add("flash");
+    }
+
+    function renderSearchResults(results = [], query = "") {
+      searchResultsCache = Array.isArray(results) ? results : [];
+      const hasQuery = !!String(query || "").trim();
+      searchResults.classList.toggle("show", hasQuery);
+
+      if (!hasQuery) {
+        searchResultsList.innerHTML = "";
+        searchMetaText.textContent = "Hasil akan muncul realtime saat kamu mengetik.";
+        searchResults.classList.remove("show");
+        return;
+      }
+
+      searchMetaText.textContent = `Ditemukan ${results.length} hasil untuk "${query}".`;
+
+      if (!results.length) {
+        searchResultsList.innerHTML = `
+          <div class="search-empty">
+            Pencarian untuk <strong>${escapeHtml(query)}</strong> tidak ditemukan. Coba kata lain atau pakai format <strong>user:nama</strong>.
+          </div>
+        `;
+        selectedSearchResultId = "";
+        return;
+      }
+
+      searchResultsList.innerHTML = results.map((item, index) => {
+        const isUser = item.type === "user";
+        const title = isUser ? (item.displayName || item.user || "User") : (item.title || "Artikel");
+        const subtitle = isUser ? `@${item.user || "-"} • ${item.role || "visitor"}` : (item.body || "Artikel");
+        const statusText = isUser ? getOnlineLabel(item) : "Artikel";
+        const dotClass = isUser ? getStatusDot(item) : "article";
+        const footerLeft = isUser ? getReadableAccountStatus(item.status) : `slug: ${item.slug || "-"}`;
+        const footerRight = isUser ? (item.registeredAt || "-") : "Klik untuk lihat detail";
+        return `
+          <button type="button" class="search-result-item ${selectedSearchResultId === item.id ? "active" : ""}" data-search-result="${escapeHtml(item.id)}" style="animation-delay:${Math.min(index * 0.06, 0.42)}s">
+            <div class="search-result-main">
+              <div class="search-status">
+                <span class="status-dot ${dotClass}"></span>
+                <span>${escapeHtml(statusText)}</span>
+              </div>
+              <div class="search-result-profile">
+                <div class="search-result-copy">
+                  <strong>${escapeHtml(title)}</strong>
+                  <span>${escapeHtml(subtitle)}</span>
+                </div>
+                <div class="search-result-avatar">${escapeHtml(getSearchPreviewInitial(title))}</div>
+              </div>
+            </div>
+            <div class="search-result-footer">
+              <span class="search-result-badge ${isUser ? "" : "article"}">${escapeHtml(isUser ? "Account" : "Informasi")}</span>
+              <span>${escapeHtml(footerLeft)}</span>
+              <span>${escapeHtml(footerRight)}</span>
+            </div>
+          </button>
+        `;
+      }).join("");
+      if (!results.some((item) => item.id === selectedSearchResultId)) {
+        selectedSearchResultId = "";
+      }
+
+      searchResultsList.querySelectorAll("[data-search-result]").forEach((button) => {
+        button.addEventListener("click", () => {
+          selectedSearchResultId = button.dataset.searchResult;
+          const item = searchResultsCache.find((entry) => entry.id === selectedSearchResultId);
+          renderSearchView(item);
+          renderSearchResults(searchResultsCache, query);
+          searchResults.classList.remove("show");
+        });
+      });
+    }
+
+    function renderSearchView(item) {
+      if (!item) {
+        searchViewPanel.style.display = "none";
+        searchViewPanel.innerHTML = "";
+        return;
+      }
+
+      if (item.type === "article") {
+        searchViewPanel.innerHTML = `
+          <div class="search-article-hero">
+            <div class="search-article-badge">Artikel Pilihan</div>
+            <div>
+              <h2 style="margin:0 0 10px;">${escapeHtml(item.title || "Artikel")}</h2>
+              <p class="desc" style="margin:0;">${escapeHtml(item.body || "Artikel tidak punya deskripsi tambahan.")}</p>
+            </div>
+          </div>
+          <div class="search-view-divider"></div>
+          <div class="search-article-body">
+            <div class="search-article-copy">
+              <div class="profile-label">Tentang Artikel</div>
+              <p>${escapeHtml(item.content || item.body || "-")}</p>
+            </div>
+            <div class="search-article-side">
+              <div class="profile-label">Artikel Ini Membahas</div>
+              <p>${escapeHtml(item.summary || "Profile account, aktivitas, dan gambaran singkat user.")}</p>
+              <div class="search-view-divider"></div>
+              <div class="profile-label">Slug</div>
+              <div class="profile-value">${escapeHtml(item.slug || "-")}</div>
+            </div>
+          </div>
+        `;
+      } else {
+        const onlineLabel = getOnlineLabel(item);
+        const accountLabel = getReadableAccountStatus(item.status);
+        searchViewPanel.innerHTML = `
+          <div class="search-account-layout">
+            <div class="search-account-top">
+              <div class="profile-avatar">
+                <span>${escapeHtml(getSearchPreviewInitial(item.displayName || item.user))}</span>
+              </div>
+              <div class="search-account-hero">
+                <div class="search-account-title">
+                  <h2>${escapeHtml(item.displayName || item.user || "Account")}</h2>
+                  <div class="search-account-handle">@${escapeHtml(item.user || "-")}</div>
+                </div>
+                <div class="search-account-pill-row">
+                  <div class="profile-role-badge">Role: ${escapeHtml(item.role || "visitor")}</div>
+                  <div class="search-preview-status">
+                    <span class="status-dot ${getStatusDot(item)}"></span>
+                    <span>${escapeHtml(onlineLabel)}</span>
+                  </div>
+                  <div class="profile-nickname">
+                    <strong>${escapeHtml(accountLabel)}</strong>
+                  </div>
+                </div>
+                <div class="search-account-bio">
+                  <div class="profile-bio-title">Deskripsi</div>
+                  <div class="profile-bio-text">${renderBioMarkup(item.bio || "Belum ada deskripsi user.")}</div>
+                </div>
+              </div>
+            </div>
+            <div class="search-view-divider"></div>
+            <div class="profile-grid">
+              <div class="profile-item">
+                <div class="profile-label">Username</div>
+                <div class="profile-value">${escapeHtml(item.user || "-")}</div>
+                <div class="profile-sub">Username account.</div>
+              </div>
+              <div class="profile-item">
+                <div class="profile-label">Tanggal Account</div>
+                <div class="profile-value">${escapeHtml(item.registeredAt || "-")}</div>
+                <div class="profile-sub">Tanggal pembuatan account.</div>
+              </div>
+              <div class="profile-item">
+                <div class="profile-label">Status</div>
+                <div class="profile-value">${escapeHtml(`${onlineLabel} | ${accountLabel}`)}</div>
+                <div class="profile-sub">Hijau online, merah offline.</div>
+              </div>
+              <div class="profile-item">
+                <div class="profile-label">Nama</div>
+                <div class="profile-value">${escapeHtml(item.displayName || item.user || "-")}</div>
+                <div class="profile-sub">Nama tampilan account.</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      homeMainSection.style.display = "none";
+      profilePanel.style.display = "none";
+      searchViewPanel.style.display = "grid";
+      searchViewPanel.classList.remove("flash");
+      void searchViewPanel.offsetWidth;
+      searchViewPanel.classList.add("flash");
+      searchViewPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function renderSearchResults(results = [], query = "") {
+      searchResultsCache = Array.isArray(results) ? results : [];
+      const hasQuery = !!String(query || "").trim();
+      searchResults.classList.toggle("show", hasQuery);
+
+      if (!hasQuery) {
+        searchResultsList.innerHTML = "";
+        searchMetaText.textContent = "Hasil akan muncul realtime saat kamu mengetik.";
+        searchResults.classList.remove("show");
+        return;
+      }
+
+      searchMetaText.textContent = `Ditemukan ${results.length} hasil untuk "${query}".`;
+
+      if (!results.length) {
+        searchResultsList.innerHTML = `
+          <div class="search-empty">
+            Pencarian untuk <strong>${escapeHtml(query)}</strong> tidak ditemukan. Coba kata lain atau pakai format <strong>user:nama</strong>.
+          </div>
+        `;
+        selectedSearchResultId = "";
+        return;
+      }
+
+      searchResultsList.innerHTML = results.map((item, index) => {
+        const isUser = item.type === "user";
+        const title = isUser ? (item.displayName || item.user || "User") : (item.title || "Artikel");
+        const subtitle = isUser ? `@${item.user || "-"} | ${item.role || "visitor"}` : (item.body || "Artikel");
+        const statusText = isUser ? getOnlineLabel(item) : "Artikel";
+        const dotClass = isUser ? getStatusDot(item) : "article";
+        const footerLeft = isUser ? getReadableAccountStatus(item.status) : `slug: ${item.slug || "-"}`;
+        const footerRight = isUser ? (item.registeredAt || "-") : "Klik untuk lihat detail";
+        return `
+          <button type="button" class="search-result-item ${selectedSearchResultId === item.id ? "active" : ""}" data-search-result="${escapeHtml(item.id)}" style="animation-delay:${Math.min(index * 0.06, 0.42)}s">
+            <div class="search-result-main">
+              <div class="search-status">
+                <span class="status-dot ${dotClass}"></span>
+                <span>${escapeHtml(statusText)}</span>
+              </div>
+              <div class="search-result-profile">
+                <div class="search-result-avatar">${escapeHtml(getSearchPreviewInitial(title))}</div>
+                <div class="search-result-copy">
+                  <strong>${escapeHtml(title)}</strong>
+                  <span>${escapeHtml(subtitle)}</span>
+                </div>
+              </div>
+            </div>
+            <div class="search-result-footer">
+              <span class="search-result-badge ${isUser ? "" : "article"}">${escapeHtml(isUser ? "Account" : "Informasi")}</span>
+              <span class="search-result-meta">
+                <span>${escapeHtml(footerLeft)}</span>
+                <span>${escapeHtml(footerRight)}</span>
+              </span>
+            </div>
+          </button>
+        `;
+      }).join("");
+
+      if (!results.some((item) => item.id === selectedSearchResultId)) {
+        selectedSearchResultId = "";
+      }
+
+      searchResultsList.querySelectorAll("[data-search-result]").forEach((button) => {
+        button.addEventListener("click", async () => {
+          selectedSearchResultId = button.dataset.searchResult;
+          const item = searchResultsCache.find((entry) => entry.id === selectedSearchResultId);
+          if (item?.type === "user") {
+            try {
+              await openPublicProfileView(item.user);
+            } catch (error) {
+              notify("Profil Gagal Dibuka", error.message, "error");
+              return;
+            }
+          } else {
+            renderSearchView(item);
+            clearProfileRoute(false);
+          }
+          renderSearchResults(searchResultsCache, query);
+          searchResults.classList.remove("show");
+          searchResultsList.scrollTop = 0;
+          setSearchExpanded(false);
+          updateSearchRotatorVisibility();
+        });
+      });
+    }
+
+    async function performSearch(query) {
+      const normalized = String(query || "").trim();
+      if (!normalized) {
+        selectedSearchResultId = "";
+        renderSearchResults([], "");
+        return;
+      }
+
+      const user = localStorage.getItem("trusted_user");
+      const sessionToken = localStorage.getItem("session_token");
+      const currentRequestId = ++searchRequestId;
+      try {
+        const result = user && sessionToken && !isPublicMode
+          ? await sendJson("/api/search", { user, sessionToken, query: normalized })
+          : await sendJson("/api/search/public", { query: normalized });
+        if (currentRequestId !== searchRequestId) {
+          return;
+        }
+        renderSearchResults(result.results || [], normalized);
+      } catch (error) {
+        if (currentRequestId !== searchRequestId) {
+          return;
+        }
+        searchResults.classList.add("show");
+        searchResultsList.innerHTML = `
+          <div class="search-empty">
+            Search gagal dimuat. ${escapeHtml(error.message)}
+          </div>
+        `;
+        selectedSearchResultId = "";
+      }
+    }
+
+    function queueSearch(query) {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => performSearch(query), 220);
+    }
+
+    function updateSearchRotatorVisibility() {
+      const shouldHide = document.activeElement === searchInput || !!searchInput.value.trim() || navSearch.classList.contains("expanded");
+      searchRotatorWord.classList.toggle("hidden", shouldHide);
+    }
+
+    function renderProfile(profile) {
+      profileCache = profile;
+      isPasswordPartialShown = false;
+      const displayName = profile.displayName || profile.user || "User";
+      profileDisplayName.textContent = displayName;
+      profileRoleValue.textContent = profile.role || "visitor";
+      profileBioText.innerHTML = renderBioMarkup(profile.bio || "Belum ada deskripsi user.");
+      profileAvatarText.textContent = displayName.slice(0, 1).toUpperCase();
+      profileUserValue.textContent = profile.user || "-";
+      profileCreatedAt.textContent = profile.registeredAt || "-";
+      profileTelegram.textContent = profile.telegramUsername || profile.telegram || "-";
+      profileTelegramSub.textContent = profile.telegramUsername
+        ? `Username Telegram terdeteksi: ${profile.telegramUsername}`
+        : `Username Telegram tidak terdeteksi, pakai ID: ${profile.telegram || "-"}`;
+      profilePassword.textContent = "********";
+      togglePassBtn.textContent = "Lihat Sebagian";
+      const previousUsers = Array.isArray(profile.previousUsers) ? profile.previousUsers : [];
+      profileUserHistory.textContent = previousUsers.length
+        ? `Username sebelumnya: ${previousUsers.join(", ")}`
+        : "Belum ada username sebelumnya.";
+    }
+
+    async function loadProfile() {
+      const user = localStorage.getItem("trusted_user");
+      const sessionToken = localStorage.getItem("session_token");
+      if (!user || !sessionToken) {
+        return;
+      }
+      try {
+        const result = await sendJson("/api/profile", { user, sessionToken });
+        lastProfileLoadError = "";
+        renderProfile(result.profile);
+        return true;
+      } catch (error) {
+        console.error(error);
+        if (lastProfileLoadError !== error.message) {
+          notify("Profil gagal dimuat", error.message, "error");
+          lastProfileLoadError = error.message;
+        }
+        return false;
+      }
+    }
+
+    function goToHomeSection(options = {}) {
+      showSkeleton(true);
+      searchViewPanel.style.display = "none";
+      profilePanel.style.display = "none";
+      homeMainSection.style.display = "grid";
+      homeMainSection.classList.remove("flash");
+      void homeMainSection.offsetWidth;
+      homeMainSection.classList.add("flash");
+      homeMainSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (options.replaceRoute) {
+        clearProfileRoute(true);
+      } else if (options.updateRoute !== false) {
+        clearProfileRoute(false);
+      }
+      setTimeout(() => showSkeleton(false), 260);
+    }
+
+    async function goToProfileSection(options = {}) {
+      showSkeleton(true);
+      const loaded = await loadProfile();
+      if (!loaded) {
+        showSkeleton(false);
+        return;
+      }
+      homeMainSection.style.display = "none";
+      searchViewPanel.style.display = "none";
+      profilePanel.style.display = "grid";
+      profilePanel.classList.remove("flash");
+      void profilePanel.offsetWidth;
+      profilePanel.classList.add("flash");
+      profilePanel.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (options.replaceRoute) {
+        clearProfileRoute(true);
+      } else if (options.updateRoute !== false) {
+        clearProfileRoute(false);
+      }
+      setTimeout(() => showSkeleton(false), 260);
+    }
+
+    function openProfileEditor(field) {
+      editingProfileField = field;
+      profileEditInput.value = "";
+      profileEditInput.type = field === "pass" ? "password" : "text";
+      profileEditInput.style.display = field === "bio" ? "none" : "block";
+      profileEditTextarea.style.display = field === "bio" ? "block" : "none";
+      profileEditHelp.classList.toggle("show", field === "bio");
+      profileEditCounter.classList.toggle("show", field === "bio");
+      profileEditTextarea.value = "";
+      if (field === "display_name") {
+        profileEditTitle.textContent = "Edit Nama Panggilan";
+        profileEditCaption.textContent = "Masukkan nama panggilan baru untuk profil ini.";
+        profileEditInput.placeholder = "Contoh: Azee Keren";
+      } else if (field === "bio") {
+        profileEditTitle.textContent = "Edit Deskripsi User";
+        profileEditCaption.textContent = "Masukkan deskripsi dengan format hidup seperti bold, italic, underline, dan link.";
+        profileEditTextarea.placeholder = "Contoh:\n<b>Admin utama</>\n<i>Aktif malam hari</>\n<a l=https://contoh.com>Link saya<link>";
+        profileEditTextarea.maxLength = 100;
+        profileEditTextarea.value = profileCache?.bio || "";
+        updateBioCounter();
+      } else if (field === "user") {
+        profileEditTitle.textContent = "Edit Username";
+        profileEditCaption.textContent = "Masukkan username baru. Username lama akan masuk riwayat.";
+        profileEditInput.placeholder = "Masukkan username baru";
+      } else {
+        profileEditTitle.textContent = "Edit Password";
+        profileEditCaption.textContent = "Masukkan password baru. Tidak boleh sama dengan password sebelumnya.";
+        profileEditInput.placeholder = "Masukkan password baru";
+      }
+      openModal(profileEditModal);
+      setTimeout(() => {
+        if (field === "bio") {
+          profileEditTextarea.focus();
+        } else {
+          profileEditInput.focus();
+        }
+      }, 40);
+    }
+
+    async function submitProfileEdit() {
+      const user = localStorage.getItem("trusted_user");
+      const sessionToken = localStorage.getItem("session_token");
+      const value = (editingProfileField === "bio" ? profileEditTextarea.value : profileEditInput.value).trim();
+      if (!value) {
+        showErrorPopup("Edit Profil Gagal", "Nilai baru tidak boleh kosong.");
+        return;
+      }
+      if (editingProfileField === "bio" && value.length > 100) {
+        showErrorPopup("Edit Profil Gagal", "Deskripsi maksimal 100 karakter.");
+        return;
+      }
+      if (editingProfileField === "user" && !isValidUsername(value)) {
+        showErrorPopup("Edit Profil Gagal", "Username hanya boleh huruf, angka, #, titik, underscore, dan strip. Panjang 2 sampai 10 karakter.");
+        return;
+      }
+      if (editingProfileField === "pass" && !isValidPassword(value)) {
+        showErrorPopup("Edit Profil Gagal", "Password harus 2 sampai 8 karakter.");
+        return;
+      }
+      setLoading(true, ["Menyimpan perubahan profil...", "Memperbarui data account..."]);
+      try {
+        const result = await sendJson("/api/profile/update", {
+          user,
+          sessionToken,
+          field: editingProfileField,
+          value
+        });
+        if (result.nextUser) {
+          localStorage.setItem("trusted_user", result.nextUser);
+          homeUserLink.textContent = result.nextUser;
+          homeTitle.textContent = "Hai, " + result.nextUser;
+          ownerHomeTitle.textContent = "Hai, " + result.nextUser;
+        }
+        renderProfile(result.profile);
+        closeModal(profileEditModal);
+        showSuccess("Profil Diperbarui", result.message);
+        if (localStorage.getItem("trusted_role") === "owner") {
+          refreshDashboard();
+          refreshConsole();
+        }
+      } catch (error) {
+        showErrorPopup("Edit Profil Gagal", error.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    function updateAdminRoleOptions(data) {
+      const roles = Object.keys(data.roles || {});
+      const currentValue = adminAddRole.value;
+      const baseRoles = ["visitor", "owner"];
+      const customRoles = roles.filter((role) => !baseRoles.includes(role) && role !== "costume").sort();
+      const finalOptions = [...baseRoles, ...customRoles, "costume"];
+      adminAddRole.innerHTML = finalOptions.map((role) => `
+        <option value="${role}">${role}</option>
+      `).join("");
+      adminAddRole.value = finalOptions.includes(currentValue) ? currentValue : "visitor";
+      customRoleWrap.style.display = adminAddRole.value === "costume" ? "grid" : "none";
+    }
+
+    function renderRoleFilter(data) {
+      const roles = Object.keys(data.roles || {});
+      if (!roles.length) {
+        roleFilterSelect.innerHTML = "";
+        return;
+      }
+      if (!roles.includes(activeRole)) {
+        activeRole = roles[0];
+      }
+      roleFilterSelect.innerHTML = roles.map((role) => `
+        <option value="${role}" ${role === activeRole ? "selected" : ""}>${role}</option>
+      `).join("");
+      updateAdminRoleOptions(data);
+    }
+
+    function renderDeleteRoleChecklist() {
+      const roles = Object.keys(dashboardCache.roles || {}).filter((role) => !["visitor", "owner"].includes(role));
+      if (!roles.length) {
+        deleteRoleChecklist.innerHTML = `<div class="checklist-item"><span>Tidak ada role custom untuk dihapus.</span></div>`;
+        return;
+      }
+      deleteRoleChecklist.innerHTML = roles.map((role) => `
+        <label class="checklist-item">
+          <input type="checkbox" value="${role}">
+          <span>${role}</span>
+        </label>
+      `).join("");
+    }
+
+    function renderGraph(items) {
+      const max = Math.max(1, ...items.map((item) => item.total));
+      graphWrap.innerHTML = items.map((item) => `
+        <div class="graph-row">
+          <strong>${item.label}</strong>
+          <div class="graph-bar">
+            <div class="graph-fill" style="width:${(item.total / max) * 100}%"></div>
+          </div>
+          <span>${item.total}</span>
+        </div>
+      `).join("");
+    }
+
+    function renderRoleUsers(data) {
+      const users = data.roles?.[activeRole] || [];
+      if (!users.length) {
+        roleUserList.innerHTML = `<div class="user-item"><div><strong>${activeRole}</strong><span>Belum ada user pada role ini.</span></div></div>`;
+        return;
+      }
+
+      roleUserList.innerHTML = users.map((item) => `
+        <div class="user-item">
+          <div>
+            <strong>${item.user}</strong>
+            <span>${item.role} • ${item.status}${item.previousUsers?.length ? ` • sebelumnya: ${item.previousUsers.join(", ")}` : ""}</span>
+          </div>
+          <div style="text-align:right; min-width: 180px;">
+            <strong style="font-size:15px;">Terakhir Login</strong>
+            <span>${item.lastLogin}</span>
+          </div>
+          <div class="user-actions">
+            <button class="mini-btn info" data-action="set-role" data-user="${item.user}">Set Role</button>
+            <button class="mini-btn danger" data-action="delete" data-status="${item.status}" data-user="${item.user}">${item.status === "deleted" ? "Undelete" : "Delete"}</button>
+            <button class="mini-btn warn" data-action="hold" data-user="${item.user}">Tahan</button>
+            <button class="mini-btn info" data-action="${item.status === "blocked" ? "unblock" : "block"}" data-user="${item.user}">
+              ${item.status === "blocked" ? "Unblock" : "Block"}
+            </button>
+          </div>
+        </div>
+      `).join("");
+
+      roleUserList.querySelectorAll("[data-action]").forEach((button) => {
+        button.addEventListener("click", () => handleOwnerAction(button.dataset.user, button.dataset.action, button.dataset.status || ""));
+      });
+    }
+
+    function renderConsole(logs = []) {
+      if (!logs.length) {
+        const welcomeLines = [
+          "",
+          "> MENU HELP <",
+          "---------------",
+          "> help",
+          "> help notify",
+          "> users",
+          "> roles"
+        ];
+        consoleScreen.innerHTML = welcomeLines.map((line) => `
+          <div class="console-line">
+            <span class="console-time">${escapeHtml(formatConsoleTime())}</span>
+            <span class="console-level info">output</span>
+            <span>${escapeHtml(line)}</span>
+          </div>
+        `).join("");
+        return;
+      }
+
+      consoleScreen.innerHTML = logs.flatMap((log) => {
+        const lines = String(log.message || "").split("\n");
+        return lines.map((line, index) => `
+          <div class="console-line">
+            <span class="console-time">${index === 0 ? escapeHtml(formatConsoleTime(log.ts)) : ""}</span>
+            <span class="console-level ${escapeHtml(log.level || "info")}">${index === 0 ? escapeHtml(log.level || "info") : ""}</span>
+            <span>${escapeHtml(line)}</span>
+          </div>
+        `);
+      }).join("");
+      consoleScreen.scrollTop = consoleScreen.scrollHeight;
+    }
+
+    function addToast(event) {
+      const toast = document.createElement("div");
+      toast.className = "toast";
+      toast.dataset.id = event.id;
+      toast.dataset.mode = event.mode || "normal";
+      toast.innerHTML = `
+        <div class="toast-title">${event.title || "Notif"}</div>
+        <div class="toast-body">${event.body || ""}</div>
+        <div class="toast-time"></div>
+      `;
+      toastStack.prepend(toast);
+
+      const timeEl = toast.querySelector(".toast-time");
+      let countdown = Number(event.countdownSeconds || 0);
+      let holdUntil = Number(event.holdUntil || 0);
+      let interval = null;
+      if (holdUntil > 0 || countdown > 0) {
+        const renderTime = () => {
+          if (holdUntil > 0) {
+            const secondsLeft = Math.max(0, Math.ceil((holdUntil - Date.now()) / 1000));
+            timeEl.textContent = `time:${secondsToClock(secondsLeft)}`;
+            if (secondsLeft <= 0 && interval) {
+              clearInterval(interval);
+            }
+            return;
+          }
+          timeEl.textContent = `time:${secondsToClock(Math.max(0, countdown))}`;
+        };
+        renderTime();
+        interval = setInterval(() => {
+          if (holdUntil > 0) {
+            renderTime();
+            return;
+          }
+          countdown -= 1;
+          renderTime();
+          if (countdown <= 0) {
+            clearInterval(interval);
+          }
+        }, 1000);
+      }
+
+      let startX = 0;
+      let currentX = 0;
+      const onPointerMove = (evt) => {
+        if (toast.dataset.mode === "block") {
+          return;
+        }
+        currentX = evt.clientX - startX;
+        toast.classList.add("swiping");
+        toast.style.transform = `translateX(${currentX}px)`;
+      };
+      const onPointerUp = async () => {
+        window.removeEventListener("pointermove", onPointerMove);
+        window.removeEventListener("pointerup", onPointerUp);
+        if (toast.dataset.mode === "block") {
+          return;
+        }
+        toast.classList.remove("swiping");
+        if (Math.abs(currentX) > 90) {
+          toast.style.opacity = "0";
+          toast.style.transform = `translateX(${currentX > 0 ? 420 : -420}px)`;
+          setTimeout(() => toast.remove(), 220);
+          await sendJson("/api/events/clear", {
+            user: localStorage.getItem("trusted_user"),
+            eventId: event.id,
+            sessionToken: localStorage.getItem("session_token")
+          }).catch(() => {});
+        } else {
+          toast.style.transform = "translateX(0)";
+        }
+      };
+      toast.addEventListener("pointerdown", (evt) => {
+        if (toast.dataset.mode === "block") {
+          return;
+        }
+        startX = evt.clientX;
+        currentX = 0;
+        window.addEventListener("pointermove", onPointerMove);
+        window.addEventListener("pointerup", onPointerUp);
+      });
+    }
+
+    function applyAccountState(state) {
+      if (!state?.reason) {
+        if (activeStateReason) {
+          clearBlockNotifications();
+        }
+        showSkeleton(false);
+        hideScreenLock();
+        return;
+      }
+
+      if (state.reason === "deleted") {
+        if (activeStateReason !== "deleted") {
+          clearBlockNotifications();
+          notify("account telah didelete", "see you", "error", "block");
+        }
+        activeStateReason = "deleted";
+        showSkeleton(true);
+        showScreenLock("account telah didelete", "see you");
+        forceBackToAuth(5000);
+        return;
+      }
+
+      if (state.reason === "not-found") {
+        if (activeStateReason !== "not-found") {
+          clearBlockNotifications();
+          notify("account telah dihapus permanen", "data account sudah tidak ada di database", "error", "block");
+        }
+        activeStateReason = "not-found";
+        showSkeleton(true);
+        showScreenLock("account telah dihapus permanen", "data account sudah tidak ada di database");
+        forceBackToAuth(1800);
+        return;
+      }
+
+      if (state.reason === "blocked") {
+        if (activeStateReason !== "blocked") {
+          clearBlockNotifications();
+          notify("Account anda di suspend", "akses account sedang diblokir", "error", "block");
+        }
+        activeStateReason = "blocked";
+        showSkeleton(true);
+        showScreenLock("Account anda di suspend", "akses account sedang diblokir");
+        forceBackToAuth(1200);
+        return;
+      }
+
+      if (state.reason === "held") {
+        const holdChanged = activeStateReason !== "held" || activeHoldUntil !== Number(state.holdUntil || 0);
+        if (holdChanged) {
+          clearBlockNotifications();
+          notify("account anda ditahan, sedang dalam proses.", `time:${secondsToClock(Math.max(0, Math.ceil((Number(state.holdUntil || 0) - Date.now()) / 1000)))}`, "error", "block");
+        }
+        activeStateReason = "held";
+        showSkeleton(true);
+        showScreenLock("account anda ditahan, sedang dalam proses.", `time:${secondsToClock(Math.max(0, Math.ceil((Number(state.holdUntil || 0) - Date.now()) / 1000)))}`);
+        startHoldCountdown(state.holdUntil);
+      }
+    }
+
+    async function pollSessionStatus() {
+      const user = localStorage.getItem("trusted_user");
+      const sessionToken = localStorage.getItem("session_token");
+      if (!user || !sessionToken || document.hidden) {
+        return;
+      }
+
+      try {
+        const data = await sendJson("/api/session/status", { user, sessionToken });
+        (data.events || []).forEach((event) => {
+          if (!document.querySelector(`.toast[data-id="${event.id}"]`)) {
+            addToast(event);
+          }
+        });
+        applyAccountState(data.state || {});
+      } catch (error) {
+        console.error(error);
+        if (/session tidak valid/i.test(String(error.message || ""))) {
+          forceBackToAuth(0);
+        }
+      }
+    }
+
+    async function handleOwnerAction(user, action, status = "") {
+      if (action === "set-role") {
+        selectedSetRoleUser = user;
+        setRoleCaption.textContent = `Pilih role tujuan untuk ${user}.`;
+        const roles = Object.keys(dashboardCache.roles || {}).sort();
+        setRoleSelect.innerHTML = roles.map((role) => `<option value="${role}">${role}</option>`).join("");
+        openModal(setRoleModal);
+        return;
+      }
+
+      if (action === "delete") {
+        selectedDeleteUser = user;
+        selectedDeleteStatus = status || "active";
+        const isDeleted = selectedDeleteStatus === "deleted";
+        deleteUserCaption.textContent = isDeleted
+          ? `Account ${user} sedang dalam status delete. Mau dipulihkan lagi atau dihapus permanen?`
+          : `Apakah anda yakin untuk mendelete ${user}?`;
+        confirmDeleteBtn.style.display = isDeleted ? "none" : "inline-flex";
+        confirmDeletePermBtn.style.display = "inline-flex";
+        confirmUndeleteBtn.style.display = isDeleted ? "inline-flex" : "none";
+        openModal(deleteModal);
+        return;
+      }
+
+      if (action === "hold") {
+        selectedHoldUser = user;
+        holdUserCaption.textContent = `Atur durasi tahan untuk ${user}.`;
+        openModal(holdModal);
+        return;
+      }
+
+      setLoading(true, ["Memproses aksi owner...", "Mengirim update user..."]);
+      try {
+        const result = await sendJson("/api/admin/action", {
+          user,
+          action,
+          actor: localStorage.getItem("trusted_user") || ""
+        });
+        showSuccess("Aksi Owner Berhasil", result.message);
+        refreshDashboard();
+        refreshConsole();
+      } catch (error) {
+        showErrorPopup("Aksi Gagal", error.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    async function refreshDashboard() {
+      if (localStorage.getItem("trusted_role") !== "owner") {
+        return;
+      }
+
+      try {
+        startSlowFetchSkeleton();
+        const response = await fetch("/api/dashboard");
+        if (!response.ok) {
+          throw new Error("Gagal memuat dashboard.");
+        }
+        const data = await response.json();
+        dashboardCache = data;
+        totalUsers.textContent = data.totalUsers || 0;
+        renderGraph(data.chart || []);
+        renderRoleFilter(data);
+        renderRoleUsers(data);
+        renderConsoleSuggestions();
+        renderConsoleHintChips();
+      } catch (error) {
+        console.error(error);
+      } finally {
+        stopSlowFetchSkeleton();
+      }
+    }
+
+    async function refreshConsole() {
+      if (localStorage.getItem("trusted_role") !== "owner") {
+        return;
+      }
+
+      try {
+        startSlowFetchSkeleton();
+        const response = await fetch("/api/admin/console");
+        if (!response.ok) {
+          throw new Error("Gagal memuat console.");
+        }
+        const data = await response.json();
+        renderConsole(data.logs || []);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        stopSlowFetchSkeleton();
+      }
+    }
+
+    async function sendJson(url, payload) {
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          const error = new Error(data.message || "Terjadi kesalahan server.");
+          error.data = data;
+          throw error;
+        }
+        return data;
+      } catch (error) {
+        if (error instanceof TypeError) {
+          throw new Error("Request gagal. Cek apakah server aktif atau DevTools Request Blocking sedang menyala.");
+        }
+        throw error;
+      }
+    }
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => setPanel(tab.dataset.tab));
+    });
+
+    updateSearchRotatorVisibility();
+
+    searchToggleBtn.addEventListener("click", () => {
+      const expanded = navSearch.classList.contains("expanded");
+      setSearchExpanded(!expanded);
+      updateSearchRotatorVisibility();
+      if (!expanded) {
+        setTimeout(() => searchInput.focus(), 40);
+      }
+    });
+
+    searchInput.addEventListener("input", () => {
+      if (!navSearch.classList.contains("expanded")) {
+        setSearchExpanded(true);
+      }
+      updateSearchRotatorVisibility();
+      queueSearch(searchInput.value);
+    });
+
+    searchInput.addEventListener("focus", () => {
+      setSearchExpanded(true);
+      updateSearchRotatorVisibility();
+      updateSearchDropdownPosition();
+      searchResults.classList.toggle("show", !!searchInput.value.trim());
+    });
+
+    searchInput.addEventListener("blur", () => {
+      updateSearchRotatorVisibility();
+    });
+
+    searchInput.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        searchInput.value = "";
+        selectedSearchResultId = "";
+        renderSearchResults([], "");
+        setSearchExpanded(false);
+      }
+    });
+
+    document.querySelectorAll("[data-search-chip]").forEach((button) => {
+      button.addEventListener("click", () => {
+        searchInput.value = button.dataset.searchChip || "";
+        setSearchExpanded(true);
+        searchInput.focus();
+        updateSearchRotatorVisibility();
+        updateSearchDropdownPosition();
+        queueSearch(searchInput.value);
+      });
+    });
+
+    searchResults.addEventListener("mousedown", (event) => {
+      event.preventDefault();
+    });
+
+    searchResults.addEventListener("wheel", (event) => {
+      event.stopPropagation();
+    }, { passive: true });
+
+    window.addEventListener("scroll", updateSearchDropdownPosition, { passive: true });
+    window.addEventListener("resize", updateSearchDropdownPosition);
+    window.addEventListener("popstate", () => {
+      if (isLoginRoute()) {
+        showAuth();
+        return;
+      }
+      if (!isAuthenticated()) {
+        if (getRouteProfileUser()) {
+          showPublicHome();
+        } else {
+          showAuth();
+        }
+        return;
+      }
+      void syncViewWithRoute({ fallbackHome: true, replace: true });
+    });
+
+    document.addEventListener("click", (event) => {
+      const safeLink = event.target.closest("[data-safe-link]");
+      if (safeLink) {
+        event.preventDefault();
+        openLinkConfirm(safeLink.dataset.safeLink || "");
+        return;
+      }
+      if (!event.target.closest(".nav-search")) {
+        searchResults.classList.remove("show");
+        if (!searchInput.value.trim()) {
+          setSearchExpanded(false);
+        }
+        updateSearchRotatorVisibility();
+      }
+      if (!event.target.closest(".mobile-menu-btn") && !event.target.closest(".mobile-menu-panel")) {
+        mobileMenuPanel.classList.remove("show");
+      }
+    });
+
+    closeSuccess.addEventListener("click", () => {
+      successPopup.classList.remove("show");
+    });
+    closeLinkConfirm.addEventListener("click", () => {
+      closeModal(linkConfirmModal);
+      pendingLinkUrl = "";
+    });
+    closeTelegramBridge.addEventListener("click", () => {
+      closeTelegramBridgeModal();
+    });
+    confirmLinkOpen.addEventListener("click", () => {
+      if (pendingLinkUrl) {
+        window.open(pendingLinkUrl, "_blank", "noopener,noreferrer");
+      }
+      closeModal(linkConfirmModal);
+      pendingLinkUrl = "";
+    });
+    confirmTelegramBridge.addEventListener("click", () => {
+      if (telegramBridgeUrl) {
+        window.open(telegramBridgeUrl, "_blank", "noopener,noreferrer");
+      }
+      startTelegramBridgePolling();
+    });
+
+    logoutBtn.addEventListener("click", async () => {
+      const user = localStorage.getItem("trusted_user");
+      const sessionToken = localStorage.getItem("session_token");
+      setLoading(true, ["Mereset perangkat terpercaya...", "Mengeluarkan sesi login..."]);
+      try {
+        await sendJson("/api/logout", { user, sessionToken });
+      } catch (error) {
+        console.error(error);
+      } finally {
+        clearProfileRoute(true);
+        localStorage.removeItem("trusted_user");
+        localStorage.removeItem("trusted_role");
+        localStorage.removeItem("session_token");
+        trustDevice.checked = false;
+        clearInterval(dashboardTimer);
+        clearInterval(consoleTimer);
+        clearInterval(sessionPollTimer);
+        showAuth();
+        setPanel("login");
+        successPopup.classList.remove("show");
+        setLoading(false);
+      }
+    });
+
+    profileLogoutBtn.addEventListener("click", () => logoutBtn.click());
+    mobileLogoutBtn.addEventListener("click", () => logoutBtn.click());
+    homeNavLink.addEventListener("click", (event) => {
+      event.preventDefault();
+      mobileMenuPanel.classList.remove("show");
+      if (isAuthenticated() && !isPublicMode) {
+        goToHomeSection();
+      } else {
+        showPublicHome({ clearRoute: true, replaceRoute: true });
+      }
+    });
+    mobileHomeLink.addEventListener("click", (event) => {
+      event.preventDefault();
+      mobileMenuPanel.classList.remove("show");
+      if (isAuthenticated() && !isPublicMode) {
+        goToHomeSection();
+      } else {
+        showPublicHome({ clearRoute: true, replaceRoute: true });
+      }
+    });
+    homeUserLink.addEventListener("click", async (event) => {
+      event.preventDefault();
+      mobileMenuPanel.classList.remove("show");
+      if (!isAuthenticated() || isPublicMode) {
+        showAuth({ routeToLogin: true, replaceRoute: true });
+        return;
+      }
+      await goToProfileSection();
+    });
+    mobileUserLink.addEventListener("click", async (event) => {
+      event.preventDefault();
+      mobileMenuPanel.classList.remove("show");
+      if (!isAuthenticated() || isPublicMode) {
+        showAuth({ routeToLogin: true, replaceRoute: true });
+        return;
+      }
+      await goToProfileSection();
+    });
+    mobileMenuBtn.addEventListener("click", () => {
+      mobileMenuPanel.classList.toggle("show");
+    });
+    skipLoginLink.addEventListener("click", (event) => {
+      event.preventDefault();
+      skipLoginLink.classList.add("leaving");
+      shell.classList.add("leaving-auth");
+      setTimeout(() => {
+        skipLoginLink.classList.remove("leaving");
+        showPublicHome({ clearRoute: true, replaceRoute: true, animateEntry: true });
+      }, 260);
+    });
+
+    addUserBtn.addEventListener("click", () => openModal(addUserModal));
+    closeAddUser.addEventListener("click", () => closeModal(addUserModal));
+    closeHoldModal.addEventListener("click", () => closeModal(holdModal));
+    closeSetRoleModal.addEventListener("click", () => closeModal(setRoleModal));
+    closeDeleteModal.addEventListener("click", () => closeModal(deleteModal));
+    closeDeleteRoleModal.addEventListener("click", () => closeModal(deleteRoleModal));
+    closeProfileEditModal.addEventListener("click", () => closeModal(profileEditModal));
+    editDisplayNameBtn.addEventListener("click", () => openProfileEditor("display_name"));
+    editBioBtn.addEventListener("click", () => openProfileEditor("bio"));
+    editUserBtn.addEventListener("click", () => openProfileEditor("user"));
+    editPassBtn.addEventListener("click", () => openProfileEditor("pass"));
+    submitProfileEditBtn.addEventListener("click", submitProfileEdit);
+    profileEditTextarea.addEventListener("input", updateBioCounter);
+    togglePassBtn.addEventListener("click", () => {
+      if (!profileCache) {
+        return;
+      }
+      isPasswordPartialShown = !isPasswordPartialShown;
+      profilePassword.textContent = isPasswordPartialShown
+        ? maskPasswordPartially(profileCache.pass || "")
+        : "********";
+      togglePassBtn.textContent = isPasswordPartialShown ? "Sembunyikan" : "Lihat Sebagian";
+    });
+
+    adminAddRole.addEventListener("change", () => {
+      customRoleWrap.style.display = adminAddRole.value === "costume" ? "grid" : "none";
+    });
+
+    roleFilterSelect.addEventListener("change", () => {
+      activeRole = roleFilterSelect.value;
+      renderRoleUsers(dashboardCache);
+    });
+
+    consoleInput.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowUp") {
+        event.preventDefault();
+        if (!consoleHistory.length) {
+          return;
+        }
+        if (consoleHistoryIndex < consoleHistory.length - 1) {
+          consoleHistoryIndex += 1;
+        }
+        consoleInput.value = consoleHistory[consoleHistory.length - 1 - consoleHistoryIndex];
+        return;
+      }
+
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        if (!consoleHistory.length) {
+          return;
+        }
+        if (consoleHistoryIndex > 0) {
+          consoleHistoryIndex -= 1;
+          consoleInput.value = consoleHistory[consoleHistory.length - 1 - consoleHistoryIndex];
+        } else {
+          consoleHistoryIndex = -1;
+          consoleInput.value = "";
+        }
+      }
+    });
+
+    consoleForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const rawInput = consoleInput.value.trim();
+      if (!rawInput) {
+        return;
+      }
+
+      const normalizedInput = rawInput.toLowerCase();
+      if (pendingConsoleCommand) {
+        if (normalizedInput === "y") {
+          clearBlockNotifications();
+          consoleInput.value = "";
+          const approvedCommand = pendingConsoleCommand;
+          pendingConsoleCommand = null;
+          await runConsoleCommand(approvedCommand);
+          return;
+        }
+        if (normalizedInput === "n") {
+          clearBlockNotifications();
+          pendingConsoleCommand = null;
+          consoleInput.value = "";
+          notify("Command dibatalkan", "aksi berisiko tidak dijalankan", "info");
+          appendLocalConsolePrompt("command dibatalkan", "info");
+          return;
+        }
+        notify("Menunggu konfirmasi", "ketik y untuk lanjut atau n untuk batal", "error", "block");
+        return;
+      }
+
+      if (isDestructiveConsoleCommand(rawInput)) {
+        consoleInput.value = "";
+        queueConsoleConfirm(rawInput);
+        return;
+      }
+
+      await runConsoleCommand(rawInput);
+    });
+
+    async function runConsoleCommand(command) {
+      if (!command) {
+        return;
+      }
+      consoleHistory.push(command);
+      if (consoleHistory.length > 60) {
+        consoleHistory = consoleHistory.slice(-60);
+      }
+      consoleHistoryIndex = -1;
+      setLoading(true, ["Menjalankan command console...", "Membaca data sistem..."]);
+      try {
+        const actor = localStorage.getItem("trusted_user") || "";
+        const result = await sendJson("/api/admin/console/command", { command, actor });
+        consoleInput.value = "";
+        await refreshDashboard();
+        await refreshConsole();
+        if (result.download?.filename && typeof result.download.content === "string") {
+          downloadTextFile(result.download.filename, result.download.content, result.download.mime || "text/plain;charset=utf-8");
+        }
+        notify("Command berhasil", result.message, "success");
+      } catch (error) {
+        await refreshConsole();
+        notify("Command gagal", error.message, "error");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    deleteRoleBtn.addEventListener("click", async () => {
+      renderDeleteRoleChecklist();
+      openModal(deleteRoleModal);
+    });
+
+    confirmDeleteRoleBtn.addEventListener("click", async () => {
+      const selectedRoles = Array.from(deleteRoleChecklist.querySelectorAll('input[type="checkbox"]:checked'))
+        .map((input) => input.value);
+      if (!selectedRoles.length) {
+        showErrorPopup("Delete Role Gagal", "Pilih minimal satu role untuk dihapus.");
+        return;
+      }
+      setLoading(true, ["Menghapus role...", "Memindahkan user ke visitor..."]);
+      try {
+        for (const role of selectedRoles) {
+          await sendJson("/api/admin/action", {
+            action: "delete_role",
+            role,
+            actor: localStorage.getItem("trusted_user") || ""
+          });
+        }
+        closeModal(deleteRoleModal);
+        showSuccess("Role Dihapus", "Role yang dicentang berhasil dihapus dan user di dalamnya dikembalikan ke visitor.");
+        refreshDashboard();
+        refreshConsole();
+      } catch (error) {
+        showErrorPopup("Delete Role Gagal", error.message);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    submitAddUser.addEventListener("click", async () => {
+      const adminUserValue = document.getElementById("admin-add-user").value.trim();
+      const adminPassValue = document.getElementById("admin-add-pass").value.trim();
+      if (!isValidUsername(adminUserValue)) {
+        showErrorPopup("Add User Gagal", "Username hanya boleh huruf, angka, #, titik, underscore, dan strip. Panjang 2 sampai 10 karakter.");
+        return;
+      }
+      if (!isValidPassword(adminPassValue)) {
+        showErrorPopup("Add User Gagal", "Password harus 2 sampai 8 karakter.");
+        return;
+      }
+      setLoading(true, ["Menambah user baru...", "Menyimpan ke database..."]);
+      try {
+        const result = await sendJson("/api/admin/add-user", {
+          user: adminUserValue,
+          password: adminPassValue,
+          telegram: document.getElementById("admin-add-tele").value.trim(),
+          role: document.getElementById("admin-add-role").value,
+          customRole: document.getElementById("admin-custom-role").value.trim()
+        });
+        closeModal(addUserModal);
+        showSuccess("Add User Berhasil", result.message);
+        refreshDashboard();
+        refreshConsole();
+      } catch (error) {
+        showErrorPopup("Add User Gagal", error.message);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    confirmDeleteBtn.addEventListener("click", async () => {
+      setLoading(true, ["Mendelete account...", "Mengirim notif realtime..."]);
+      try {
+        const result = await sendJson("/api/admin/action", {
+          user: selectedDeleteUser,
+          action: "delete",
+          actor: localStorage.getItem("trusted_user") || ""
+        });
+        closeModal(deleteModal);
+        showSuccess("Delete Berhasil", result.message);
+        refreshDashboard();
+        refreshConsole();
+      } catch (error) {
+        showErrorPopup("Delete Gagal", error.message);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    confirmUndeleteBtn.addEventListener("click", async () => {
+      setLoading(true, ["Memulihkan account...", "Mengembalikan status user..."]);
+      try {
+        const result = await sendJson("/api/admin/action", {
+          user: selectedDeleteUser,
+          action: "undelete",
+          actor: localStorage.getItem("trusted_user") || ""
+        });
+        closeModal(deleteModal);
+        showSuccess("Undelete Berhasil", result.message);
+        refreshDashboard();
+        refreshConsole();
+      } catch (error) {
+        showErrorPopup("Undelete Gagal", error.message);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    confirmDeletePermBtn.addEventListener("click", async () => {
+      setLoading(true, ["Menghapus permanen account...", "Membersihkan data JSON..."]);
+      try {
+        const result = await sendJson("/api/admin/action", {
+          user: selectedDeleteUser,
+          action: "delete_perm",
+          actor: localStorage.getItem("trusted_user") || ""
+        });
+        closeModal(deleteModal);
+        showSuccess("Delete Permanen Berhasil", result.message);
+        refreshDashboard();
+        refreshConsole();
+      } catch (error) {
+        showErrorPopup("Delete Permanen Gagal", error.message);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    confirmSetRoleBtn.addEventListener("click", async () => {
+      setLoading(true, ["Memindahkan role user...", "Menyimpan perubahan role..."]);
+      try {
+        const result = await sendJson("/api/admin/action", {
+          user: selectedSetRoleUser,
+          action: "set_role",
+          role: setRoleSelect.value,
+          actor: localStorage.getItem("trusted_user") || ""
+        });
+        closeModal(setRoleModal);
+        showSuccess("Role Berhasil Diubah", result.message);
+        refreshDashboard();
+        refreshConsole();
+      } catch (error) {
+        showErrorPopup("Set Role Gagal", error.message);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    submitHoldBtn.addEventListener("click", async () => {
+      const h = Number(document.getElementById("hold-hours").value || 0);
+      const m = Number(document.getElementById("hold-minutes").value || 0);
+      const s = Number(document.getElementById("hold-seconds").value || 0);
+      const total = (h * 3600) + (m * 60) + s;
+      setLoading(true, ["Menahan account...", "Mengirim notif realtime..."]);
+      try {
+        const result = await sendJson("/api/admin/action", {
+          user: selectedHoldUser,
+          action: "hold",
+          durationSeconds: total,
+          actor: localStorage.getItem("trusted_user") || ""
+        });
+        closeModal(holdModal);
+        showSuccess("User Ditahan", result.message);
+        refreshDashboard();
+        refreshConsole();
+      } catch (error) {
+        showErrorPopup("Tahan Gagal", error.message);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    releaseHoldBtn.addEventListener("click", async () => {
+      setLoading(true, ["Menghentikan tahan...", "Mengirim notif realtime..."]);
+      try {
+        const result = await sendJson("/api/admin/action", {
+          user: selectedHoldUser,
+          action: "release_hold",
+          actor: localStorage.getItem("trusted_user") || ""
+        });
+        closeModal(holdModal);
+        showSuccess("Tahan Dihentikan", result.message);
+        refreshDashboard();
+        refreshConsole();
+      } catch (error) {
+        showErrorPopup("Stop Tahan Gagal", error.message);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    testSendBtn.addEventListener("click", async () => {
+      setMessage(registerMessage, "", "");
+      setLoading(true, ["Menyiapkan pesan test...", "Mengirim ke Telegram..."]);
+      try {
+        const result = await sendJson("/api/register/test-send", {
+          user: registerForm.user.value.trim(),
+          telegram: registerForm.telegram.value.trim()
+        });
+        setMessage(registerMessage, result.message, "success");
+      } catch (error) {
+        if (error.data?.needsTelegramStart) {
+          openTelegramBridgeModal(error.data, "test");
+        }
+        setMessage(registerMessage, error.message, "error");
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    registerForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      setMessage(registerMessage, "", "");
+      registerOtpDrop.classList.remove("show");
+      if (!isValidUsername(registerForm.user.value)) {
+        setMessage(registerMessage, "Username hanya boleh huruf, angka, #, titik, underscore, dan strip. Panjang 2 sampai 10 karakter.", "error");
+        return;
+      }
+      if (!isValidPassword(registerForm.password.value)) {
+        setMessage(registerMessage, "Password harus 2 sampai 8 karakter.", "error");
+        return;
+      }
+      if (registerForm.password.value !== registerForm.confirmPassword.value) {
+        setMessage(registerMessage, "Password dan confirm password harus sama.", "error");
+        return;
+      }
+      setLoading(true, ["Membuat data register...", "Mengirim OTP register...", "Menyiapkan form OTP..."]);
+      try {
+        const result = await sendJson("/api/register", {
+          user: registerForm.user.value.trim(),
+          password: registerForm.password.value,
+          confirmPassword: registerForm.confirmPassword.value,
+          telegram: registerForm.telegram.value.trim()
+        });
+        document.getElementById("register-otp").value = "";
+        registerOtpDrop.classList.add("show");
+        setMessage(registerMessage, result.message, "success");
+      } catch (error) {
+        if (error.data?.needsTelegramStart) {
+          openTelegramBridgeModal(error.data, "register");
+        }
+        setMessage(registerMessage, error.message, "error");
+        if (error.message.toLowerCase().includes("username sudah terdaftar")) {
+          showErrorPopup("Username Sudah Dipakai", "Username ini telah digunakan dan dipakai user lain. Gunakan username lain.");
+        }
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    verifyRegisterBtn.addEventListener("click", async () => {
+      setMessage(registerMessage, "", "");
+      setLoading(true, ["Memeriksa OTP register...", "Menyimpan akun aktif..."]);
+      try {
+        const result = await sendJson("/api/register/verify", {
+          user: registerForm.user.value.trim(),
+          password: registerForm.password.value,
+          otp: document.getElementById("register-otp").value.trim()
+        });
+        setMessage(registerMessage, result.message, "success");
+        showSuccess("DATA TELAH BERHASIL", "Akun berhasil dibuat dan sekarang sudah bisa dipakai login.");
+        setPanel("login");
+      } catch (error) {
+        setMessage(registerMessage, error.message, "error");
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    loginForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      setMessage(loginMessage, "", "");
+      loginOtpDrop.classList.remove("show");
+      setLoading(true, ["Memeriksa data login...", "Mengirim OTP login...", "Menyiapkan form OTP..."]);
+      try {
+        const result = await sendJson("/api/login", {
+          user: loginForm.user.value.trim(),
+          password: loginForm.password.value,
+          deviceToken: getDeviceToken()
+        });
+        if (result.autoLogin) {
+          setMessage(loginMessage, result.message, "success");
+          showHome(result.user, result.role || "visitor", result.sessionToken || "");
+          return;
+        }
+        document.getElementById("login-otp").value = "";
+        loginOtpDrop.classList.add("show");
+        setMessage(loginMessage, result.message, "success");
+      } catch (error) {
+        setMessage(loginMessage, error.message, "error");
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    verifyLoginBtn.addEventListener("click", async () => {
+      setMessage(loginMessage, "", "");
+      setLoading(true, ["Memeriksa OTP login...", "Menyelesaikan login..."]);
+      try {
+        const result = await sendJson("/api/login/verify", {
+          user: loginForm.user.value.trim(),
+          password: loginForm.password.value,
+          otp: document.getElementById("login-otp").value.trim(),
+          trustDevice: trustDevice.checked,
+          deviceToken: getDeviceToken()
+        });
+        setMessage(loginMessage, result.message, "success");
+        showSuccess("Login Berhasil", "Hai, " + result.user + ".");
+        showHome(result.user, result.role || "visitor", result.sessionToken || "");
+      } catch (error) {
+        setMessage(loginMessage, error.message, "error");
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    async function restoreTrustedSession() {
+      if (isLoginRoute()) {
+        showAuth();
+        return;
+      }
+      if (getRouteProfileUser()) {
+        showPublicHome();
+        return;
+      }
+      const savedUser = localStorage.getItem("trusted_user");
+      if (!savedUser) {
+        showAuth();
+        return;
+      }
+
+      try {
+        const result = await sendJson("/api/session/auto", {
+          user: savedUser,
+          deviceToken: getDeviceToken()
+        });
+        showHome(result.user, result.role || localStorage.getItem("trusted_role") || "visitor", result.sessionToken || "");
+        clearInterval(sessionPollTimer);
+        sessionPollTimer = setInterval(pollSessionStatus, 1000);
+        pollSessionStatus();
+      } catch {
+        localStorage.removeItem("trusted_user");
+        localStorage.removeItem("trusted_role");
+        localStorage.removeItem("session_token");
+        showAuth();
+      }
+    }
+
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden && localStorage.getItem("trusted_user") && localStorage.getItem("session_token")) {
+        pollSessionStatus();
+      }
+    });
+
+    restoreTrustedSession();
+  </script>
+</body>
+</html>

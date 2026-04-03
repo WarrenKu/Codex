@@ -1,0 +1,1358 @@
+{
+  "reg": {
+    "01-04-26": {
+      "22-13-03": {
+        "az": {
+          "user": "az",
+          "tele": "7722649397",
+          "pass": "az",
+          "otprial": "cG3XN",
+          "use": "yes",
+          "send": "berhasil kirim",
+          "status": "success",
+          "role": "owner",
+          "trusted": "no",
+          "trusted_ip": "",
+          "hold_until": 1775057648470,
+          "blocked": "no",
+          "deleted": "yes"
+        }
+      },
+      "22-34-45": {
+        "ar": {
+          "user": "ar",
+          "tele": "7722649397",
+          "pass": "ar",
+          "otprial": "",
+          "use": "yes",
+          "send": "owner-add-user",
+          "status": "success",
+          "role": "owner",
+          "trusted": "no",
+          "trusted_ip": "",
+          "blocked": "no",
+          "hold_until": 1775058827220,
+          "deleted": "no"
+        }
+      },
+      "22-41-37": {
+        "sd": {
+          "user": "sd",
+          "tele": "7722649397",
+          "pass": "sd",
+          "otprial": "",
+          "use": "yes",
+          "send": "owner-add-user",
+          "status": "success",
+          "role": "owner",
+          "trusted": "no",
+          "trusted_ip": "",
+          "blocked": "no",
+          "hold_until": 0,
+          "deleted": "no"
+        }
+      },
+      "22-49-11": {
+        "f": {
+          "user": "f",
+          "tele": "7722649397",
+          "pass": "f",
+          "otprial": "",
+          "use": "yes",
+          "send": "owner-add-user",
+          "status": "success",
+          "role": "ssssss",
+          "trusted": "no",
+          "trusted_ip": "",
+          "blocked": "no",
+          "hold_until": 0,
+          "deleted": "yes",
+          "trusted_token": ""
+        }
+      },
+      "22-53-28": {
+        "2323": {
+          "user": "2323",
+          "tele": "3232",
+          "pass": "3232",
+          "otprial": "",
+          "use": "yes",
+          "send": "owner-add-user",
+          "status": "success",
+          "role": "visitor",
+          "trusted": "no",
+          "trusted_ip": "",
+          "blocked": "no",
+          "hold_until": 0,
+          "deleted": "no"
+        }
+      },
+      "22-54-49": {
+        "aze": {
+          "user": "aze",
+          "tele": "7722649397",
+          "pass": "aze",
+          "otprial": "y5obM",
+          "use": "yes",
+          "send": "berhasil kirim",
+          "status": "success",
+          "role": "owner",
+          "trusted": "yes",
+          "trusted_ip": "::1",
+          "blocked": "no",
+          "hold_until": 1775115933884,
+          "deleted": "no",
+          "trusted_token": "MTc3NTEwNzE2ODA5Ny10NjNua2ljY3lvLU1vemlsbGEvNS4w",
+          "active_session_token": "sess_mnhgdc3t_38zey7gdaao"
+        }
+      },
+      "23-04-30": {
+        "2113": {
+          "user": "2113",
+          "tele": "7722649397",
+          "pass": "2113",
+          "otprial": "",
+          "use": "yes",
+          "send": "owner-add-user",
+          "status": "success",
+          "role": "ssssss",
+          "trusted": "no",
+          "trusted_ip": "",
+          "blocked": "no",
+          "hold_until": 0,
+          "deleted": "no"
+        }
+      }
+    },
+    "02-04-26": {
+      "12-38-14": {
+        "22": {
+          "user": "22",
+          "tele": "22",
+          "pass": "22",
+          "otprial": "",
+          "use": "yes",
+          "send": "owner-add-user",
+          "status": "success",
+          "role": "owner",
+          "trusted": "no",
+          "trusted_ip": "",
+          "trusted_token": "",
+          "blocked": "no",
+          "hold_until": 0,
+          "deleted": "no"
+        }
+      },
+      "12-42-38": {
+        "wdw": {
+          "user": "wdw",
+          "tele": "7722649397",
+          "pass": "wdw",
+          "otprial": "",
+          "use": "yes",
+          "send": "owner-add-user",
+          "status": "success",
+          "role": "visitor",
+          "trusted": "no",
+          "trusted_ip": "",
+          "trusted_token": "",
+          "blocked": "no",
+          "hold_until": 0,
+          "deleted": "no"
+        }
+      },
+      "12-44-04": {
+        "wdww": {
+          "user": "wdww",
+          "tele": "7722649397",
+          "pass": "wdww",
+          "otprial": "",
+          "use": "yes",
+          "send": "owner-add-user",
+          "status": "success",
+          "role": "visitor",
+          "trusted": "no",
+          "trusted_ip": "",
+          "trusted_token": "",
+          "blocked": "no",
+          "hold_until": 0,
+          "deleted": "no"
+        }
+      },
+      "12-45-31": {
+        "as": {
+          "user": "as",
+          "tele": "7722649397",
+          "pass": "as",
+          "otprial": "nSz2s",
+          "use": "yes",
+          "send": "berhasil kirim",
+          "status": "success",
+          "role": "visitor",
+          "trusted": "no",
+          "trusted_ip": "",
+          "trusted_token": "",
+          "blocked": "no",
+          "hold_until": 0,
+          "deleted": "no"
+        }
+      },
+      "13-47-46": {
+        "s": {
+          "user": "s",
+          "tele": "s",
+          "pass": "s",
+          "otprial": "",
+          "use": "yes",
+          "send": "owner-add-user",
+          "status": "success",
+          "role": "qweq2rqw",
+          "trusted": "no",
+          "trusted_ip": "",
+          "trusted_token": "",
+          "blocked": "no",
+          "hold_until": 1775116131613,
+          "deleted": "no"
+        }
+      },
+      "14-15-03": {
+        "b": {
+          "user": "b",
+          "tele": "7722649397",
+          "pass": "b",
+          "otprial": "bnnYh",
+          "use": "yes",
+          "send": "berhasil kirim",
+          "status": "success",
+          "role": "visitor",
+          "trusted": "no",
+          "trusted_ip": "",
+          "trusted_token": "",
+          "blocked": "no",
+          "hold_until": 1775114381173,
+          "deleted": "no"
+        }
+      },
+      "14-49-42": {
+        "we": {
+          "user": "we",
+          "tele": "7722649397",
+          "pass": "we",
+          "otprial": "",
+          "use": "yes",
+          "send": "owner-add-user",
+          "status": "success",
+          "role": "sadawd",
+          "trusted": "no",
+          "trusted_ip": "",
+          "trusted_token": "",
+          "blocked": "no",
+          "hold_until": 0,
+          "deleted": "no"
+        }
+      },
+      "14-50-05": {
+        "12": {
+          "user": "12",
+          "tele": "7722649397",
+          "pass": "12",
+          "otprial": "",
+          "use": "yes",
+          "send": "owner-add-user",
+          "status": "success",
+          "role": "qweq2",
+          "trusted": "no",
+          "trusted_ip": "",
+          "trusted_token": "",
+          "blocked": "no",
+          "hold_until": 0,
+          "deleted": "no"
+        }
+      },
+      "14-50-13": {
+        "11": {
+          "user": "11",
+          "tele": "7722649397",
+          "pass": "11",
+          "otprial": "",
+          "use": "yes",
+          "send": "owner-add-user",
+          "status": "success",
+          "role": "qweq2",
+          "trusted": "no",
+          "trusted_ip": "",
+          "trusted_token": "",
+          "blocked": "no",
+          "hold_until": 0,
+          "deleted": "no"
+        }
+      },
+      "14-50-28": {
+        "wwwq": {
+          "user": "wwwq",
+          "tele": "7722649397",
+          "pass": "wwwq",
+          "otprial": "",
+          "use": "yes",
+          "send": "owner-add-user",
+          "status": "success",
+          "role": "qweq2rqw",
+          "trusted": "no",
+          "trusted_ip": "",
+          "trusted_token": "",
+          "blocked": "no",
+          "hold_until": 0,
+          "deleted": "no"
+        }
+      },
+      "18-40-08": {
+        "fe": {
+          "user": "fe",
+          "tele": "7722649397",
+          "pass": "de",
+          "otprial": "H9nRB",
+          "use": "yes",
+          "send": "berhasil kirim",
+          "status": "success",
+          "role": "visitor",
+          "trusted": "no",
+          "trusted_ip": "",
+          "trusted_token": "",
+          "blocked": "no",
+          "hold_until": 0,
+          "deleted": "no"
+        }
+      },
+      "18-41-20": {
+        "ee": {
+          "user": "ee",
+          "tele": "7722649397",
+          "pass": "ee",
+          "otprial": "5R8iw",
+          "use": "yes",
+          "send": "berhasil kirim",
+          "status": "success",
+          "role": "visitor",
+          "trusted": "no",
+          "trusted_ip": "",
+          "trusted_token": "",
+          "blocked": "no",
+          "hold_until": 0,
+          "deleted": "no"
+        }
+      },
+      "19-04-57": {
+        "azee": {
+          "user": "azee",
+          "tele": "7722649397",
+          "pass": "azee",
+          "otprial": "ajreJ",
+          "use": "yes",
+          "send": "berhasil kirim",
+          "status": "success",
+          "role": "visitor",
+          "trusted": "no",
+          "trusted_ip": "",
+          "trusted_token": "",
+          "active_session_token": "",
+          "blocked": "no",
+          "hold_until": 0,
+          "deleted": "no"
+        }
+      },
+      "19-16-44": {
+        "wrw": {
+          "user": "wrw",
+          "tele": "7722649397",
+          "pass": "wrw",
+          "otprial": "rSkre",
+          "use": "yes",
+          "send": "berhasil kirim",
+          "status": "success",
+          "role": "visitor",
+          "trusted": "no",
+          "trusted_ip": "",
+          "trusted_token": "",
+          "active_session_token": "",
+          "blocked": "no",
+          "hold_until": 0,
+          "deleted": "no"
+        }
+      }
+    }
+  },
+  "log": {
+    "01-04-26": {
+      "22-13-22": {
+        "az": {
+          "user": "az",
+          "tele": "7722649397",
+          "pass": "az",
+          "otprial": "XCjCb",
+          "percya": "yes",
+          "ip": "::1",
+          "send": "berhasil kirim"
+        }
+      },
+      "22-16-05": {
+        "az": {
+          "user": "az",
+          "tele": "7722649397",
+          "pass": "az",
+          "otprial": "zs45b",
+          "percya": "yes",
+          "ip": "::1",
+          "send": "berhasil kirim"
+        }
+      },
+      "22-25-37": {
+        "az": {
+          "user": "az",
+          "tele": "7722649397",
+          "pass": "az",
+          "otprial": "dADzE",
+          "percya": "yes",
+          "ip": "::1",
+          "send": "berhasil kirim"
+        }
+      },
+      "22-27-13": {
+        "az": {
+          "user": "az",
+          "tele": "7722649397",
+          "pass": "az",
+          "otprial": "ozF9w",
+          "percya": "yes",
+          "ip": "::1",
+          "send": "berhasil kirim"
+        }
+      },
+      "22-34-53": {
+        "ar": {
+          "user": "ar",
+          "tele": "7722649397",
+          "pass": "ar",
+          "otprial": "ekzER",
+          "percya": "yes",
+          "ip": "::1",
+          "send": "berhasil kirim"
+        }
+      },
+      "22-41-12": {
+        "ar": {
+          "user": "ar",
+          "tele": "7722649397",
+          "pass": "ar",
+          "otprial": "bHxhi",
+          "percya": "yes",
+          "ip": "127.0.0.1",
+          "send": "berhasil kirim"
+        }
+      },
+      "22-48-26": {
+        "ar": {
+          "user": "ar",
+          "tele": "7722649397",
+          "pass": "ar",
+          "otprial": "XhDFm",
+          "percya": "yes",
+          "ip": "::1",
+          "send": "berhasil kirim"
+        }
+      },
+      "22-55-02": {
+        "aze": {
+          "user": "aze",
+          "tele": "7722649397",
+          "pass": "aze",
+          "otprial": "NWL2k",
+          "percya": "yes",
+          "ip": "::1",
+          "send": "berhasil kirim"
+        }
+      },
+      "23-03-58": {
+        "ar": {
+          "user": "ar",
+          "tele": "7722649397",
+          "pass": "ar",
+          "otprial": "a8vG7",
+          "percya": "yes",
+          "ip": "127.0.0.1",
+          "send": "berhasil kirim"
+        }
+      },
+      "23-05-03": {
+        "ar": {
+          "user": "ar",
+          "tele": "7722649397",
+          "pass": "ar",
+          "otprial": "iS2hw",
+          "percya": "yes",
+          "ip": "::1",
+          "send": "berhasil kirim"
+        }
+      }
+    },
+    "02-04-26": {
+      "12-05-28": {
+        "ar": {
+          "user": "ar",
+          "tele": "7722649397",
+          "pass": "ar",
+          "otprial": "DWNte",
+          "percya": "yes",
+          "ip": "::1",
+          "send": "berhasil kirim"
+        }
+      },
+      "12-07-54": {
+        "aze": {
+          "user": "aze",
+          "tele": "7722649397",
+          "pass": "aze",
+          "otprial": "qgH35",
+          "percya": "yes",
+          "ip": "::1",
+          "send": "berhasil kirim"
+        }
+      },
+      "12-20-06": {
+        "aze": {
+          "user": "aze",
+          "tele": "7722649397",
+          "pass": "aze",
+          "otprial": "gTd8P",
+          "percya": "yes",
+          "ip": "::1",
+          "send": "berhasil kirim"
+        }
+      },
+      "12-28-26": {
+        "aze": {
+          "user": "aze",
+          "tele": "7722649397",
+          "pass": "aze",
+          "otprial": "UrFQr",
+          "percya": "yes",
+          "ip": "::1",
+          "send": "berhasil kirim"
+        }
+      },
+      "12-47-48": {
+        "as": {
+          "user": "as",
+          "tele": "7722649397",
+          "pass": "as",
+          "otprial": "UGFhK",
+          "percya": "yes",
+          "ip": "::1",
+          "send": "berhasil kirim"
+        }
+      },
+      "13-33-22": {
+        "aze": {
+          "user": "aze",
+          "tele": "7722649397",
+          "pass": "aze",
+          "otprial": "ehMLT",
+          "percya": "yes",
+          "ip": "::1",
+          "send": "berhasil kirim"
+        }
+      },
+      "14-14-20": {
+        "aze": {
+          "user": "aze",
+          "tele": "7722649397",
+          "pass": "aze",
+          "otprial": "w5ku3",
+          "percya": "yes",
+          "ip": "::1",
+          "send": "berhasil kirim"
+        }
+      },
+      "14-15-21": {
+        "b": {
+          "user": "b",
+          "tele": "7722649397",
+          "pass": "b",
+          "otprial": "KTWVY",
+          "percya": "no",
+          "ip": "::1",
+          "send": "berhasil kirim"
+        }
+      },
+      "14-29-18": {
+        "aze": {
+          "user": "aze",
+          "tele": "7722649397",
+          "pass": "aze",
+          "otprial": "u5vtD",
+          "percya": "yes",
+          "ip": "::1",
+          "send": "berhasil kirim"
+        }
+      },
+      "18-41-54": {
+        "ee": {
+          "user": "ee",
+          "tele": "7722649397",
+          "pass": "ee",
+          "otprial": "yijya",
+          "percya": "yes",
+          "ip": "::1",
+          "send": "berhasil kirim"
+        }
+      },
+      "18-50-24": {
+        "aze": {
+          "user": "aze",
+          "tele": "7722649397",
+          "pass": "aze",
+          "otprial": "DF8Wp",
+          "percya": "yes",
+          "ip": "::1",
+          "send": "berhasil kirim"
+        }
+      },
+      "18-52-32": {
+        "aze": {
+          "user": "aze",
+          "tele": "7722649397",
+          "pass": "aze",
+          "otprial": "YNUsp",
+          "percya": "yes",
+          "ip": "::1",
+          "send": "berhasil kirim"
+        }
+      },
+      "19-09-33": {
+        "aze": {
+          "user": "aze",
+          "tele": "7722649397",
+          "pass": "aze",
+          "otprial": "Z9evw",
+          "percya": "yes",
+          "ip": "::1",
+          "send": "berhasil kirim"
+        }
+      },
+      "19-15-47": {
+        "aze": {
+          "user": "aze",
+          "tele": "7722649397",
+          "pass": "aze",
+          "otprial": "fzsG4",
+          "percya": "no",
+          "ip": "::1",
+          "send": "berhasil kirim"
+        }
+      },
+      "19-17-24": {
+        "aze": {
+          "user": "aze",
+          "tele": "7722649397",
+          "pass": "aze",
+          "otprial": "Ev2Hj",
+          "percya": "yes",
+          "ip": "::1",
+          "send": "berhasil kirim"
+        }
+      }
+    }
+  },
+  "log-otp": {
+    "01-04-26": {
+      "22-13-22": {
+        "az": {
+          "user": "az",
+          "tele": "7722649397",
+          "pass": "az",
+          "otprial": "XCjCb",
+          "use": "yes",
+          "send": "berhasil kirim"
+        }
+      },
+      "22-16-05": {
+        "az": {
+          "user": "az",
+          "tele": "7722649397",
+          "pass": "az",
+          "otprial": "zs45b",
+          "use": "yes",
+          "send": "berhasil kirim"
+        }
+      },
+      "22-25-37": {
+        "az": {
+          "user": "az",
+          "tele": "7722649397",
+          "pass": "az",
+          "otprial": "dADzE",
+          "use": "yes",
+          "send": "berhasil kirim"
+        }
+      },
+      "22-27-13": {
+        "az": {
+          "user": "az",
+          "tele": "7722649397",
+          "pass": "az",
+          "otprial": "ozF9w",
+          "use": "yes",
+          "send": "berhasil kirim"
+        }
+      },
+      "22-34-53": {
+        "ar": {
+          "user": "ar",
+          "tele": "7722649397",
+          "pass": "ar",
+          "otprial": "ekzER",
+          "use": "yes",
+          "send": "berhasil kirim"
+        }
+      },
+      "22-41-12": {
+        "ar": {
+          "user": "ar",
+          "tele": "7722649397",
+          "pass": "ar",
+          "otprial": "bHxhi",
+          "use": "yes",
+          "send": "berhasil kirim"
+        }
+      },
+      "22-48-26": {
+        "ar": {
+          "user": "ar",
+          "tele": "7722649397",
+          "pass": "ar",
+          "otprial": "XhDFm",
+          "use": "yes",
+          "send": "berhasil kirim"
+        }
+      },
+      "22-55-02": {
+        "aze": {
+          "user": "aze",
+          "tele": "7722649397",
+          "pass": "aze",
+          "otprial": "NWL2k",
+          "use": "yes",
+          "send": "berhasil kirim"
+        }
+      },
+      "23-03-58": {
+        "ar": {
+          "user": "ar",
+          "tele": "7722649397",
+          "pass": "ar",
+          "otprial": "a8vG7",
+          "use": "yes",
+          "send": "berhasil kirim"
+        }
+      },
+      "23-05-03": {
+        "ar": {
+          "user": "ar",
+          "tele": "7722649397",
+          "pass": "ar",
+          "otprial": "iS2hw",
+          "use": "yes",
+          "send": "berhasil kirim"
+        }
+      }
+    },
+    "02-04-26": {
+      "12-05-28": {
+        "ar": {
+          "user": "ar",
+          "tele": "7722649397",
+          "pass": "ar",
+          "otprial": "DWNte",
+          "use": "yes",
+          "send": "berhasil kirim"
+        }
+      },
+      "12-07-54": {
+        "aze": {
+          "user": "aze",
+          "tele": "7722649397",
+          "pass": "aze",
+          "otprial": "qgH35",
+          "use": "yes",
+          "send": "berhasil kirim"
+        }
+      },
+      "12-20-06": {
+        "aze": {
+          "user": "aze",
+          "tele": "7722649397",
+          "pass": "aze",
+          "otprial": "gTd8P",
+          "use": "yes",
+          "send": "berhasil kirim"
+        }
+      },
+      "12-28-26": {
+        "aze": {
+          "user": "aze",
+          "tele": "7722649397",
+          "pass": "aze",
+          "otprial": "UrFQr",
+          "use": "yes",
+          "send": "berhasil kirim"
+        }
+      },
+      "12-47-48": {
+        "as": {
+          "user": "as",
+          "tele": "7722649397",
+          "pass": "as",
+          "otprial": "UGFhK",
+          "use": "yes",
+          "send": "berhasil kirim"
+        }
+      },
+      "13-33-22": {
+        "aze": {
+          "user": "aze",
+          "tele": "7722649397",
+          "pass": "aze",
+          "otprial": "ehMLT",
+          "use": "yes",
+          "send": "berhasil kirim"
+        }
+      },
+      "14-14-20": {
+        "aze": {
+          "user": "aze",
+          "tele": "7722649397",
+          "pass": "aze",
+          "otprial": "w5ku3",
+          "use": "yes",
+          "send": "berhasil kirim"
+        }
+      },
+      "14-15-21": {
+        "b": {
+          "user": "b",
+          "tele": "7722649397",
+          "pass": "b",
+          "otprial": "KTWVY",
+          "use": "yes",
+          "send": "berhasil kirim"
+        }
+      },
+      "14-29-18": {
+        "aze": {
+          "user": "aze",
+          "tele": "7722649397",
+          "pass": "aze",
+          "otprial": "u5vtD",
+          "use": "yes",
+          "send": "berhasil kirim"
+        }
+      },
+      "18-41-54": {
+        "ee": {
+          "user": "ee",
+          "tele": "7722649397",
+          "pass": "ee",
+          "otprial": "yijya",
+          "use": "yes",
+          "send": "berhasil kirim"
+        }
+      },
+      "18-50-24": {
+        "aze": {
+          "user": "aze",
+          "tele": "7722649397",
+          "pass": "aze",
+          "otprial": "DF8Wp",
+          "use": "yes",
+          "send": "berhasil kirim"
+        }
+      },
+      "18-52-32": {
+        "aze": {
+          "user": "aze",
+          "tele": "7722649397",
+          "pass": "aze",
+          "otprial": "YNUsp",
+          "use": "yes",
+          "send": "berhasil kirim"
+        }
+      },
+      "19-09-33": {
+        "aze": {
+          "user": "aze",
+          "tele": "7722649397",
+          "pass": "aze",
+          "otprial": "Z9evw",
+          "use": "yes",
+          "send": "berhasil kirim"
+        }
+      },
+      "19-15-47": {
+        "aze": {
+          "user": "aze",
+          "tele": "7722649397",
+          "pass": "aze",
+          "otprial": "fzsG4",
+          "use": "yes",
+          "send": "berhasil kirim"
+        }
+      },
+      "19-17-24": {
+        "aze": {
+          "user": "aze",
+          "tele": "7722649397",
+          "pass": "aze",
+          "otprial": "Ev2Hj",
+          "use": "yes",
+          "send": "berhasil kirim"
+        }
+      }
+    }
+  },
+  "events": {
+    "22": [
+      {
+        "id": "1775115051957-fx8qn1",
+        "type": "owner-notify",
+        "createdAt": 1775115051957,
+        "title": "server mainten",
+        "body": "console notify dari aze",
+        "expiresAt": 1775115055957,
+        "countdownSeconds": 4,
+        "color": "info",
+        "mode": "normal"
+      },
+      {
+        "id": "1775116532816-9y8t9g",
+        "type": "set-role",
+        "createdAt": 1775116532816,
+        "title": "Role account diperbarui",
+        "body": "role baru: owner",
+        "expiresAt": 1775116544816
+      }
+    ],
+    "2113": [
+      {
+        "id": "1775115051957-eyvp33",
+        "type": "owner-notify",
+        "createdAt": 1775115051957,
+        "title": "server mainten",
+        "body": "console notify dari aze",
+        "expiresAt": 1775115055957,
+        "countdownSeconds": 4,
+        "color": "info",
+        "mode": "normal"
+      }
+    ],
+    "2323": [
+      {
+        "id": "1775059453405-kcm6dv",
+        "type": "set-role",
+        "createdAt": 1775059453405,
+        "title": "Role account diperbarui",
+        "body": "role baru: visitor",
+        "expiresAt": 1775059465405
+      },
+      {
+        "id": "1775115051957-ya5f08",
+        "type": "owner-notify",
+        "createdAt": 1775115051957,
+        "title": "server mainten",
+        "body": "console notify dari aze",
+        "expiresAt": 1775115055957,
+        "countdownSeconds": 4,
+        "color": "info",
+        "mode": "normal"
+      }
+    ],
+    "f": [
+      {
+        "id": "1775059477835-jkh24w",
+        "type": "set-role",
+        "createdAt": 1775059477835,
+        "title": "Role account diperbarui",
+        "body": "role baru: ssssss",
+        "expiresAt": 1775059489835
+      },
+      {
+        "id": "1775112398817-gcicpl",
+        "type": "block",
+        "createdAt": 1775112398817,
+        "title": "Account anda di suspend",
+        "body": "akses account sedang diblokir",
+        "expiresAt": 1775112418817
+      },
+      {
+        "id": "1775112404941-bzva7n",
+        "type": "unblock",
+        "createdAt": 1775112404941,
+        "title": "Account diaktifkan kembali",
+        "body": "akses account sudah dibuka",
+        "expiresAt": 1775112416941
+      },
+      {
+        "id": "1775113495525-addme4",
+        "type": "delete",
+        "createdAt": 1775113495525,
+        "title": "account telah didelete",
+        "body": "see you",
+        "expiresAt": 1775113510525,
+        "countdownSeconds": 5
+      },
+      {
+        "id": "1775115051957-ynigpr",
+        "type": "owner-notify",
+        "createdAt": 1775115051957,
+        "title": "server mainten",
+        "body": "console notify dari aze",
+        "expiresAt": 1775115055957,
+        "countdownSeconds": 4,
+        "color": "info",
+        "mode": "normal"
+      }
+    ],
+    "b": [
+      {
+        "id": "1775114352526-v6k99i",
+        "type": "hold",
+        "createdAt": 1775114352526,
+        "title": "account anda ditahan, sedang dalam proses.",
+        "body": "time:14.19.13",
+        "expiresAt": 1775114353779,
+        "holdUntil": 1775114353779
+      },
+      {
+        "id": "1775114359174-qc4nrj",
+        "type": "hold",
+        "createdAt": 1775114359174,
+        "title": "account anda ditahan, sedang dalam proses.",
+        "body": "time:14.19.41",
+        "expiresAt": 1775114381173,
+        "holdUntil": 1775114381173
+      },
+      {
+        "id": "1775115051957-e5jqfi",
+        "type": "owner-notify",
+        "createdAt": 1775115051957,
+        "title": "server mainten",
+        "body": "console notify dari aze",
+        "expiresAt": 1775115055956,
+        "countdownSeconds": 4,
+        "color": "info",
+        "mode": "normal"
+      }
+    ],
+    "s": [
+      {
+        "id": "1775115051957-2sw1ma",
+        "type": "owner-notify",
+        "createdAt": 1775115051957,
+        "title": "server mainten",
+        "body": "console notify dari aze",
+        "expiresAt": 1775115055957,
+        "countdownSeconds": 4,
+        "color": "info",
+        "mode": "normal"
+      },
+      {
+        "id": "1775116071614-h84clt",
+        "type": "hold",
+        "createdAt": 1775116071614,
+        "title": "account anda ditahan, sedang dalam proses.",
+        "body": "time:14.48.51",
+        "expiresAt": 1775116131613,
+        "holdUntil": 1775116131613
+      },
+      {
+        "id": "1775116546296-1mrjbm",
+        "type": "set-role",
+        "createdAt": 1775116546296,
+        "title": "Role account diperbarui",
+        "body": "role baru: qweq2rqw",
+        "expiresAt": 1775116558296
+      }
+    ],
+    "as": [
+      {
+        "id": "1775115051957-v79ybe",
+        "type": "owner-notify",
+        "createdAt": 1775115051957,
+        "title": "server mainten",
+        "body": "console notify dari aze",
+        "expiresAt": 1775115055957,
+        "countdownSeconds": 4,
+        "color": "info",
+        "mode": "normal"
+      }
+    ],
+    "wdww": [
+      {
+        "id": "1775115051957-fv73vu",
+        "type": "owner-notify",
+        "createdAt": 1775115051957,
+        "title": "server mainten",
+        "body": "console notify dari aze",
+        "expiresAt": 1775115055957,
+        "countdownSeconds": 4,
+        "color": "info",
+        "mode": "normal"
+      }
+    ],
+    "wdw": [
+      {
+        "id": "1775115051957-kq3q8z",
+        "type": "owner-notify",
+        "createdAt": 1775115051957,
+        "title": "server mainten",
+        "body": "console notify dari aze",
+        "expiresAt": 1775115055957,
+        "countdownSeconds": 4,
+        "color": "info",
+        "mode": "normal"
+      }
+    ],
+    "sd": [
+      {
+        "id": "1775115051957-eosjqg",
+        "type": "owner-notify",
+        "createdAt": 1775115051957,
+        "title": "server mainten",
+        "body": "console notify dari aze",
+        "expiresAt": 1775115055957,
+        "countdownSeconds": 4,
+        "color": "info",
+        "mode": "normal"
+      },
+      {
+        "id": "1775116535090-z400jl",
+        "type": "set-role",
+        "createdAt": 1775116535090,
+        "title": "Role account diperbarui",
+        "body": "role baru: owner",
+        "expiresAt": 1775116547090
+      }
+    ],
+    "ar": [
+      {
+        "id": "1775115051957-yt1jim",
+        "type": "owner-notify",
+        "createdAt": 1775115051957,
+        "title": "server mainten",
+        "body": "console notify dari aze",
+        "expiresAt": 1775115055957,
+        "countdownSeconds": 4,
+        "color": "info",
+        "mode": "normal"
+      }
+    ]
+  },
+  "consoleLogs": [
+    {
+      "id": "1775132081221-ytvcpv",
+      "ts": 1775132081221,
+      "level": "output",
+      "message": "console cleared"
+    },
+    {
+      "id": "1775132086023-h2i072",
+      "ts": 1775132086023,
+      "level": "cmd",
+      "message": "[aze] $ s"
+    },
+    {
+      "id": "1775132086023-j1onai",
+      "ts": 1775132086023,
+      "level": "error",
+      "message": "Command tidak dikenali. Ketik help untuk melihat daftar command."
+    },
+    {
+      "id": "1775132088458-ilz20j",
+      "ts": 1775132088458,
+      "level": "cmd",
+      "message": "[aze] $ help"
+    },
+    {
+      "id": "1775132088458-mda00p",
+      "ts": 1775132088458,
+      "level": "output",
+      "message": ""
+    },
+    {
+      "id": "1775132088458-etjol8",
+      "ts": 1775132088458,
+      "level": "output",
+      "message": "> MENU HELP <"
+    },
+    {
+      "id": "1775132088458-3k2rst",
+      "ts": 1775132088458,
+      "level": "output",
+      "message": "---------------"
+    },
+    {
+      "id": "1775132088458-hnrsqj",
+      "ts": 1775132088458,
+      "level": "output",
+      "message": "> help"
+    },
+    {
+      "id": "1775132088458-sn4ajx",
+      "ts": 1775132088458,
+      "level": "output",
+      "message": "> help notify"
+    },
+    {
+      "id": "1775132088458-kpzq9m",
+      "ts": 1775132088458,
+      "level": "output",
+      "message": "> help delete"
+    },
+    {
+      "id": "1775132088458-jqm73e",
+      "ts": 1775132088458,
+      "level": "output",
+      "message": "> help edit"
+    },
+    {
+      "id": "1775132088458-5k9xlc",
+      "ts": 1775132088458,
+      "level": "output",
+      "message": "> help export"
+    },
+    {
+      "id": "1775132088458-gt3yh8",
+      "ts": 1775132088458,
+      "level": "output",
+      "message": "> help users"
+    },
+    {
+      "id": "1775132088458-cnaipy",
+      "ts": 1775132088458,
+      "level": "output",
+      "message": "> help roles"
+    },
+    {
+      "id": "1775132088458-nofw54",
+      "ts": 1775132088458,
+      "level": "output",
+      "message": "> help check"
+    },
+    {
+      "id": "1775132088458-kvgt4b",
+      "ts": 1775132088458,
+      "level": "output",
+      "message": "> help set-role"
+    },
+    {
+      "id": "1775132088458-a15vth",
+      "ts": 1775132088458,
+      "level": "output",
+      "message": "> help hold"
+    },
+    {
+      "id": "1775132088458-l7at6x",
+      "ts": 1775132088458,
+      "level": "output",
+      "message": "> help block"
+    },
+    {
+      "id": "1775132119805-fqz746",
+      "ts": 1775132119805,
+      "level": "cmd",
+      "message": "[aze] $ roles"
+    },
+    {
+      "id": "1775132119805-sk7ce6",
+      "ts": 1775132119805,
+      "level": "output",
+      "message": "visitor: 8"
+    },
+    {
+      "id": "1775132119805-ka98h7",
+      "ts": 1775132119805,
+      "level": "output",
+      "message": "qweq2rqw: 2"
+    },
+    {
+      "id": "1775132119805-c649mc",
+      "ts": 1775132119805,
+      "level": "output",
+      "message": "qweq2: 2"
+    },
+    {
+      "id": "1775132119805-fcfd8c",
+      "ts": 1775132119805,
+      "level": "output",
+      "message": "sadawd: 1"
+    },
+    {
+      "id": "1775132119805-7v5iaw",
+      "ts": 1775132119805,
+      "level": "output",
+      "message": "owner: 5"
+    },
+    {
+      "id": "1775132119805-6jb9nk",
+      "ts": 1775132119805,
+      "level": "output",
+      "message": "ssssss: 2"
+    },
+    {
+      "id": "1775132145446-pykr0t",
+      "ts": 1775132145446,
+      "level": "info",
+      "message": "Logout: aze"
+    },
+    {
+      "id": "1775132148970-07hfxj",
+      "ts": 1775132148971,
+      "level": "info",
+      "message": "OTP login dibuat untuk aze (berhasil kirim)"
+    },
+    {
+      "id": "1775132160230-e415uh",
+      "ts": 1775132160230,
+      "level": "success",
+      "message": "Login berhasil: aze"
+    },
+    {
+      "id": "1775132206971-pzif5j",
+      "ts": 1775132206971,
+      "level": "info",
+      "message": "Register baru dibuat untuk wrw (berhasil kirim)"
+    },
+    {
+      "id": "1775132228035-wkkv0n",
+      "ts": 1775132228035,
+      "level": "success",
+      "message": "Register OTP berhasil diverifikasi: wrw"
+    },
+    {
+      "id": "1775132247226-j40u41",
+      "ts": 1775132247226,
+      "level": "info",
+      "message": "OTP login dibuat untuk aze (berhasil kirim)"
+    },
+    {
+      "id": "1775132255459-gvv70f",
+      "ts": 1775132255460,
+      "level": "success",
+      "message": "Login berhasil: aze [trusted]"
+    },
+    {
+      "id": "1775132784198-dk2839",
+      "ts": 1775132784198,
+      "level": "success",
+      "message": "Auto login trusted device: aze"
+    }
+  ]
+}

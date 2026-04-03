@@ -1,0 +1,14 @@
+{
+  "name": "situsxwb",
+  "private": true,
+  "version": "1.0.0",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "migrate:kv": "node scripts/migrate-to-kv.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
