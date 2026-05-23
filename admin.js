@@ -198,6 +198,92 @@
         align-items: center;
         justify-content: center;
       }
+      .admin-avatar-action-menu {
+        position: absolute;
+        right: -4px;
+        bottom: -84px;
+        min-width: 132px;
+        padding: 8px;
+        border-radius: 15px;
+        background: rgba(18, 27, 45, .98);
+        border: 1px solid rgba(150, 177, 221, .18);
+        box-shadow: 0 18px 40px rgba(0,0,0,.34);
+        display: none;
+        gap: 6px;
+        z-index: 40;
+      }
+      .admin-avatar-action-menu.show {
+        display: grid;
+      }
+      .admin-avatar-action-menu button {
+        border: 0;
+        border-radius: 10px;
+        padding: 9px 11px;
+        text-align: left;
+        background: rgba(255,255,255,.07);
+        color: #eff6ff;
+        font-weight: 700;
+      }
+      .admin-avatar-action-menu button.danger {
+        color: #ffd6dc;
+        background: rgba(255, 99, 132, .16);
+      }
+      .admin-crop-modal {
+        position: fixed;
+        inset: 0;
+        padding: 18px;
+        background: rgba(3, 8, 18, .68);
+        backdrop-filter: blur(10px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+      }
+      .admin-crop-modal.show {
+        display: flex;
+      }
+      .admin-crop-card {
+        width: min(470px, 100%);
+        padding: 18px;
+        border-radius: 22px;
+        background: #111a2b;
+        border: 1px solid rgba(150, 177, 221, .18);
+        box-shadow: 0 28px 80px rgba(0,0,0,.45);
+        display: grid;
+        gap: 14px;
+      }
+      .admin-crop-stage {
+        position: relative;
+        width: min(330px, 100%);
+        aspect-ratio: 1;
+        justify-self: center;
+        overflow: hidden;
+        border-radius: 24px;
+        background: rgba(255,255,255,.06);
+        border: 1px solid rgba(150, 177, 221, .2);
+        cursor: grab;
+        touch-action: none;
+      }
+      .admin-crop-stage:active {
+        cursor: grabbing;
+      }
+      .admin-crop-stage img {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        max-width: none;
+        user-select: none;
+        pointer-events: none;
+        transform-origin: center;
+      }
+      .admin-crop-mask {
+        position: absolute;
+        inset: 0;
+        border: 999px solid rgba(0,0,0,.28);
+        border-radius: 24px;
+        box-shadow: inset 0 0 0 2px rgba(255,255,255,.72);
+        pointer-events: none;
+      }
       .admin-profile-handle-wrap {
         position: relative;
         display: inline-flex;
@@ -483,7 +569,29 @@
       });
     }
 
-    const bindMediaUploader = (buttonId, inputId, target, previewEl) => {
+    const postProfileMedia = async (payload) => {
+      const response = await fetch("/api/profile/media", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user: trustedUser,
+          sessionToken,
+          ...payload
+        })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(result.message || "Update gambar gagal.");
+      }
+      if (result.profile) {
+        profileDataCache = result.profile;
+        renderProfile(profileDataCache);
+        hydrateChrome();
+      }
+      return result;
+    };
+
+    const bindCoverUploader = (buttonId, inputId, target, previewEl) => {
       const trigger = document.getElementById(buttonId);
       const input = document.getElementById(inputId);
       if (!trigger || !input || !previewEl || input.dataset.mediaBound) {
@@ -507,25 +615,7 @@
         const reader = new FileReader();
         reader.onload = async () => {
           try {
-            const response = await fetch("/api/profile/media", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                user: trustedUser,
-                sessionToken,
-                target,
-                dataUrl: reader.result
-              })
-            });
-            const result = await response.json().catch(() => ({}));
-            if (!response.ok) {
-              throw new Error(result.message || "Upload gambar gagal.");
-            }
-            if (result.profile) {
-              profileDataCache = result.profile;
-              renderProfile(profileDataCache);
-              hydrateChrome();
-            }
+            await postProfileMedia({ target, dataUrl: reader.result });
           } catch (error) {
             window.alert(error.message || "Upload gambar gagal.");
           } finally {
@@ -535,8 +625,191 @@
         reader.readAsDataURL(file);
       });
     };
-    bindMediaUploader("admin-avatar-edit-btn", "admin-avatar-file-input", "avatar", avatarImage);
-    bindMediaUploader("admin-cover-edit-btn", "admin-cover-file-input", "cover", coverImage);
+    bindCoverUploader("admin-cover-edit-btn", "admin-cover-file-input", "cover", coverImage);
+
+    const bindAvatarCropper = () => {
+      const trigger = document.getElementById("admin-avatar-edit-btn");
+      const menu = document.getElementById("admin-avatar-action-menu");
+      const changeBtn = document.getElementById("admin-avatar-change-btn");
+      const deleteBtn = document.getElementById("admin-avatar-delete-btn");
+      const input = document.getElementById("admin-avatar-file-input");
+      const modal = document.getElementById("admin-avatar-crop-modal");
+      const stage = document.getElementById("admin-avatar-crop-stage");
+      const image = document.getElementById("admin-avatar-crop-image");
+      const zoom = document.getElementById("admin-avatar-crop-zoom");
+      const cancelBtn = document.getElementById("admin-avatar-crop-cancel");
+      const saveBtn = document.getElementById("admin-avatar-crop-save");
+      if (!trigger || !menu || !changeBtn || !deleteBtn || !input || !modal || !stage || !image || !zoom || !cancelBtn || !saveBtn || trigger.dataset.avatarBound) {
+        return;
+      }
+      trigger.dataset.avatarBound = "true";
+      const state = {
+        fileUrl: "",
+        naturalWidth: 1,
+        naturalHeight: 1,
+        baseScale: 1,
+        zoom: 1,
+        x: 0,
+        y: 0,
+        dragging: false,
+        startX: 0,
+        startY: 0,
+        originX: 0,
+        originY: 0
+      };
+      const closeMenu = () => menu.classList.remove("show");
+      const openPicker = () => {
+        closeMenu();
+        input.value = "";
+        input.click();
+      };
+      const updateImage = () => {
+        const scale = state.baseScale * state.zoom;
+        image.style.width = `${state.naturalWidth * scale}px`;
+        image.style.height = `${state.naturalHeight * scale}px`;
+        image.style.transform = `translate(calc(-50% + ${state.x}px), calc(-50% + ${state.y}px))`;
+      };
+      const clamp = () => {
+        const rect = stage.getBoundingClientRect();
+        const scale = state.baseScale * state.zoom;
+        const imageWidth = state.naturalWidth * scale;
+        const imageHeight = state.naturalHeight * scale;
+        const maxX = Math.max(0, (imageWidth - rect.width) / 2);
+        const maxY = Math.max(0, (imageHeight - rect.height) / 2);
+        state.x = Math.max(-maxX, Math.min(maxX, state.x));
+        state.y = Math.max(-maxY, Math.min(maxY, state.y));
+      };
+      const closeModal = () => {
+        modal.classList.remove("show");
+        modal.setAttribute("aria-hidden", "true");
+        if (state.fileUrl) {
+          URL.revokeObjectURL(state.fileUrl);
+          state.fileUrl = "";
+        }
+        image.removeAttribute("src");
+      };
+      const openCrop = (file) => {
+        if (!file || !/^image\/(png|jpe?g|webp)$/i.test(file.type || "")) {
+          window.alert("Gunakan gambar PNG, JPG, atau WEBP.");
+          return;
+        }
+        if (file.size > 6 * 1024 * 1024) {
+          window.alert("Ukuran file maksimal 6MB sebelum crop.");
+          return;
+        }
+        if (state.fileUrl) {
+          URL.revokeObjectURL(state.fileUrl);
+        }
+        state.fileUrl = URL.createObjectURL(file);
+        image.onload = () => {
+          const rect = stage.getBoundingClientRect();
+          state.naturalWidth = image.naturalWidth || 1;
+          state.naturalHeight = image.naturalHeight || 1;
+          state.baseScale = Math.max(rect.width / state.naturalWidth, rect.height / state.naturalHeight);
+          state.zoom = 1;
+          state.x = 0;
+          state.y = 0;
+          zoom.value = "1";
+          updateImage();
+        };
+        image.src = state.fileUrl;
+        modal.classList.add("show");
+        modal.setAttribute("aria-hidden", "false");
+      };
+      const cropToDataUrl = () => {
+        const outputSize = 512;
+        const rect = stage.getBoundingClientRect();
+        const scale = state.baseScale * state.zoom;
+        const visibleLeft = (state.naturalWidth * scale - rect.width) / 2 - state.x;
+        const visibleTop = (state.naturalHeight * scale - rect.height) / 2 - state.y;
+        const sourceX = visibleLeft / scale;
+        const sourceY = visibleTop / scale;
+        const sourceSize = rect.width / scale;
+        const canvas = document.createElement("canvas");
+        canvas.width = outputSize;
+        canvas.height = outputSize;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(image, sourceX, sourceY, sourceSize, sourceSize, 0, 0, outputSize, outputSize);
+        return canvas.toDataURL("image/jpeg", 0.9);
+      };
+      trigger.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (!String(profileDataCache?.avatarUrl || "").trim()) {
+          openPicker();
+          return;
+        }
+        menu.classList.toggle("show");
+      });
+      changeBtn.addEventListener("click", openPicker);
+      deleteBtn.addEventListener("click", async () => {
+        closeMenu();
+        if (!window.confirm("Hapus foto profil dan kembali ke default?")) {
+          return;
+        }
+        try {
+          await postProfileMedia({ target: "avatar", action: "delete" });
+        } catch (error) {
+          window.alert(error.message || "Hapus foto profil gagal.");
+        }
+      });
+      input.addEventListener("change", () => {
+        const file = input.files && input.files[0];
+        if (file) {
+          openCrop(file);
+        }
+      });
+      zoom.addEventListener("input", () => {
+        state.zoom = Number(zoom.value || 1);
+        clamp();
+        updateImage();
+      });
+      stage.addEventListener("pointerdown", (event) => {
+        stage.setPointerCapture(event.pointerId);
+        state.dragging = true;
+        state.startX = event.clientX;
+        state.startY = event.clientY;
+        state.originX = state.x;
+        state.originY = state.y;
+      });
+      stage.addEventListener("pointermove", (event) => {
+        if (!state.dragging) {
+          return;
+        }
+        state.x = state.originX + event.clientX - state.startX;
+        state.y = state.originY + event.clientY - state.startY;
+        clamp();
+        updateImage();
+      });
+      stage.addEventListener("pointerup", () => {
+        state.dragging = false;
+      });
+      stage.addEventListener("pointercancel", () => {
+        state.dragging = false;
+      });
+      cancelBtn.addEventListener("click", closeModal);
+      saveBtn.addEventListener("click", async () => {
+        const original = saveBtn.innerHTML;
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = "Saving...";
+        try {
+          await postProfileMedia({ target: "avatar", dataUrl: cropToDataUrl() });
+          closeModal();
+        } catch (error) {
+          window.alert(error.message || "Update foto profil gagal.");
+        } finally {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = original;
+          input.value = "";
+        }
+      });
+      document.addEventListener("click", (event) => {
+        if (!trigger.parentElement?.contains(event.target)) {
+          closeMenu();
+        }
+      });
+    };
+    bindAvatarCropper();
 
     const form = document.getElementById("admin-profile-form");
     if (form && !form.dataset.boundProfile) {
