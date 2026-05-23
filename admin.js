@@ -166,6 +166,9 @@
         position: relative;
       }
       .profile-card {
+        position: relative;
+      }
+      .profile-card {
         overflow: visible;
       }
       .admin-profile-cover-wrap {
@@ -208,10 +211,11 @@
       }
       .admin-avatar-action-menu {
         position: absolute;
-        left: calc(100% + 10px);
-        top: 50%;
-        transform: translateY(-50%);
-        min-width: 132px;
+        left: calc(50% + 58px);
+        top: 112px;
+        transform: none;
+        width: 132px;
+        min-width: 0;
         padding: 8px;
         border-radius: 15px;
         background: rgba(18, 27, 45, .98);
@@ -244,12 +248,12 @@
         }
         .admin-avatar-action-menu {
           position: absolute;
-          left: calc(100% + 8px);
+          left: calc(50% + 48px);
           right: auto;
-          top: 50%;
+          top: 104px;
           bottom: auto;
-          transform: translateY(-50%);
-          width: clamp(104px, 34vw, 136px);
+          transform: none;
+          width: clamp(112px, 36vw, 136px);
           min-width: 0;
           padding: 7px;
           border-radius: 14px;
