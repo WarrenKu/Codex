@@ -38,7 +38,7 @@ const DISPLAY_NAME_MAX = 32;
 const PASSWORD_MIN = 1;
 const PASSWORD_MAX = 64;
 const TELEGRAM_TARGET_MAX = 32;
-const POST_CONTENT_MAX = 2000;
+const POST_CONTENT_MAX = 6000;
 const POST_COMMENT_MAX = 280;
 const EMPTY_STORE = {
   reg: {},
