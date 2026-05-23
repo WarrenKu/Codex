@@ -6801,9 +6801,103 @@
       display: grid;
       place-items: center;
       background: linear-gradient(135deg, var(--primary), var(--primary2));
+      border: 0;
       color: white;
       font-weight: 900;
       box-shadow: 0 18px 36px rgba(35, 116, 255, 0.28);
+      cursor: pointer;
+    }
+
+    .profile-avatar-menu {
+      position: absolute;
+      right: 6px;
+      bottom: -94px;
+      min-width: 132px;
+      padding: 8px;
+      border-radius: 18px;
+      background: rgba(8, 15, 25, 0.96);
+      border: 1px solid rgba(147, 200, 255, 0.18);
+      box-shadow: 0 22px 52px rgba(0,0,0,0.34);
+      display: none;
+      z-index: 8;
+    }
+
+    .profile-avatar-menu.show {
+      display: grid;
+      gap: 6px;
+    }
+
+    .profile-avatar-menu button {
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 12px;
+      color: var(--text);
+      background: rgba(255,255,255,0.06);
+      font-weight: 800;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .profile-avatar-menu button.danger {
+      color: #ffd7dc;
+      background: rgba(255, 99, 132, 0.14);
+    }
+
+    .avatar-crop-card {
+      width: min(480px, calc(100vw - 28px));
+      padding: 18px;
+      border-radius: 24px;
+      background: rgba(8, 15, 25, 0.98);
+      border: 1px solid rgba(147, 200, 255, 0.18);
+      box-shadow: 0 28px 80px rgba(0,0,0,0.42);
+      display: grid;
+      gap: 14px;
+    }
+
+    .avatar-crop-stage {
+      position: relative;
+      width: min(340px, 100%);
+      aspect-ratio: 1;
+      justify-self: center;
+      border-radius: 28px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(147, 200, 255, 0.2);
+      touch-action: none;
+      cursor: grab;
+    }
+
+    .avatar-crop-stage:active {
+      cursor: grabbing;
+    }
+
+    .avatar-crop-stage img {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      max-width: none;
+      user-select: none;
+      pointer-events: none;
+      transform-origin: center;
+    }
+
+    .avatar-crop-mask {
+      position: absolute;
+      inset: 0;
+      border: 999px solid rgba(0,0,0,0.28);
+      border-radius: 28px;
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,0.65);
+      pointer-events: none;
+    }
+
+    .avatar-crop-controls {
+      display: grid;
+      gap: 8px;
+    }
+
+    .avatar-crop-controls input[type="range"] {
+      width: 100%;
+      accent-color: var(--primary);
     }
 
     .profile-head-copy h2 {
@@ -9801,7 +9895,11 @@
         <div class="profile-top">
           <div class="profile-avatar">
             <span id="profile-avatar-text">U</span>
-            <div class="profile-edit-badge">✎</div>
+            <div class="profile-avatar-menu" id="profile-avatar-menu">
+              <button type="button" id="profile-avatar-change-btn">Change</button>
+              <button type="button" class="danger" id="profile-avatar-delete-btn">Delete</button>
+            </div>
+            <button type="button" class="profile-edit-badge" id="profile-avatar-edit-btn" aria-label="Edit foto profil">✎</button>
           </div>
           <div class="profile-head-copy">
             <h2 id="profile-panel-title">Profil Account</h2>
@@ -10111,6 +10209,27 @@
 
   <div class="passkey-copy-hint" id="passkey-copy-hint">copy at keyboard</div>
 
+  <input type="file" id="profile-avatar-file-input" accept="image/png,image/jpeg,image/webp" hidden>
+
+  <div class="admin-modal" id="avatar-crop-modal">
+    <div class="avatar-crop-card">
+      <h3 style="margin:0;">Atur Foto Profil</h3>
+      <p class="hint" style="margin:0;">Geser foto dan atur zoom sampai posisi avatar pas.</p>
+      <div class="avatar-crop-stage" id="avatar-crop-stage">
+        <img id="avatar-crop-image" alt="Preview crop foto profil">
+        <div class="avatar-crop-mask"></div>
+      </div>
+      <label class="avatar-crop-controls">
+        <span class="profile-label">Zoom</span>
+        <input type="range" id="avatar-crop-zoom" min="1" max="3" step="0.01" value="1">
+      </label>
+      <div class="action-row" style="margin-top:0;">
+        <button type="button" class="secondary" id="avatar-crop-cancel">Cancel</button>
+        <button type="button" class="primary" id="avatar-crop-save">Update Profil</button>
+      </div>
+    </div>
+  </div>
+
   <div class="emoji-picker" id="emoji-picker">
     <div class="emoji-picker-head">
       <div class="emoji-picker-title">Emoji Picker</div>
@@ -10408,6 +10527,18 @@
     const profileGridSection = profilePanel?.querySelector(".profile-grid");
     const profilePostsCardSection = profilePanel?.querySelector(".profile-posts-card");
     const profileAvatarText = document.getElementById("profile-avatar-text");
+    const profileAvatarWrap = profileAvatarText?.parentElement;
+    const profileAvatarEditBtn = document.getElementById("profile-avatar-edit-btn");
+    const profileAvatarMenu = document.getElementById("profile-avatar-menu");
+    const profileAvatarChangeBtn = document.getElementById("profile-avatar-change-btn");
+    const profileAvatarDeleteBtn = document.getElementById("profile-avatar-delete-btn");
+    const profileAvatarFileInput = document.getElementById("profile-avatar-file-input");
+    const avatarCropModal = document.getElementById("avatar-crop-modal");
+    const avatarCropStage = document.getElementById("avatar-crop-stage");
+    const avatarCropImage = document.getElementById("avatar-crop-image");
+    const avatarCropZoom = document.getElementById("avatar-crop-zoom");
+    const avatarCropCancel = document.getElementById("avatar-crop-cancel");
+    const avatarCropSave = document.getElementById("avatar-crop-save");
     const profileDisplayName = document.getElementById("profile-display-name");
     const profileRoleValue = document.getElementById("profile-role-value");
     const profileBioText = document.getElementById("profile-bio-text");
@@ -12783,6 +12914,137 @@
         target.style.backgroundRepeat = "";
         target.style.color = "";
       }
+    }
+
+    function closeProfileAvatarMenu() {
+      profileAvatarMenu?.classList.remove("show");
+    }
+
+    function openProfileAvatarPicker() {
+      closeProfileAvatarMenu();
+      profileAvatarFileInput.value = "";
+      profileAvatarFileInput.click();
+    }
+
+    const avatarCropState = {
+      fileUrl: "",
+      naturalWidth: 1,
+      naturalHeight: 1,
+      baseScale: 1,
+      zoom: 1,
+      x: 0,
+      y: 0,
+      dragging: false,
+      startX: 0,
+      startY: 0,
+      originX: 0,
+      originY: 0
+    };
+
+    function updateAvatarCropImage() {
+      const scale = avatarCropState.baseScale * avatarCropState.zoom;
+      avatarCropImage.style.width = `${avatarCropState.naturalWidth * scale}px`;
+      avatarCropImage.style.height = `${avatarCropState.naturalHeight * scale}px`;
+      avatarCropImage.style.transform = `translate(calc(-50% + ${avatarCropState.x}px), calc(-50% + ${avatarCropState.y}px))`;
+    }
+
+    function clampAvatarCrop() {
+      const rect = avatarCropStage.getBoundingClientRect();
+      const scale = avatarCropState.baseScale * avatarCropState.zoom;
+      const imageWidth = avatarCropState.naturalWidth * scale;
+      const imageHeight = avatarCropState.naturalHeight * scale;
+      const maxX = Math.max(0, (imageWidth - rect.width) / 2);
+      const maxY = Math.max(0, (imageHeight - rect.height) / 2);
+      avatarCropState.x = Math.max(-maxX, Math.min(maxX, avatarCropState.x));
+      avatarCropState.y = Math.max(-maxY, Math.min(maxY, avatarCropState.y));
+    }
+
+    function openAvatarCropModal(file) {
+      if (!file || !/^image\/(png|jpe?g|webp)$/i.test(file.type || "")) {
+        showErrorPopup("Foto Profil Gagal", "Pilih file PNG, JPG, atau WEBP.");
+        return;
+      }
+      if (file.size > 6 * 1024 * 1024) {
+        showErrorPopup("Foto Profil Gagal", "Ukuran file maksimal 6MB sebelum crop.");
+        return;
+      }
+      if (avatarCropState.fileUrl) {
+        URL.revokeObjectURL(avatarCropState.fileUrl);
+      }
+      avatarCropState.fileUrl = URL.createObjectURL(file);
+      avatarCropImage.onload = () => {
+        const rect = avatarCropStage.getBoundingClientRect();
+        avatarCropState.naturalWidth = avatarCropImage.naturalWidth || 1;
+        avatarCropState.naturalHeight = avatarCropImage.naturalHeight || 1;
+        avatarCropState.baseScale = Math.max(rect.width / avatarCropState.naturalWidth, rect.height / avatarCropState.naturalHeight);
+        avatarCropState.zoom = 1;
+        avatarCropState.x = 0;
+        avatarCropState.y = 0;
+        avatarCropZoom.value = "1";
+        updateAvatarCropImage();
+      };
+      avatarCropImage.src = avatarCropState.fileUrl;
+      avatarCropModal.classList.add("show");
+    }
+
+    function getCroppedAvatarDataUrl() {
+      const outputSize = 512;
+      const rect = avatarCropStage.getBoundingClientRect();
+      const scale = avatarCropState.baseScale * avatarCropState.zoom;
+      const visibleLeft = (avatarCropState.naturalWidth * scale - rect.width) / 2 - avatarCropState.x;
+      const visibleTop = (avatarCropState.naturalHeight * scale - rect.height) / 2 - avatarCropState.y;
+      const sourceX = visibleLeft / scale;
+      const sourceY = visibleTop / scale;
+      const sourceSize = rect.width / scale;
+      const canvas = document.createElement("canvas");
+      canvas.width = outputSize;
+      canvas.height = outputSize;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(avatarCropImage, sourceX, sourceY, sourceSize, sourceSize, 0, 0, outputSize, outputSize);
+      return canvas.toDataURL("image/jpeg", 0.9);
+    }
+
+    function closeAvatarCropModal() {
+      avatarCropModal.classList.remove("show");
+      if (avatarCropState.fileUrl) {
+        URL.revokeObjectURL(avatarCropState.fileUrl);
+        avatarCropState.fileUrl = "";
+      }
+      avatarCropImage.removeAttribute("src");
+    }
+
+    async function saveProfileAvatar(dataUrl) {
+      const user = localStorage.getItem("trusted_user") || "";
+      const sessionToken = localStorage.getItem("session_token") || "";
+      const result = await sendJson("/api/profile/media", {
+        user,
+        sessionToken,
+        target: "avatar",
+        dataUrl
+      });
+      renderProfile({
+        ...result.profile,
+        posts: profileCache?.posts || []
+      });
+      await refreshPostFeed({ silent: true });
+      return result;
+    }
+
+    async function deleteProfileAvatar() {
+      const user = localStorage.getItem("trusted_user") || "";
+      const sessionToken = localStorage.getItem("session_token") || "";
+      const result = await sendJson("/api/profile/media", {
+        user,
+        sessionToken,
+        target: "avatar",
+        action: "delete"
+      });
+      renderProfile({
+        ...result.profile,
+        posts: profileCache?.posts || []
+      });
+      await refreshPostFeed({ silent: true });
+      return result;
     }
 
     function getPostCategoryClass(category = "") {
@@ -16019,6 +16281,80 @@
     closeDeleteModal.addEventListener("click", () => closeModal(deleteModal));
     closeDeleteRoleModal.addEventListener("click", () => closeModal(deleteRoleModal));
     closeProfileEditModal.addEventListener("click", () => closeModal(profileEditModal));
+    profileAvatarEditBtn?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const hasAvatar = !!String(profileCache?.avatarUrl || "").trim();
+      if (!hasAvatar) {
+        openProfileAvatarPicker();
+        return;
+      }
+      profileAvatarMenu?.classList.toggle("show");
+    });
+    profileAvatarChangeBtn?.addEventListener("click", openProfileAvatarPicker);
+    profileAvatarDeleteBtn?.addEventListener("click", async () => {
+      closeProfileAvatarMenu();
+      setLoading(true, ["Menghapus foto profil...", "Mengembalikan avatar default..."]);
+      try {
+        const result = await deleteProfileAvatar();
+        notify("Foto profil dihapus", result.message || "Avatar kembali ke default.", "success");
+      } catch (error) {
+        showErrorPopup("Hapus Foto Gagal", error.message);
+      } finally {
+        setLoading(false);
+      }
+    });
+    profileAvatarFileInput?.addEventListener("change", () => {
+      const file = profileAvatarFileInput.files?.[0];
+      if (file) {
+        openAvatarCropModal(file);
+      }
+    });
+    avatarCropZoom?.addEventListener("input", () => {
+      avatarCropState.zoom = Number(avatarCropZoom.value || 1);
+      clampAvatarCrop();
+      updateAvatarCropImage();
+    });
+    avatarCropStage?.addEventListener("pointerdown", (event) => {
+      avatarCropStage.setPointerCapture(event.pointerId);
+      avatarCropState.dragging = true;
+      avatarCropState.startX = event.clientX;
+      avatarCropState.startY = event.clientY;
+      avatarCropState.originX = avatarCropState.x;
+      avatarCropState.originY = avatarCropState.y;
+    });
+    avatarCropStage?.addEventListener("pointermove", (event) => {
+      if (!avatarCropState.dragging) {
+        return;
+      }
+      avatarCropState.x = avatarCropState.originX + event.clientX - avatarCropState.startX;
+      avatarCropState.y = avatarCropState.originY + event.clientY - avatarCropState.startY;
+      clampAvatarCrop();
+      updateAvatarCropImage();
+    });
+    avatarCropStage?.addEventListener("pointerup", () => {
+      avatarCropState.dragging = false;
+    });
+    avatarCropStage?.addEventListener("pointercancel", () => {
+      avatarCropState.dragging = false;
+    });
+    avatarCropCancel?.addEventListener("click", closeAvatarCropModal);
+    avatarCropSave?.addEventListener("click", async () => {
+      setLoading(true, ["Merapikan crop foto...", "Mengupdate foto profil..."]);
+      try {
+        const result = await saveProfileAvatar(getCroppedAvatarDataUrl());
+        closeAvatarCropModal();
+        notify("Foto profil diupdate", result.message || "Foto profil berhasil diperbarui.", "success");
+      } catch (error) {
+        showErrorPopup("Update Foto Gagal", error.message);
+      } finally {
+        setLoading(false);
+      }
+    });
+    document.addEventListener("click", (event) => {
+      if (!profileAvatarWrap?.contains(event.target)) {
+        closeProfileAvatarMenu();
+      }
+    });
     profileEditInput.addEventListener("input", () => {
       if (editingProfileField === "display_name") {
         updateDisplayNameCounter();

@@ -4010,9 +4010,9 @@ async function handleProfileUpdate(body, res) {
 }
 
 async function handleProfileMediaUpdate(body, res) {
-  const { user, sessionToken, target, dataUrl } = body;
-  if (!user || !sessionToken || !target || !dataUrl) {
-    return json(res, 400, { message: "User, session token, target, dan file wajib diisi." });
+  const { user, sessionToken, target, dataUrl, action } = body;
+  if (!user || !sessionToken || !target) {
+    return json(res, 400, { message: "User, session token, dan target wajib diisi." });
   }
 
   const safeTarget = String(target || "").trim().toLowerCase();
@@ -4028,6 +4028,28 @@ async function handleProfileMediaUpdate(body, res) {
   const profileEntry = findLatestUserEntry(store.reg, (item) => item.user === user && item.status === "success");
   if (!profileEntry) {
     return json(res, 404, { message: "Profil user tidak ditemukan." });
+  }
+
+  const mediaStore = await readProfileMediaStore();
+  mediaStore.users ||= {};
+  mediaStore.users[user] ||= {};
+
+  if (String(action || "").trim().toLowerCase() === "delete") {
+    if (safeTarget === "avatar") {
+      delete mediaStore.users[user].avatarUrl;
+    } else {
+      delete mediaStore.users[user].coverUrl;
+    }
+    mediaStore.users[user].updatedAt = Date.now();
+    await writeProfileMediaStore(mediaStore);
+    return json(res, 200, {
+      message: safeTarget === "avatar" ? "Foto profil berhasil dihapus." : "Cover profil berhasil dihapus.",
+      profile: getProfilePayload(store, user, mediaStore)
+    });
+  }
+
+  if (!dataUrl) {
+    return json(res, 400, { message: "File wajib diisi." });
   }
 
   const match = String(dataUrl || "").match(/^data:(image\/(?:png|jpeg|jpg|webp));base64,(.+)$/i);
@@ -4059,9 +4081,6 @@ async function handleProfileMediaUpdate(body, res) {
     relativeUrl = `${safeTarget === "avatar" ? "/data/user/files/pro/" : "/data/user/files/prosub/"}${encodeURIComponent(fileName)}?v=${Date.now()}`;
   }
 
-  const mediaStore = await readProfileMediaStore();
-  mediaStore.users ||= {};
-  mediaStore.users[user] ||= {};
   if (safeTarget === "avatar") {
     mediaStore.users[user].avatarUrl = relativeUrl;
   } else {
