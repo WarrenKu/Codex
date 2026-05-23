@@ -1,0 +1,10 @@
+node_modules/
+.vercel/
+.env
+.env.*
+data/*.tmp
+data/*.bak
+_tmp_adminhmd/
+**/.vs/
+data/otp-store.json
+data/user/
