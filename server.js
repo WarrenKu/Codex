@@ -12,6 +12,7 @@ const KV_REST_API_URL = process.env.KV_REST_API_URL || "";
 const KV_REST_API_TOKEN = process.env.KV_REST_API_TOKEN || "";
 const REDIS_URL = process.env.Cordex_REDIS_URL || process.env.REDIS_URL || "redis://default:3VCLJyqEGp4uhpJrdF4KAOOtEWvmlkzT@redis-13225.crce214.us-east-1-3.ec2.cloud.redislabs.com:13225";
 const KV_STORE_KEY = process.env.KV_STORE_KEY || "otp-store";
+const PASSKEY_STORE_KEY = process.env.PASSKEY_STORE_KEY || `${KV_STORE_KEY}:passkeys`;
 const INDEX_FILE = path.join(__dirname, "index.html");
 const ADMIN_V2_DIR = path.join(__dirname, "admin-v2");
 const DATA_DIR = path.join(__dirname, "data");
@@ -163,6 +164,9 @@ async function ensureStore() {
 }
 
 async function ensurePasskeyStore() {
+  if (useRemoteStore()) {
+    return;
+  }
   await fs.mkdir(USER_DIR, { recursive: true });
   try {
     await fs.access(PASSKEY_FILE);
@@ -234,6 +238,25 @@ async function getRedisClient() {
 }
 
 async function readPasskeyStore() {
+  if (useRemoteStore()) {
+    let raw = "";
+    if (KV_REST_API_URL && KV_REST_API_TOKEN) {
+      const result = await kvCommand(["GET", PASSKEY_STORE_KEY]);
+      raw = typeof result?.result === "string" ? result.result : "";
+    } else {
+      const client = await getRedisClient();
+      raw = await client.get(PASSKEY_STORE_KEY) || "";
+    }
+    if (!String(raw || "").trim()) {
+      return {};
+    }
+    try {
+      return JSON.parse(raw);
+    } catch (error) {
+      throw new Error(`Data passkey rusak. Detail: ${error.message}`);
+    }
+  }
+
   await ensurePasskeyStore();
   const raw = await fs.readFile(PASSKEY_FILE, "utf8");
   if (!String(raw || "").trim()) {
@@ -248,6 +271,17 @@ async function readPasskeyStore() {
 
 async function writePasskeyStore(store) {
   const task = async () => {
+    if (useRemoteStore()) {
+      const payload = JSON.stringify(store || {});
+      if (KV_REST_API_URL && KV_REST_API_TOKEN) {
+        await kvCommand(["SET", PASSKEY_STORE_KEY, payload]);
+      } else {
+        const client = await getRedisClient();
+        await client.set(PASSKEY_STORE_KEY, payload);
+      }
+      return;
+    }
+
     await ensurePasskeyStore();
     await fs.writeFile(PASSKEY_FILE, JSON.stringify(store, null, 2), "utf8");
   };

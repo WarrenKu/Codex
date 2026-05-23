@@ -15010,7 +15010,16 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
-        const data = await response.json();
+        const rawText = await response.text();
+        let data = {};
+        if (rawText.trim()) {
+          try {
+            data = JSON.parse(rawText);
+          } catch {
+            const fallback = rawText.replace(/\s+/g, " ").trim().slice(0, 180);
+            throw new Error(fallback || `Server mengirim response tidak valid (${response.status}).`);
+          }
+        }
         if (!response.ok) {
           const error = new Error(data.message || "Terjadi kesalahan server.");
           error.data = data;
