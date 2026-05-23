@@ -13,6 +13,9 @@ const KV_REST_API_TOKEN = process.env.KV_REST_API_TOKEN || "";
 const REDIS_URL = process.env.Cordex_REDIS_URL || process.env.REDIS_URL || "redis://default:3VCLJyqEGp4uhpJrdF4KAOOtEWvmlkzT@redis-13225.crce214.us-east-1-3.ec2.cloud.redislabs.com:13225";
 const KV_STORE_KEY = process.env.KV_STORE_KEY || "otp-store";
 const PASSKEY_STORE_KEY = process.env.PASSKEY_STORE_KEY || `${KV_STORE_KEY}:passkeys`;
+const POST_STORE_KEY = process.env.POST_STORE_KEY || `${KV_STORE_KEY}:posts`;
+const THEME_CONFIG_STORE_KEY = process.env.THEME_CONFIG_STORE_KEY || `${KV_STORE_KEY}:theme-config`;
+const PROFILE_MEDIA_STORE_KEY = process.env.PROFILE_MEDIA_STORE_KEY || `${KV_STORE_KEY}:profile-media`;
 const INDEX_FILE = path.join(__dirname, "index.html");
 const ADMIN_V2_DIR = path.join(__dirname, "admin-v2");
 const DATA_DIR = path.join(__dirname, "data");
@@ -176,10 +179,16 @@ async function ensurePasskeyStore() {
 }
 
 async function ensurePostStore() {
+  if (useRemoteStore()) {
+    return;
+  }
   await fs.mkdir(POST_DIR, { recursive: true });
 }
 
 async function ensureThemeConfigStore() {
+  if (useRemoteStore()) {
+    return;
+  }
   await fs.mkdir(USER_DIR, { recursive: true });
   try {
     await fs.access(THEME_CONFIG_FILE);
@@ -189,6 +198,9 @@ async function ensureThemeConfigStore() {
 }
 
 async function ensureProfileMediaStore() {
+  if (useRemoteStore()) {
+    return;
+  }
   await fs.mkdir(PROFILE_AVATAR_DIR, { recursive: true });
   await fs.mkdir(PROFILE_COVER_DIR, { recursive: true });
   try {
@@ -289,7 +301,41 @@ async function writePasskeyStore(store) {
   return passkeyWriteQueue;
 }
 
+async function readRemoteJsonStore(key, fallback) {
+  let raw = "";
+  if (KV_REST_API_URL && KV_REST_API_TOKEN) {
+    const result = await kvCommand(["GET", key]);
+    raw = typeof result?.result === "string" ? result.result : "";
+  } else {
+    const client = await getRedisClient();
+    raw = await client.get(key) || "";
+  }
+  if (!String(raw || "").trim()) {
+    return fallback;
+  }
+  return JSON.parse(raw);
+}
+
+async function writeRemoteJsonStore(key, value) {
+  const payload = JSON.stringify(value);
+  if (KV_REST_API_URL && KV_REST_API_TOKEN) {
+    await kvCommand(["SET", key, payload]);
+    return;
+  }
+  const client = await getRedisClient();
+  await client.set(key, payload);
+}
+
 async function readPostStore() {
+  if (useRemoteStore()) {
+    try {
+      const posts = await readRemoteJsonStore(POST_STORE_KEY, []);
+      return Array.isArray(posts) ? posts : [];
+    } catch (error) {
+      throw new Error(`Data post rusak. Detail: ${error.message}`);
+    }
+  }
+
   await ensurePostStore();
   const files = await fs.readdir(POST_DIR, { withFileTypes: true });
   const posts = [];
@@ -313,11 +359,24 @@ async function readPostStore() {
 
 async function writePostEntry(post) {
   const task = async () => {
-    await ensurePostStore();
     const safeId = String(post?.id || "").trim().replace(/[^a-zA-Z0-9_-]/g, "");
     if (!safeId) {
       throw new Error("ID post tidak valid.");
     }
+    if (useRemoteStore()) {
+      const posts = await readPostStore();
+      const nextPost = normalizePostRecord(post);
+      const index = posts.findIndex((item) => String(item?.id || "") === safeId);
+      if (index >= 0) {
+        posts[index] = nextPost;
+      } else {
+        posts.push(nextPost);
+      }
+      await writeRemoteJsonStore(POST_STORE_KEY, posts);
+      return;
+    }
+
+    await ensurePostStore();
     const filePath = path.join(POST_DIR, `${safeId}.json`);
     await fs.writeFile(filePath, JSON.stringify(post, null, 2), "utf8");
   };
@@ -365,6 +424,15 @@ function normalizeThemeConfigInput(raw = {}) {
 }
 
 async function readThemeConfigStore() {
+  if (useRemoteStore()) {
+    try {
+      const parsed = await readRemoteJsonStore(THEME_CONFIG_STORE_KEY, { users: {} });
+      return parsed && typeof parsed === "object" ? parsed : { users: {} };
+    } catch (error) {
+      throw new Error(`Data theme config rusak. Detail: ${error.message}`);
+    }
+  }
+
   await ensureThemeConfigStore();
   const raw = await fs.readFile(THEME_CONFIG_FILE, "utf8");
   if (!String(raw || "").trim()) {
@@ -380,6 +448,11 @@ async function readThemeConfigStore() {
 
 async function writeThemeConfigStore(store) {
   const task = async () => {
+    if (useRemoteStore()) {
+      await writeRemoteJsonStore(THEME_CONFIG_STORE_KEY, store || { users: {} });
+      return;
+    }
+
     await ensureThemeConfigStore();
     await fs.writeFile(THEME_CONFIG_FILE, JSON.stringify(store, null, 2), "utf8");
   };
@@ -388,6 +461,15 @@ async function writeThemeConfigStore(store) {
 }
 
 async function readProfileMediaStore() {
+  if (useRemoteStore()) {
+    try {
+      const parsed = await readRemoteJsonStore(PROFILE_MEDIA_STORE_KEY, { users: {} });
+      return parsed && typeof parsed === "object" ? parsed : { users: {} };
+    } catch (error) {
+      throw new Error(`Data media profil rusak. Detail: ${error.message}`);
+    }
+  }
+
   await ensureProfileMediaStore();
   const raw = await fs.readFile(PROFILE_MEDIA_FILE, "utf8");
   if (!String(raw || "").trim()) {
@@ -403,6 +485,11 @@ async function readProfileMediaStore() {
 
 async function writeProfileMediaStore(store) {
   const task = async () => {
+    if (useRemoteStore()) {
+      await writeRemoteJsonStore(PROFILE_MEDIA_STORE_KEY, store || { users: {} });
+      return;
+    }
+
     await ensureProfileMediaStore();
     await fs.writeFile(PROFILE_MEDIA_FILE, JSON.stringify(store, null, 2), "utf8");
   };
@@ -421,6 +508,9 @@ function getProfileMediaPayload(mediaStore, user) {
 }
 
 function readProfileMediaUsersSync() {
+  if (useRemoteStore()) {
+    return {};
+  }
   try {
     const raw = require("fs").readFileSync(PROFILE_MEDIA_FILE, "utf8");
     const parsed = JSON.parse(raw || "{}");
@@ -1096,6 +1186,16 @@ function getPostFilePath(postId = "") {
 }
 
 async function readPostEntry(postId = "") {
+  if (useRemoteStore()) {
+    const safeId = String(postId || "").trim().replace(/[^a-zA-Z0-9_-]/g, "");
+    const posts = await readPostStore();
+    const post = posts.find((item) => String(item?.id || "") === safeId);
+    if (!post) {
+      throw new Error("Posting tidak ditemukan.");
+    }
+    return normalizePostRecord(post);
+  }
+
   await ensurePostStore();
   const filePath = getPostFilePath(postId);
   try {
@@ -3737,8 +3837,17 @@ async function handlePostDelete(body, res) {
     return json(res, 403, { message: "Kamu hanya bisa hapus posting milik sendiri." });
   }
 
-  const filePath = getPostFilePath(postId);
-  await fs.unlink(filePath);
+  if (useRemoteStore()) {
+    const safeId = String(postId || "").trim().replace(/[^a-zA-Z0-9_-]/g, "");
+    const posts = await readPostStore();
+    await writeRemoteJsonStore(
+      POST_STORE_KEY,
+      posts.filter((item) => String(item?.id || "") !== safeId)
+    );
+  } else {
+    const filePath = getPostFilePath(postId);
+    await fs.unlink(filePath);
+  }
   return json(res, 200, {
     message: "Posting berhasil dihapus.",
     postId: String(postId)
@@ -3925,14 +4034,17 @@ async function handleProfileMediaUpdate(body, res) {
     return json(res, 400, { message: "Ukuran gambar harus di bawah 2.5MB." });
   }
 
-  await ensureProfileMediaStore();
   const safeUser = sanitizeMediaUserKey(user);
-  const folder = safeTarget === "avatar" ? PROFILE_AVATAR_DIR : PROFILE_COVER_DIR;
   const fileName = `${safeUser}.${ext}`;
-  const filePath = path.join(folder, fileName);
-  await fs.writeFile(filePath, buffer);
+  let relativeUrl = dataUrl;
+  if (!useRemoteStore()) {
+    await ensureProfileMediaStore();
+    const folder = safeTarget === "avatar" ? PROFILE_AVATAR_DIR : PROFILE_COVER_DIR;
+    const filePath = path.join(folder, fileName);
+    await fs.writeFile(filePath, buffer);
+    relativeUrl = `${safeTarget === "avatar" ? "/data/user/files/pro/" : "/data/user/files/prosub/"}${encodeURIComponent(fileName)}?v=${Date.now()}`;
+  }
 
-  const relativeUrl = `${safeTarget === "avatar" ? "/data/user/files/pro/" : "/data/user/files/prosub/"}${encodeURIComponent(fileName)}?v=${Date.now()}`;
   const mediaStore = await readProfileMediaStore();
   mediaStore.users ||= {};
   mediaStore.users[user] ||= {};
