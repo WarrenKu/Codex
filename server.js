@@ -39,7 +39,7 @@ const PASSWORD_MIN = 1;
 const PASSWORD_MAX = 64;
 const TELEGRAM_TARGET_MAX = 32;
 const POST_TEXT_MAX = 900;
-const POST_CODE_MAX = 3000;
+const POST_CODE_MAX = 9000;
 const POST_COMMENT_MAX = 280;
 const EMPTY_STORE = {
   reg: {},
