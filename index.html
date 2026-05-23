@@ -6782,6 +6782,7 @@
       box-shadow: 0 28px 70px rgba(0,0,0,0.24);
       display: grid;
       place-items: center;
+      cursor: pointer;
     }
 
     .profile-avatar span {
@@ -6976,7 +6977,8 @@
       flex: 1 1 280px;
     }
 
-    .profile-nickname strong {
+    .profile-nickname strong,
+    .profile-nickname .profile-identity-link {
       font-size: 15px;
       font-weight: 800;
       line-height: 1.2;
@@ -6985,6 +6987,56 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+
+    .profile-identity-link {
+      border: 0;
+      padding: 0;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      font-weight: inherit;
+      cursor: pointer;
+      text-align: left;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .profile-identity-link:hover,
+    .profile-public-handle:hover {
+      color: #9ed8ff;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+
+    .profile-public-handle {
+      border: 0;
+      padding: 0;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 800;
+      cursor: pointer;
+      line-height: 1.4;
+    }
+
+    .profile-share-btn {
+      border: 1px solid rgba(147, 200, 255, 0.18);
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      font-weight: 900;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .profile-share-btn:hover {
+      border-color: rgba(51,193,255,0.42);
+      background: rgba(51,193,255,0.12);
     }
 
     .profile-name-row {
@@ -9924,7 +9976,9 @@
                 <div class="profile-name-row">
                   <div class="profile-role-badge">Role: <span id="profile-role-value">visitor</span></div>
                   <div class="profile-nickname">
-                    <strong id="profile-display-name">User</strong>
+                    <button type="button" class="profile-identity-link" id="profile-display-name">User</button>
+                    <button type="button" class="profile-public-handle" id="profile-public-handle">@user</button>
+                    <button type="button" class="profile-share-btn" id="profile-share-user-btn">Share User</button>
                     <button type="button" class="edit-chip" id="edit-display-name-btn">Edit Nama</button>
                   </div>
                 </div>
@@ -10555,6 +10609,8 @@
     const avatarCropCancel = document.getElementById("avatar-crop-cancel");
     const avatarCropSave = document.getElementById("avatar-crop-save");
     const profileDisplayName = document.getElementById("profile-display-name");
+    const profilePublicHandle = document.getElementById("profile-public-handle");
+    const profileShareUserBtn = document.getElementById("profile-share-user-btn");
     const profileRoleValue = document.getElementById("profile-role-value");
     const profileBioText = document.getElementById("profile-bio-text");
     const profileUserValue = document.getElementById("profile-user-value");
@@ -12053,6 +12109,10 @@
     function buildProfileUrl(user = "") {
       const safeUser = String(user || "").trim();
       return safeUser ? `/?/@${encodeURIComponent(safeUser)}` : "/";
+    }
+
+    function getAbsoluteProfileUrl(user = "") {
+      return `${window.location.origin || ""}${buildProfileUrl(user)}`;
     }
 
     function isLoginRoute() {
@@ -13765,6 +13825,46 @@
       openLinkConfirm(shareUrl);
     }
 
+    async function openCurrentUserPublicProfile(options = {}) {
+      const user = String(profileCache?.user || localStorage.getItem("trusted_user") || "").trim();
+      if (!user) {
+        notify("Profil User", "User belum terbaca.", "error");
+        return;
+      }
+      await openPublicProfile(user, { replace: !!options.replace });
+    }
+
+    async function shareCurrentUserProfile() {
+      const user = String(profileCache?.user || localStorage.getItem("trusted_user") || "").trim();
+      if (!user) {
+        notify("Share User", "User belum terbaca.", "error");
+        return;
+      }
+      const shareUrl = getAbsoluteProfileUrl(user);
+      const displayName = profileCache?.displayName || user;
+      try {
+        if (navigator.share) {
+          await navigator.share({
+            title: `Profil ${displayName}`,
+            text: `Lihat profil @${user}`,
+            url: shareUrl
+          });
+          notify("Share User", "Profil user berhasil dibagikan.", "success");
+          return;
+        }
+      } catch (error) {
+        if (error?.name === "AbortError") {
+          return;
+        }
+      }
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+        notify("Share User", "Link profil user sudah dicopy.", "success");
+        return;
+      }
+      openLinkConfirm(shareUrl);
+    }
+
     async function loadSharedPost(targetUser, shareCode) {
       const payload = {
         targetUser,
@@ -14588,6 +14688,9 @@
       const displayName = profile.displayName || profile.user || "User";
       syncPostComposerState();
       profileDisplayName.textContent = displayName;
+      if (profilePublicHandle) {
+        profilePublicHandle.textContent = `@${profile.user || "-"}`;
+      }
       profileRoleValue.textContent = profile.role || "visitor";
       profileBioText.innerHTML = renderBioMarkup(profile.bio || "Belum ada deskripsi user.");
       applyAvatarVisual(profileAvatarText, displayName.slice(0, 1).toUpperCase(), profile.avatarUrl || "");
@@ -16296,6 +16399,15 @@
     closeDeleteModal.addEventListener("click", () => closeModal(deleteModal));
     closeDeleteRoleModal.addEventListener("click", () => closeModal(deleteRoleModal));
     closeProfileEditModal.addEventListener("click", () => closeModal(profileEditModal));
+    profileAvatarWrap?.addEventListener("click", async (event) => {
+      if (event.target.closest("#profile-avatar-edit-btn, #profile-avatar-menu")) {
+        return;
+      }
+      await openCurrentUserPublicProfile();
+    });
+    profileDisplayName?.addEventListener("click", () => openCurrentUserPublicProfile());
+    profilePublicHandle?.addEventListener("click", () => openCurrentUserPublicProfile());
+    profileShareUserBtn?.addEventListener("click", shareCurrentUserProfile);
     profileAvatarEditBtn?.addEventListener("click", (event) => {
       event.stopPropagation();
       const hasAvatar = !!String(profileCache?.avatarUrl || "").trim();
