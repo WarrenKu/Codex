@@ -1,6 +1,8 @@
 (function () {
   const search = decodeURIComponent(String(window.location.search || ""));
-  const match = search.match(/^\?\/admin\/([a-z0-9-]+)\.([a-z0-9_#-]+)$/i);
+  const pathname = decodeURIComponent(String(window.location.pathname || ""));
+  const match = pathname.match(/^\/admin\/([a-z0-9-]+)\.([a-z0-9_#-]+)$/i)
+    || search.match(/^\?\/admin\/([a-z0-9-]+)\.([a-z0-9_#-]+)$/i);
   if (!match) {
     return;
   }
@@ -31,7 +33,7 @@
 
   function buildAdminRoute(page) {
     const safePage = pageMap[page] || "dash";
-    return `/?/admin/${safePage}.${routeOwner}`;
+    return `/admin/${safePage}.${routeOwner}`;
   }
 
   function escapeHtml(value) {

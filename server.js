@@ -123,9 +123,15 @@ async function tryServeStaticFile(parsedUrl, res) {
   }
 }
 
-function parseAdminRoute(searchValue = "") {
-  const raw = decodeURIComponent(String(searchValue || "").trim());
-  const match = raw.match(/^\?\/admin\/([a-z0-9-]+)\.([a-z0-9_#-]+)$/i);
+function parseAdminRoute(routeValue = "") {
+  const rawPath = typeof routeValue === "object" && routeValue
+    ? decodeURIComponent(String(routeValue.pathname || "").trim())
+    : "";
+  const rawSearch = typeof routeValue === "object" && routeValue
+    ? decodeURIComponent(String(routeValue.search || "").trim())
+    : decodeURIComponent(String(routeValue || "").trim());
+  const match = rawPath.match(/^\/admin\/([a-z0-9-]+)\.([a-z0-9_#-]+)$/i)
+    || rawSearch.match(/^\?\/admin\/([a-z0-9-]+)\.([a-z0-9_#-]+)$/i);
   if (!match) {
     return null;
   }
@@ -4220,10 +4226,17 @@ async function handleRequest(req, res) {
       return;
     }
 
+    if (req.method === "GET") {
+      const adminRoute = parseAdminRoute(parsedUrl);
+      if (adminRoute) {
+        const html = await fs.readFile(adminRoute.filePath, "utf8");
+        res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+        return res.end(html);
+      }
+    }
+
     if (req.method === "GET" && parsedUrl.pathname === "/") {
-      const adminRoute = parseAdminRoute(parsedUrl.search);
-      const htmlPath = adminRoute ? adminRoute.filePath : INDEX_FILE;
-      const html = await fs.readFile(htmlPath, "utf8");
+      const html = await fs.readFile(INDEX_FILE, "utf8");
       res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
       return res.end(html);
     }

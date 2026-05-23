@@ -11914,7 +11914,7 @@
     }
 
     function isPanelRoute() {
-      return (window.location.search || "") === "?/panel";
+      return (window.location.search || "") === "?/panel" || /^\/admin\/[a-z0-9-]+\.[a-z0-9_#-]+$/i.test(window.location.pathname || "");
     }
 
     function isAuthenticated() {
@@ -11988,7 +11988,8 @@
     }
 
     function openPanelRoute(replace = false) {
-      updatePageRoute("/?/panel", replace);
+      const ownerRouteUser = encodeURIComponent((localStorage.getItem("trusted_user") || "owner").trim().toLowerCase() || "owner");
+      updatePageRoute(`/admin/dash.${ownerRouteUser}`, replace);
     }
 
     function closeNavAccountMenu() {
@@ -14391,7 +14392,7 @@
       }
       if ((activeThemeConfig?.neo?.dashboardTheme || "v1") === "v2") {
         const ownerRouteUser = encodeURIComponent((localStorage.getItem("trusted_user") || "owner").trim().toLowerCase() || "owner");
-        window.location.href = `/?/admin/dash.${ownerRouteUser}`;
+        window.location.href = `/admin/dash.${ownerRouteUser}`;
         return;
       }
       showSkeleton(true);
