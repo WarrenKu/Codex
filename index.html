@@ -6810,16 +6810,31 @@
 
     .profile-avatar-menu {
       position: absolute;
-      right: 6px;
-      bottom: -94px;
-      min-width: 132px;
+      left: calc(100% + 12px);
+      top: 50%;
+      transform: translateY(-50%);
+      width: 136px;
+      min-width: 0;
       padding: 8px;
       border-radius: 18px;
       background: rgba(8, 15, 25, 0.96);
       border: 1px solid rgba(147, 200, 255, 0.18);
       box-shadow: 0 22px 52px rgba(0,0,0,0.34);
       display: none;
-      z-index: 8;
+      z-index: 20;
+    }
+
+    @media (max-width: 640px) {
+      .profile-avatar-menu {
+        left: calc(100% + 8px);
+        width: clamp(112px, 36vw, 136px);
+        padding: 7px;
+      }
+
+      .profile-avatar-menu button {
+        padding: 9px 10px;
+        font-size: 12px;
+      }
     }
 
     .profile-avatar-menu.show {

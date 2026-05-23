@@ -171,10 +171,6 @@
                   <button type="button" class="btn btn-sm btn-primary admin-media-edit-btn admin-avatar-edit-btn" id="admin-avatar-edit-btn" aria-label="Edit avatar">
                     <i class="bi bi-pencil" aria-hidden="true"></i>
                   </button>
-                  <div class="admin-avatar-action-menu" id="admin-avatar-action-menu">
-                    <button type="button" id="admin-avatar-change-btn">Change</button>
-                    <button type="button" class="danger" id="admin-avatar-delete-btn">Delete</button>
-                  </div>
                 </div>
                 <h2 class="h5 mt-3 mb-1" id="admin-profile-display-name">Admin Hasan</h2>
                 <p class="text-muted mb-3" id="admin-profile-username">Product Administrator</p>
@@ -231,25 +227,6 @@
 
       <input type="file" id="admin-avatar-file-input" accept="image/png,image/jpeg,image/webp" hidden>
       <input type="file" id="admin-cover-file-input" accept="image/png,image/jpeg,image/webp" hidden>
-
-      <div class="admin-crop-modal" id="admin-avatar-crop-modal" aria-hidden="true">
-        <div class="admin-crop-card">
-          <div>
-            <h2 class="h5 mb-1">Atur Foto Profil</h2>
-            <p class="text-muted mb-0">Geser foto dan atur zoom sebelum dijadikan avatar.</p>
-          </div>
-          <div class="admin-crop-stage" id="admin-avatar-crop-stage">
-            <img id="admin-avatar-crop-image" alt="Preview crop avatar">
-            <div class="admin-crop-mask"></div>
-          </div>
-          <label class="form-label mb-0" for="admin-avatar-crop-zoom">Zoom</label>
-          <input class="form-range" type="range" id="admin-avatar-crop-zoom" min="1" max="3" step="0.01" value="1">
-          <div class="d-flex justify-content-end gap-2">
-            <button type="button" class="btn btn-light" id="admin-avatar-crop-cancel">Cancel</button>
-            <button type="button" class="btn btn-primary" id="admin-avatar-crop-save">Update Profil</button>
-          </div>
-        </div>
-      </div>
 
       <footer class="admin-footer">
         <div class="container-fluid px-3 px-lg-4">
