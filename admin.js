@@ -165,6 +165,14 @@
       .admin-profile-avatar-wrap {
         position: relative;
       }
+      .profile-card {
+        overflow: visible;
+      }
+      .admin-profile-cover-wrap {
+        overflow: hidden;
+        border-top-left-radius: inherit;
+        border-top-right-radius: inherit;
+      }
       .admin-profile-avatar-wrap {
         display: inline-flex;
         justify-content: center;
@@ -200,8 +208,9 @@
       }
       .admin-avatar-action-menu {
         position: absolute;
-        right: -4px;
-        bottom: -84px;
+        left: 50%;
+        top: calc(100% + 10px);
+        transform: translateX(-50%);
         min-width: 132px;
         padding: 8px;
         border-radius: 15px;
@@ -227,6 +236,28 @@
       .admin-avatar-action-menu button.danger {
         color: #ffd6dc;
         background: rgba(255, 99, 132, .16);
+      }
+      @media (hover: none), (max-width: 640px) {
+        .admin-media-edit-btn {
+          opacity: 1;
+          transform: none;
+        }
+        .admin-avatar-action-menu {
+          position: fixed;
+          left: 14px;
+          right: 14px;
+          bottom: 14px;
+          top: auto;
+          transform: none;
+          min-width: 0;
+          padding: 10px;
+          border-radius: 18px;
+          z-index: 2200;
+        }
+        .admin-avatar-action-menu button {
+          text-align: center;
+          padding: 12px 14px;
+        }
       }
       .admin-crop-modal {
         position: fixed;
