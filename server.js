@@ -1229,8 +1229,8 @@ async function findPostByShareCode(user = "", shareCode = "") {
   }) || null;
 }
 
-function getPostAuthorSnapshot(store, user) {
-  const mediaUsers = readProfileMediaUsersSync();
+function getPostAuthorSnapshot(store, user, mediaStore = null) {
+  const mediaUsers = mediaStore?.users || readProfileMediaUsersSync();
   let profile = getPublicProfilePayload(store, user, { users: mediaUsers });
   if (!profile) {
     const fallbackEntry = findLatestUserEntry(store.reg, (value) => {
@@ -1262,9 +1262,9 @@ function getPostAuthorSnapshot(store, user) {
   };
 }
 
-function toPublicPostPayload(store, post, viewer = "") {
+function toPublicPostPayload(store, post, viewer = "", mediaStore = null) {
   const safePost = normalizePostRecord(post);
-  const author = getPostAuthorSnapshot(store, safePost.user) || safePost.author || {
+  const author = getPostAuthorSnapshot(store, safePost.user, mediaStore) || safePost.author || {
     user: safePost.user || "user",
     displayName: safePost.user || "User",
     role: "visitor",
@@ -1272,14 +1272,14 @@ function toPublicPostPayload(store, post, viewer = "") {
   };
   const safeViewer = String(viewer || "").trim().toLowerCase();
   const comments = safePost.comments.map((comment) => {
-    const commentAuthor = getPostAuthorSnapshot(store, comment.user) || {
+    const commentAuthor = getPostAuthorSnapshot(store, comment.user, mediaStore) || {
       user: comment.user,
       displayName: comment.user,
       role: "visitor",
       bio: "Belum ada deskripsi user."
     };
     const replyToAuthor = comment.replyToUser
-      ? getPostAuthorSnapshot(store, comment.replyToUser) || {
+      ? getPostAuthorSnapshot(store, comment.replyToUser, mediaStore) || {
           user: comment.replyToUser,
           displayName: comment.replyToUser,
           role: "visitor",
@@ -1319,13 +1319,19 @@ function toPublicPostPayload(store, post, viewer = "") {
   };
 }
 
+async function buildPublicPostPayload(store, post, viewer = "") {
+  const mediaStore = await readProfileMediaStore();
+  return toPublicPostPayload(store, post, viewer, mediaStore);
+}
+
 async function getPublicPostFeed(store, limit = 24, viewer = "") {
   const posts = await readPostStore();
+  const mediaStore = await readProfileMediaStore();
   return posts
     .filter((item) => item && typeof item === "object" && String(item.visibility || "public") === "public" && String(item.content || "").trim())
     .sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0))
     .slice(0, Math.max(1, Math.min(Number(limit || 24), 60)))
-    .map((item) => toPublicPostPayload(store, item, viewer));
+    .map((item) => toPublicPostPayload(store, item, viewer, mediaStore));
 }
 
 async function getPostsByUser(store, user, limit = 24, viewer = "") {
@@ -1334,9 +1340,10 @@ async function getPostsByUser(store, user, limit = 24, viewer = "") {
     return [];
   }
   const posts = await readPostStore();
+  const mediaStore = await readProfileMediaStore();
   return posts
     .filter((item) => item && typeof item === "object" && String(item.content || "").trim())
-    .map((item) => toPublicPostPayload(store, item, viewer))
+    .map((item) => toPublicPostPayload(store, item, viewer, mediaStore))
     .filter((item) => {
       const authorUser = String(item.author?.user || "").trim();
       return authorUser === safeUser;
@@ -3578,7 +3585,7 @@ async function handlePostDetail(body, res) {
     return json(res, 404, { message: "Posting tidak ditemukan." });
   }
   return json(res, 200, {
-    post: toPublicPostPayload(store, post, viewer)
+    post: await buildPublicPostPayload(store, post, viewer)
   });
 }
 
@@ -3606,7 +3613,8 @@ async function handlePostCreate(body, res) {
     return json(res, 403, { message: "Session tidak valid." });
   }
 
-  const author = getPostAuthorSnapshot(store, safeUser);
+  const mediaStore = await readProfileMediaStore();
+  const author = getPostAuthorSnapshot(store, safeUser, mediaStore);
   if (!author) {
     return json(res, 404, { message: "Profil user tidak ditemukan." });
   }
@@ -3631,7 +3639,7 @@ async function handlePostCreate(body, res) {
   await writeStore(store);
   return json(res, 200, {
     message: "Posting berhasil dikirim.",
-    post: toPublicPostPayload(store, post, safeUser)
+    post: toPublicPostPayload(store, post, safeUser, mediaStore)
   });
 }
 
@@ -3667,7 +3675,7 @@ async function handlePostAction(body, res) {
   await writePostEntry(post);
   return json(res, 200, {
     message,
-    post: toPublicPostPayload(store, post, safeUser)
+    post: await buildPublicPostPayload(store, post, safeUser)
   });
 }
 
@@ -3709,7 +3717,7 @@ async function handlePostComment(body, res) {
   await writePostEntry(post);
   return json(res, 200, {
     message: "Komentar berhasil dikirim.",
-    post: toPublicPostPayload(store, post, safeUser)
+    post: await buildPublicPostPayload(store, post, safeUser)
   });
 }
 
@@ -3751,7 +3759,7 @@ async function handlePostCommentUpdate(body, res) {
   await writePostEntry(post);
   return json(res, 200, {
     message: "Komentar berhasil diupdate.",
-    post: toPublicPostPayload(store, post, safeUser)
+    post: await buildPublicPostPayload(store, post, safeUser)
   });
 }
 
@@ -3782,7 +3790,7 @@ async function handlePostCommentDelete(body, res) {
   await writePostEntry(post);
   return json(res, 200, {
     message: "Komentar berhasil dihapus.",
-    post: toPublicPostPayload(store, post, safeUser),
+    post: await buildPublicPostPayload(store, post, safeUser),
     commentId: safeCommentId
   });
 }
@@ -3822,7 +3830,7 @@ async function handlePostUpdate(body, res) {
   await writePostEntry(post);
   return json(res, 200, {
     message: "Posting berhasil diupdate.",
-    post: toPublicPostPayload(store, post, safeUser)
+    post: await buildPublicPostPayload(store, post, safeUser)
   });
 }
 
