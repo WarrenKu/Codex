@@ -208,9 +208,9 @@
       }
       .admin-avatar-action-menu {
         position: absolute;
-        left: 50%;
-        top: calc(100% + 10px);
-        transform: translateX(-50%);
+        left: calc(100% + 10px);
+        top: 50%;
+        transform: translateY(-50%);
         min-width: 132px;
         padding: 8px;
         border-radius: 15px;
@@ -243,20 +243,22 @@
           transform: none;
         }
         .admin-avatar-action-menu {
-          position: fixed;
-          left: 14px;
-          right: 14px;
-          bottom: 14px;
-          top: auto;
-          transform: none;
+          position: absolute;
+          left: calc(100% + 8px);
+          right: auto;
+          top: 50%;
+          bottom: auto;
+          transform: translateY(-50%);
+          width: clamp(104px, 34vw, 136px);
           min-width: 0;
-          padding: 10px;
-          border-radius: 18px;
-          z-index: 2200;
+          padding: 7px;
+          border-radius: 14px;
+          z-index: 60;
         }
         .admin-avatar-action-menu button {
-          text-align: center;
-          padding: 12px 14px;
+          text-align: left;
+          padding: 9px 10px;
+          font-size: 12px;
         }
       }
       .admin-crop-modal {
