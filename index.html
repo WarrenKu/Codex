@@ -3192,6 +3192,13 @@
       border-color: rgba(255, 200, 90, 0.24);
     }
 
+    .post-card-tag.code,
+    .post-category-chip.code {
+      background: rgba(177, 137, 255, 0.15);
+      color: #eadfff;
+      border-color: rgba(177, 137, 255, 0.3);
+    }
+
     .post-modal-card {
       width: min(620px, 100%);
       padding: 26px;
@@ -10363,6 +10370,7 @@
         <button type="button" class="post-category-chip active artikel" data-post-category="ARTIKEL">ARTIKEL</button>
         <button type="button" class="post-category-chip postingan" data-post-category="POSTINGAN">POSTINGAN</button>
         <button type="button" class="post-category-chip tutorial" data-post-category="TUTORIAL">TUTORIAL</button>
+        <button type="button" class="post-category-chip code" data-post-category="CODE">CODE</button>
       </div>
       <textarea id="post-content-input" class="post-content-input" placeholder="Apa yang Anda pikirkan hari ini?"></textarea>
       <div class="post-modal-bottom">
@@ -10678,6 +10686,8 @@
     const postModalHint = document.getElementById("post-modal-hint");
     const postContentInput = document.getElementById("post-content-input");
     const postCategoryChips = Array.from(document.querySelectorAll("[data-post-category]"));
+    const POST_TEXT_MAX = 900;
+    const POST_CODE_MAX = 3000;
     let loadingTimer = null;
     let activeRole = "visitor";
     let dashboardTimer = null;
@@ -12311,8 +12321,46 @@
       applyAvatarVisual(postModalAvatar, getPostInitial(displayName), authed ? (profileCache?.avatarUrl || "") : "");
       postModalName.textContent = displayName;
       postModalUsername.textContent = user;
+      updatePostComposerHint();
+    }
+
+    function getPostContentLimitError(content = "") {
+      const source = String(content || "").replace(/\r\n/g, "\n");
+      const codePattern = /```([a-zA-Z0-9_+#.-]+)\n([\s\S]*?)```/g;
+      let lastIndex = 0;
+      let textLength = 0;
+      let codeLength = 0;
+      let hasCodeBlock = false;
+      let match;
+      while ((match = codePattern.exec(source))) {
+        textLength += source.slice(lastIndex, match.index).trim().length;
+        codeLength += String(match[2] || "").replace(/\n$/, "").length;
+        hasCodeBlock = true;
+        lastIndex = match.index + match[0].length;
+      }
+      textLength += source.slice(lastIndex).trim().length;
+      if (!hasCodeBlock && source.trim().length > POST_TEXT_MAX) {
+        return `Isi posting maksimal ${POST_TEXT_MAX} karakter. Untuk kode panjang, pakai format \`\`\`bahasa lalu tutup dengan \`\`\`.`;
+      }
+      if (textLength > POST_TEXT_MAX) {
+        return `Teks biasa di luar blok kode maksimal ${POST_TEXT_MAX} karakter.`;
+      }
+      if (codeLength > POST_CODE_MAX) {
+        return `Kode dalam blok \`\`\`bahasa maksimal ${POST_CODE_MAX} karakter.`;
+      }
+      return "";
+    }
+
+    function updatePostComposerHint() {
+      const authed = isAuthenticated() && !isPublicMode;
+      const content = postContentInput?.value || "";
+      const limitError = getPostContentLimitError(content);
+      if (limitError) {
+        postModalHint.textContent = limitError;
+        return;
+      }
       postModalHint.textContent = authed
-        ? "Posting akan tampil di homepage dan juga di profil akun yang ngepost."
+        ? `Teks biasa maksimal ${POST_TEXT_MAX} karakter. Kode di blok \`\`\`bahasa\`\`\` maksimal ${POST_CODE_MAX} karakter.`
         : "Kamu perlu login dulu supaya posting bisa dikirim ke homepage.";
     }
 
@@ -13124,7 +13172,7 @@
 
     function getPostCategoryClass(category = "") {
       const value = String(category || "POSTINGAN").trim().toLowerCase();
-      return ["artikel", "postingan", "tutorial"].includes(value) ? value : "postingan";
+      return ["artikel", "postingan", "tutorial", "code"].includes(value) ? value : "postingan";
     }
 
     function normalizeCodeLanguage(value = "") {
@@ -14052,7 +14100,7 @@
       editingPostId = "";
       postModalTitle.textContent = "Buat postingan";
       submitPostBtn.textContent = "Kirim";
-      postModalHint.textContent = "Posting akan tampil di homepage dan bisa dibuka lewat profil public.";
+      updatePostComposerHint();
       postCategoryChips.forEach((chip) => {
         chip.classList.toggle("active", chip.dataset.postCategory === activePostCategory);
       });
@@ -14080,14 +14128,13 @@
         postContentInput.value = String(post?.content || "");
         postModalTitle.textContent = "Edit postingan";
         submitPostBtn.textContent = "Update";
-        postModalHint.textContent = "Perubahan akan memperbarui posting yang sudah tampil di homepage.";
       } else {
         postContentInput.value = "";
         activePostCategory = activePostCategory || "ARTIKEL";
         postModalTitle.textContent = "Buat postingan";
         submitPostBtn.textContent = "Kirim";
-        postModalHint.textContent = "Posting akan tampil di homepage dan bisa dibuka lewat profil public.";
       }
+      updatePostComposerHint();
       postCategoryChips.forEach((chip) => {
         chip.classList.toggle("active", chip.dataset.postCategory === activePostCategory);
       });
@@ -14106,8 +14153,9 @@
         showErrorPopup("Posting Gagal", "Isi posting tidak boleh kosong.");
         return;
       }
-      if (content.length > 800) {
-        showErrorPopup("Posting Gagal", "Isi posting maksimal 800 karakter.");
+      const contentLimitError = getPostContentLimitError(content);
+      if (contentLimitError) {
+        showErrorPopup("Posting Gagal", contentLimitError);
         return;
       }
       const isEditingPost = !!editingPostId;
@@ -16359,8 +16407,10 @@
         postCategoryChips.forEach((item) => {
           item.classList.toggle("active", item === chip);
         });
+        updatePostComposerHint();
       });
     });
+    postContentInput.addEventListener("input", updatePostComposerHint);
     postContentInput.addEventListener("keydown", async (event) => {
       if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
         event.preventDefault();

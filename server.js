@@ -38,7 +38,8 @@ const DISPLAY_NAME_MAX = 32;
 const PASSWORD_MIN = 1;
 const PASSWORD_MAX = 64;
 const TELEGRAM_TARGET_MAX = 32;
-const POST_CONTENT_MAX = 6000;
+const POST_TEXT_MAX = 900;
+const POST_CODE_MAX = 3000;
 const POST_COMMENT_MAX = 280;
 const EMPTY_STORE = {
   reg: {},
@@ -1134,6 +1135,33 @@ function createPostId(user = "") {
 function createCommentId(user = "") {
   const safeUser = String(user || "").trim().toLowerCase().replace(/[^a-z0-9_-]/g, "") || "user";
   return `comment_${Date.now()}_${safeUser}_${Math.random().toString(36).slice(2, 7)}`;
+}
+
+function getPostContentLimitError(content = "") {
+  const source = String(content || "").replace(/\r\n/g, "\n");
+  const codePattern = /```([a-zA-Z0-9_+#.-]+)\n([\s\S]*?)```/g;
+  let lastIndex = 0;
+  let textLength = 0;
+  let codeLength = 0;
+  let hasCodeBlock = false;
+  let match;
+  while ((match = codePattern.exec(source))) {
+    textLength += source.slice(lastIndex, match.index).trim().length;
+    codeLength += String(match[2] || "").replace(/\n$/, "").length;
+    hasCodeBlock = true;
+    lastIndex = match.index + match[0].length;
+  }
+  textLength += source.slice(lastIndex).trim().length;
+  if (!hasCodeBlock && source.trim().length > POST_TEXT_MAX) {
+    return `Isi posting maksimal ${POST_TEXT_MAX} karakter. Untuk kode panjang, bungkus dengan \`\`\`bahasa lalu tutup dengan \`\`\` agar limit kode ${POST_CODE_MAX} karakter.`;
+  }
+  if (textLength > POST_TEXT_MAX) {
+    return `Teks biasa di luar blok kode maksimal ${POST_TEXT_MAX} karakter.`;
+  }
+  if (codeLength > POST_CODE_MAX) {
+    return `Kode dalam blok \`\`\`bahasa maksimal ${POST_CODE_MAX} karakter.`;
+  }
+  return "";
 }
 
 function sanitizePostShareCode(code = "") {
@@ -3594,15 +3622,16 @@ async function handlePostCreate(body, res) {
   const safeUser = String(user || "").trim();
   const safeContent = String(content || "").trim();
   const safeCategory = String(category || "POSTINGAN").trim().toUpperCase();
-  const allowedCategories = new Set(["ARTIKEL", "POSTINGAN", "TUTORIAL"]);
+  const allowedCategories = new Set(["ARTIKEL", "POSTINGAN", "TUTORIAL", "CODE"]);
   if (!safeUser || !sessionToken) {
     return json(res, 400, { message: "User dan session token wajib diisi." });
   }
   if (!safeContent) {
     return json(res, 400, { message: "Isi posting tidak boleh kosong." });
   }
-  if (safeContent.length > POST_CONTENT_MAX) {
-    return json(res, 400, { message: `Isi posting maksimal ${POST_CONTENT_MAX} karakter.` });
+  const contentLimitError = getPostContentLimitError(safeContent);
+  if (contentLimitError) {
+    return json(res, 400, { message: contentLimitError });
   }
   if (!allowedCategories.has(safeCategory)) {
     return json(res, 400, { message: "Kategori post tidak valid." });
@@ -3800,15 +3829,16 @@ async function handlePostUpdate(body, res) {
   const safeUser = String(user || "").trim();
   const safeContent = String(content || "").trim();
   const safeCategory = String(category || "POSTINGAN").trim().toUpperCase();
-  const allowedCategories = new Set(["ARTIKEL", "POSTINGAN", "TUTORIAL"]);
+  const allowedCategories = new Set(["ARTIKEL", "POSTINGAN", "TUTORIAL", "CODE"]);
   if (!safeUser || !sessionToken || !postId) {
     return json(res, 400, { message: "User, session token, dan post wajib diisi." });
   }
   if (!safeContent) {
     return json(res, 400, { message: "Isi posting tidak boleh kosong." });
   }
-  if (safeContent.length > POST_CONTENT_MAX) {
-    return json(res, 400, { message: `Isi posting maksimal ${POST_CONTENT_MAX} karakter.` });
+  const contentLimitError = getPostContentLimitError(safeContent);
+  if (contentLimitError) {
+    return json(res, 400, { message: contentLimitError });
   }
   if (!allowedCategories.has(safeCategory)) {
     return json(res, 400, { message: "Kategori post tidak valid." });
