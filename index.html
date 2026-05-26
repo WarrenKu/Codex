@@ -16,8 +16,8 @@
       --primary2: #2374ff;
       --success: #6ff0b0;
       --danger: #ff8f8f;
-      --boot-loader: var(--primary);
-      --boot-loader-back: rgba(51, 193, 255, 0.22);
+      --feed-loader: var(--primary);
+      --feed-loader-back: rgba(51, 193, 255, 0.22);
       --shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
     }
 
@@ -28,7 +28,7 @@
       --line: rgba(102, 146, 190, 0.16);
       --text: #10233c;
       --muted: #667f9c;
-      --boot-loader-back: rgba(35, 116, 255, 0.2);
+      --feed-loader-back: rgba(35, 116, 255, 0.2);
       --shadow: 0 26px 64px rgba(45, 84, 128, 0.18);
     }
 
@@ -117,63 +117,54 @@
       visibility: hidden;
     }
 
-    .boot-loading {
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background:
-        radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--boot-loader) 22%, transparent), transparent 26%),
-        linear-gradient(140deg, var(--bg1), var(--bg2));
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-      transition: opacity .32s ease, visibility .32s ease;
-    }
-
-    body.booting .boot-loading {
-      opacity: 1;
-      visibility: visible;
-      pointer-events: auto;
-    }
-
-    .boot-loading-inner {
+    .feed-loading {
+      min-height: clamp(220px, 42vh, 420px);
       display: grid;
       place-items: center;
-      gap: 18px;
+      padding: 28px 12px 34px;
+      border-radius: 20px;
+      background:
+        radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--feed-loader) 18%, transparent), transparent 32%),
+        rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .feed-loading-inner {
+      display: grid;
+      place-items: center;
+      gap: 14px;
+      max-width: 100%;
       transform: translateY(0);
-      animation: bootLoaderFloat 1.8s ease-in-out infinite;
+      animation: feedLoaderFloat 1.8s ease-in-out infinite;
     }
 
-    .boot-loading svg {
-      width: 96px;
-      height: 72px;
-      filter: drop-shadow(0 16px 34px color-mix(in srgb, var(--boot-loader) 34%, transparent));
+    .feed-loading svg {
+      width: clamp(74px, 20vw, 96px);
+      height: auto;
+      filter: drop-shadow(0 14px 30px color-mix(in srgb, var(--feed-loader) 32%, transparent));
     }
 
-    .boot-loading svg polyline {
+    .feed-loading svg polyline {
       fill: none;
       stroke-width: 3;
       stroke-linecap: round;
       stroke-linejoin: round;
     }
 
-    .boot-loading svg polyline#back {
+    .feed-loading svg polyline#back {
       fill: none;
-      stroke: var(--boot-loader-back);
+      stroke: var(--feed-loader-back);
     }
 
-    .boot-loading svg polyline#front {
+    .feed-loading svg polyline#front {
       fill: none;
-      stroke: var(--boot-loader);
+      stroke: var(--feed-loader);
       stroke-dasharray: 48, 144;
       stroke-dashoffset: 192;
       animation: dash_682 1.4s linear infinite;
     }
 
-    .boot-loading-label {
+    .feed-loading-label {
       margin: 0;
       color: var(--text);
       font-size: 12px;
@@ -181,7 +172,17 @@
       letter-spacing: .14em;
       text-transform: uppercase;
       opacity: .86;
-      animation: bootLoaderText 1.4s ease-in-out infinite;
+      text-align: center;
+      animation: feedLoaderText 1.4s ease-in-out infinite;
+    }
+
+    .feed-loading-sub {
+      margin: -6px 0 0;
+      max-width: 28ch;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      text-align: center;
     }
 
     @keyframes dash_682 {
@@ -194,7 +195,7 @@
       }
     }
 
-    @keyframes bootLoaderFloat {
+    @keyframes feedLoaderFloat {
       0%, 100% {
         transform: translateY(0);
       }
@@ -204,7 +205,7 @@
       }
     }
 
-    @keyframes bootLoaderText {
+    @keyframes feedLoaderText {
       0%, 100% {
         opacity: .54;
       }
@@ -9263,15 +9264,6 @@
       </feMerge>
     </filter>
   </svg>
-  <div class="boot-loading" id="boot-loading" aria-live="polite" aria-label="Memuat halaman">
-    <div class="boot-loading-inner">
-      <svg width="64px" height="48px" viewBox="0 0 64 48" aria-hidden="true">
-        <polyline points="0.157 23.954, 14 23.954, 21.843 48, 43 0, 50 24, 64 24" id="back"></polyline>
-        <polyline points="0.157 23.954, 14 23.954, 21.843 48, 43 0, 50 24, 64 24" id="front"></polyline>
-      </svg>
-      <p class="boot-loading-label">Loading</p>
-    </div>
-  </div>
   <div class="shell auth-no-select">
     <section class="hero">
       <span class="badge">OTP Telegram Flow</span>
@@ -11315,7 +11307,7 @@
     function showHome(user, role = "visitor", sessionToken = "", options = {}) {
       const routePost = getRoutePostDetail();
       isPublicMode = false;
-      showSkeleton(true);
+      showSkeleton(false);
       stopTelegramBridgePolling();
       document.body.classList.remove("booting");
       shell.classList.remove("leaving-auth");
@@ -11347,7 +11339,8 @@
       }
       syncPostComposerState();
       if (!options.skipFeedRefresh && !routePost?.shareCode) {
-        void refreshPostFeed({ silent: true });
+        renderPostFeedLoading(postFeed, "Postingan sedang dimuat, tunggu sebentar.");
+        void refreshPostFeed({ silent: true, forceLoader: true });
       }
       clearInterval(dashboardTimer);
       clearInterval(consoleTimer);
@@ -11363,7 +11356,7 @@
       if (!options.skipRouteSync) {
         void syncViewWithRoute({ replace: true });
       }
-      setTimeout(() => showSkeleton(false), 700);
+      showSkeleton(false);
     }
 
     function showPublicHome(options = {}) {
@@ -11403,7 +11396,8 @@
       applyHomeAuthState();
       syncPostComposerState();
       if (!options.skipFeedRefresh && !routePost?.shareCode) {
-        void refreshPostFeed({ silent: true });
+        renderPostFeedLoading(postFeed, "Postingan sedang dimuat, tunggu sebentar.");
+        void refreshPostFeed({ silent: true, forceLoader: true });
       }
       if (options.clearRoute) {
         clearProfileRoute(!!options.replaceRoute);
@@ -12675,8 +12669,8 @@
       bodyStyle.setProperty("--neo-toast", safeConfig.neo.toast);
       bodyStyle.setProperty("--neo-admin", safeConfig.neo.admin);
       bodyStyle.setProperty("--neo-loader", safeConfig.neo.loader);
-      bodyStyle.setProperty("--boot-loader", safeConfig.preset === "neobrutalism" ? safeConfig.neo.loader : "var(--primary)");
-      bodyStyle.setProperty("--boot-loader-back", safeConfig.preset === "neobrutalism" ? `rgba(${themeHexToRgbString(safeConfig.neo.loader)}, 0.22)` : "rgba(51, 193, 255, 0.22)");
+      bodyStyle.setProperty("--feed-loader", safeConfig.preset === "neobrutalism" ? safeConfig.neo.loader : "var(--primary)");
+      bodyStyle.setProperty("--feed-loader-back", safeConfig.preset === "neobrutalism" ? `rgba(${themeHexToRgbString(safeConfig.neo.loader)}, 0.22)` : "rgba(51, 193, 255, 0.22)");
       bodyStyle.setProperty("--neo-accent-rgb", themeHexToRgbString(safeConfig.neo.accent));
       bodyStyle.setProperty("--neo-button-rgb", themeHexToRgbString(safeConfig.neo.button));
       bodyStyle.setProperty("--neo-surface-rgb", themeHexToRgbString(safeConfig.neo.surface));
@@ -13830,6 +13824,22 @@
       targetEl.innerHTML = items.map((item) => buildPostCardMarkup(item)).join("");
     }
 
+    function renderPostFeedLoading(targetEl = postFeed, text = "Memuat postingan...") {
+      targetEl.classList.remove("instant");
+      targetEl.innerHTML = `
+        <div class="feed-loading" role="status" aria-live="polite">
+          <div class="feed-loading-inner">
+            <svg width="64px" height="48px" viewBox="0 0 64 48" aria-hidden="true">
+              <polyline points="0.157 23.954, 14 23.954, 21.843 48, 43 0, 50 24, 64 24" id="back"></polyline>
+              <polyline points="0.157 23.954, 14 23.954, 21.843 48, 43 0, 50 24, 64 24" id="front"></polyline>
+            </svg>
+            <p class="feed-loading-label">Loading</p>
+            <p class="feed-loading-sub">${escapeHtml(text)}</p>
+          </div>
+        </div>
+      `;
+    }
+
     function buildPostFeedMarkup(posts = [], options = {}) {
       const items = Array.isArray(posts) ? posts : [];
       const emptyText = options.emptyText || "Belum ada posting.";
@@ -13840,6 +13850,10 @@
     }
 
     async function refreshPostFeed(options = {}) {
+      const shouldShowLoader = options.showLoader !== false && (options.forceLoader || !postFeedCache.length || !postFeed.children.length);
+      if (shouldShowLoader) {
+        renderPostFeedLoading(postFeed, "Postingan sedang dimuat, tunggu sebentar.");
+      }
       try {
         const user = localStorage.getItem("trusted_user");
         const sessionToken = localStorage.getItem("session_token");
@@ -16520,7 +16534,7 @@
       mobileMenuPanel.classList.toggle("show");
     });
     refreshPostsBtn.addEventListener("click", async () => {
-      await refreshPostFeed();
+      await refreshPostFeed({ forceLoader: true });
       notify("Posting", "Feed posting berhasil diperbarui.", "success");
     });
     submitPostBtn.addEventListener("click", async () => {
