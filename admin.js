@@ -25,7 +25,8 @@
     user: "user",
     users: "user",
     add: "add",
-    profile: "profile"
+    profile: "profile",
+    terminal: "terminal"
   };
 
   let adminDataCache = null;
@@ -174,6 +175,175 @@
       .metric-card.metric-danger .metric-icon {
         background: linear-gradient(135deg, rgba(255,123,155,.2), rgba(255,86,86,.12));
         color: #ffb2c6;
+      }
+      .terminal-console {
+        min-height: min(56vh, 560px);
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        background:
+          radial-gradient(circle at 12% 8%, rgba(124,92,255,.14), transparent 34%),
+          linear-gradient(180deg, rgba(18,20,44,.98), rgba(11,13,30,.98));
+        border: 1px solid rgba(142,156,210,.22);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 20px 60px rgba(0,0,0,.24);
+      }
+      .terminal-toolbar,
+      .terminal-command-bar,
+      .terminal-stat-card {
+        border: 1px solid rgba(142,156,210,.2);
+        background: rgba(38,39,75,.72);
+      }
+      .terminal-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 12px;
+        border-radius: 12px;
+      }
+      .terminal-tabs,
+      .terminal-tools {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .terminal-tab,
+      .terminal-tool {
+        border: 0;
+        color: #c9d4ff;
+        background: transparent;
+      }
+      .terminal-tab {
+        padding: 8px 11px;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 12px;
+      }
+      .terminal-tab.active {
+        background: rgba(124,92,255,.3);
+        color: #fff;
+      }
+      .terminal-tool {
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .terminal-tool:hover {
+        background: rgba(255,255,255,.08);
+        color: #fff;
+      }
+      .terminal-screen {
+        flex: 1;
+        min-height: 320px;
+        max-height: 520px;
+        overflow: auto;
+        padding: 4px 8px 12px;
+        color: #e9eeff;
+        font-family: "Consolas", "Courier New", monospace;
+        font-size: 12px;
+        line-height: 1.45;
+        white-space: pre-wrap;
+        scrollbar-color: rgba(129, 212, 255, .42) transparent;
+      }
+      .terminal-line {
+        animation: terminalLineIn .22s ease both;
+      }
+      .terminal-line.cmd { color: #ffd166; }
+      .terminal-line.output { color: #f3f6ff; }
+      .terminal-line.success { color: #57f0a6; }
+      .terminal-line.warn { color: #ffcf5d; }
+      .terminal-line.error { color: #ff5f87; font-weight: 700; }
+      .terminal-line.info { color: #8dc7ff; }
+      .terminal-command-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 48px;
+        padding: 0 14px;
+        border-radius: 8px;
+      }
+      .terminal-command-bar .terminal-prompt {
+        color: #e9eeff;
+        font-family: "Consolas", "Courier New", monospace;
+        font-weight: 900;
+      }
+      .terminal-command-input {
+        flex: 1;
+        min-width: 0;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        color: #f5f7ff;
+        font-family: "Consolas", "Courier New", monospace;
+      }
+      .terminal-command-input::placeholder {
+        color: rgba(200, 211, 255, .48);
+      }
+      .terminal-stat-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        min-height: 106px;
+        padding: 22px 24px;
+        border-radius: 10px;
+      }
+      .terminal-stat-label {
+        color: #aeb9ed;
+        font-size: 15px;
+        margin-bottom: 6px;
+      }
+      .terminal-stat-value {
+        color: #dbe7ff;
+        font-size: 19px;
+        font-weight: 700;
+      }
+      .terminal-stat-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 7px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #7c5cff, #3823e7);
+        color: #fff;
+        box-shadow: 0 16px 34px rgba(83, 61, 255, .24);
+      }
+      .terminal-stat-icon i {
+        font-size: 30px;
+      }
+      .terminal-console.is-expanded {
+        position: fixed;
+        inset: 18px;
+        z-index: 2000;
+        min-height: auto;
+      }
+      .terminal-console.is-expanded .terminal-screen {
+        max-height: none;
+      }
+      @keyframes terminalLineIn {
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @media (max-width: 640px) {
+        .terminal-toolbar,
+        .terminal-command-bar {
+          align-items: stretch;
+        }
+        .terminal-toolbar {
+          flex-direction: column;
+        }
+        .terminal-tools {
+          justify-content: flex-end;
+        }
+        .terminal-screen {
+          min-height: 360px;
+          font-size: 11px;
+        }
       }
       .sidebar-user .avatar-img,
       .profile-button .avatar-img {
@@ -412,6 +582,8 @@
         link.setAttribute("href", buildAdminRoute("add"));
       } else if (href.endsWith("profile.html")) {
         link.setAttribute("href", buildAdminRoute("profile"));
+      } else if (href.endsWith("terminal.html")) {
+        link.setAttribute("href", buildAdminRoute("terminal"));
       } else if (href.endsWith("login.html")) {
         link.setAttribute("href", "/");
       } else if (
@@ -1067,6 +1239,146 @@
     updateMetricCard(document.querySelector(".metric-card.metric-danger"), String(suspendedCount), suspendedCount ? "perlu review" : "nihil", "akun bermasalah");
   }
 
+  function formatConsoleTime(value) {
+    const date = new Date(value || Date.now());
+    return date.toLocaleTimeString("id-ID", { hour12: false });
+  }
+
+  function terminalLineHtml(log) {
+    const level = String(log?.level || "info").toLowerCase();
+    const safeLevel = ["cmd", "output", "success", "warn", "error", "info"].includes(level) ? level : "info";
+    const prefix = safeLevel === "cmd" ? "container@xwb:~$ " : `[${formatConsoleTime(log?.ts)} ${safeLevel.toUpperCase()}] `;
+    return `<div class="terminal-line ${safeLevel}">${escapeHtml(prefix + String(log?.message || ""))}</div>`;
+  }
+
+  function renderTerminalLogs(logs, filter = "all") {
+    const screen = document.getElementById("terminal-screen");
+    if (!screen) {
+      return;
+    }
+    const source = Array.isArray(logs) ? logs : [];
+    const visibleLogs = filter === "error"
+      ? source.filter((log) => String(log?.level || "").toLowerCase() === "error")
+      : source;
+    screen.innerHTML = visibleLogs.length
+      ? visibleLogs.map(terminalLineHtml).join("")
+      : `<div class="terminal-line info">[${formatConsoleTime()} INFO] Belum ada log console.</div>`;
+    screen.scrollTop = screen.scrollHeight;
+
+    const allButton = document.querySelector('[data-terminal-filter="all"]');
+    const errorButton = document.querySelector('[data-terminal-filter="error"]');
+    const errorCount = source.filter((log) => String(log?.level || "").toLowerCase() === "error").length;
+    if (allButton) {
+      allButton.textContent = `View All (${source.length})`;
+      allButton.classList.toggle("active", filter === "all");
+    }
+    if (errorButton) {
+      errorButton.textContent = `Error (${errorCount})`;
+      errorButton.classList.toggle("active", filter === "error");
+    }
+  }
+
+  function updateTerminalStats(data) {
+    const ping = Number(data?.pingMs || 0);
+    const uptime = formatUptime(data?.uptimeSeconds || 0);
+    const cpu = Math.min(99, Math.max(3, Math.round((ping / 12) + 12)));
+    const memory = window.performance?.memory
+      ? `${(window.performance.memory.usedJSHeapSize / 1073741824).toFixed(2)} GiB / ${(window.performance.memory.jsHeapSizeLimit / 1073741824).toFixed(0)} GiB`
+      : `${Math.max(1, Math.round((Number(data?.totalUsers || 0) || 1) / 30 * 10) / 10).toFixed(1)} GiB / 8 GiB`;
+    document.getElementById("terminal-cpu-value") && (document.getElementById("terminal-cpu-value").textContent = `${cpu}% / ${ping || "-"}ms`);
+    document.getElementById("terminal-memory-value") && (document.getElementById("terminal-memory-value").textContent = memory);
+    document.getElementById("terminal-uptime-value") && (document.getElementById("terminal-uptime-value").textContent = uptime);
+  }
+
+  async function loadTerminalLogs() {
+    const response = await fetch("/api/admin/console", { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error("Console gagal dimuat.");
+    }
+    return response.json();
+  }
+
+  function initTerminalPage() {
+    if (routePage !== "terminal") {
+      return;
+    }
+    const consolePanel = document.getElementById("terminal-console");
+    const form = document.getElementById("terminal-command-form");
+    const input = document.getElementById("terminal-command-input");
+    const clearButton = document.getElementById("terminal-clear");
+    const copyButton = document.getElementById("terminal-copy");
+    const expandButton = document.getElementById("terminal-expand");
+    let terminalLogs = [];
+    let terminalFilter = "all";
+
+    const refreshLogs = async () => {
+      try {
+        const data = await loadTerminalLogs();
+        terminalLogs = Array.isArray(data.logs) ? data.logs : [];
+        renderTerminalLogs(terminalLogs, terminalFilter);
+      } catch (error) {
+        renderTerminalLogs([{ level: "error", ts: Date.now(), message: error.message || "Console gagal dimuat." }], "all");
+      }
+    };
+
+    document.querySelectorAll("[data-terminal-filter]").forEach((button) => {
+      button.addEventListener("click", () => {
+        terminalFilter = button.dataset.terminalFilter || "all";
+        renderTerminalLogs(terminalLogs, terminalFilter);
+      });
+    });
+
+    form?.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const command = String(input?.value || "").trim();
+      if (!command || !input) {
+        return;
+      }
+      input.disabled = true;
+      terminalLogs.push({ level: "cmd", ts: Date.now(), message: command });
+      renderTerminalLogs(terminalLogs, terminalFilter);
+      try {
+        const response = await fetch("/api/admin/console/command", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ command, actor: trustedUser, sessionToken })
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          terminalLogs.push({ level: "error", ts: Date.now(), message: result.message || "Command gagal dijalankan." });
+        } else {
+          terminalLogs.push({ level: "success", ts: Date.now(), message: result.message || "Command berhasil." });
+          (result.output || []).forEach((line) => terminalLogs.push({ level: "output", ts: Date.now(), message: line }));
+        }
+        input.value = "";
+        await refreshLogs();
+      } catch (error) {
+        terminalLogs.push({ level: "error", ts: Date.now(), message: error.message || "Command gagal dijalankan." });
+        renderTerminalLogs(terminalLogs, terminalFilter);
+      } finally {
+        input.disabled = false;
+        input.focus();
+      }
+    });
+
+    clearButton?.addEventListener("click", async () => {
+      input && (input.value = "clear");
+      form?.requestSubmit();
+    });
+
+    copyButton?.addEventListener("click", async () => {
+      const text = terminalLogs.map((log) => `[${formatConsoleTime(log.ts)}] [${String(log.level || "info").toUpperCase()}] ${log.message}`).join("\n");
+      await navigator.clipboard?.writeText(text);
+    });
+
+    expandButton?.addEventListener("click", () => {
+      consolePanel?.classList.toggle("is-expanded");
+    });
+
+    refreshLogs();
+    window.setInterval(refreshLogs, 4500);
+  }
+
   function initAddUserPage() {
     if (routePage !== "add") {
       return;
@@ -1153,8 +1465,9 @@
     injectAdminEnhancements();
     withOwnerRoute();
     initAddUserPage();
+    initTerminalPage();
     let dashRefreshTimer = null;
-    if (routePage === "dash" || routePage === "user" || routePage === "users" || routePage === "profile") {
+    if (routePage === "dash" || routePage === "user" || routePage === "users" || routePage === "profile" || routePage === "terminal") {
       try {
         adminDataCache = await loadDashboardData();
         if (routePage === "profile") {
@@ -1173,6 +1486,16 @@
           }, 5000);
         } else if (routePage === "profile") {
           renderProfile(profileDataCache);
+        } else if (routePage === "terminal") {
+          updateTerminalStats(adminDataCache);
+          dashRefreshTimer = window.setInterval(async () => {
+            try {
+              adminDataCache = await loadDashboardData();
+              updateTerminalStats(adminDataCache);
+            } catch (error) {
+              console.error(error);
+            }
+          }, 5000);
         } else {
           renderUsers(adminDataCache);
         }

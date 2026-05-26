@@ -144,7 +144,8 @@ function parseAdminRoute(routeValue = "") {
     user: "users.html",
     users: "users.html",
     add: "add-user.html",
-    profile: "profile.html"
+    profile: "profile.html",
+    terminal: "terminal.html"
   };
   const fileName = pageMap[pageKey];
   if (!fileName) {

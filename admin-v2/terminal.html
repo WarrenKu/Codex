@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="XWB Xenon Web owner profile workspace">
-  <title>Profile | XWB Admin</title>
+  <meta name="description" content="XWB Xenon Web owner terminal console">
+  <title>Terminal | XWB Admin</title>
 
   <link rel="stylesheet" href="/_tmp_adminhmd/adminhmd-1.0.0/assets/css/bootstrap.min.css">
   <link rel="stylesheet" href="/_tmp_adminhmd/adminhmd-1.0.0/assets/vendors/bootstrap-icons/bootstrap-icons.css">
@@ -39,11 +39,11 @@
           <span class="nav-icon"><i class="bi bi-person-plus" aria-hidden="true"></i></span>
           <span class="nav-text">Add User</span>
         </a>
-        <a class="nav-link active" href="profile.html" aria-current="page">
+        <a class="nav-link" href="profile.html">
           <span class="nav-icon"><i class="bi bi-person-badge" aria-hidden="true"></i></span>
           <span class="nav-text">Profile</span>
         </a>
-        <a class="nav-link" href="terminal.html">
+        <a class="nav-link active" href="terminal.html" aria-current="page">
           <span class="nav-icon">
             <svg xmlns="http://www.w3.org/2000/svg" height="22" viewBox="0 -960 960 960" width="22" fill="currentColor" aria-hidden="true"><path d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm0-80h640v-400H160v400Zm140-40-56-56 103-104-104-104 57-56 160 160-160 160Zm180 0v-80h240v80H480Z"/></svg>
           </span>
@@ -105,7 +105,7 @@
           </button>
 
           <form class="d-none d-md-flex ms-3 flex-grow-1" role="search">
-            <input class="form-control search-input" type="search" placeholder="Search users, orders, reports" aria-label="Search">
+            <input class="form-control search-input" type="search" placeholder="Search users, commands, logs" aria-label="Search">
           </form>
 
           <div class="navbar-actions ms-auto">
@@ -154,114 +154,76 @@
         <div class="container-fluid px-3 px-lg-4 py-4">
           <div class="page-heading">
             <div class="page-heading-copy">
-              <span class="page-icon"><i class="bi bi-person-badge" aria-hidden="true"></i></span>
+              <span class="page-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor" aria-hidden="true"><path d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm0-80h640v-400H160v400Zm140-40-56-56 103-104-104-104 57-56 160 160-160 160Zm180 0v-80h240v80H480Z"/></svg>
+              </span>
               <div>
-                <p class="eyebrow mb-1">Account</p>
-                <h1 class="h3 mb-1">Profile</h1>
-                <p class="text-muted mb-0">Kelola nickname, bio, dan identitas akun admin realtime dari workspace ini.</p>
+                <p class="eyebrow mb-1">System Console</p>
+                <h1 class="h3 mb-1">Terminal</h1>
+                <p class="text-muted mb-0">Console lama untuk command owner, log realtime, dan status server.</p>
               </div>
             </div>
           </div>
 
-          <section class="row g-3">
-            <div class="col-12 col-xl-4">
-              <div class="panel h-100 text-center profile-card">
-                <div class="profile-cover admin-profile-cover-wrap">
-                  <img id="admin-profile-cover-image" data-preserve-admin-media="cover" src="/_tmp_adminhmd/adminhmd-1.0.0/assets/images/png/dasher-ui-bootstrap-5.jpg" alt="XWB admin preview">
-                  <button type="button" class="btn btn-sm btn-light admin-media-edit-btn admin-cover-edit-btn" id="admin-cover-edit-btn" aria-label="Edit cover">
-                    <i class="bi bi-pencil" aria-hidden="true"></i>
-                  </button>
-                </div>
-                <div class="admin-profile-avatar-wrap">
-                  <img class="avatar-img avatar-xl profile-photo" id="admin-profile-avatar-image" data-preserve-admin-media="avatar" src="/_tmp_adminhmd/adminhmd-1.0.0/assets/images/avatar/avatar.jpg" alt="Admin profile">
-                  <button type="button" class="btn btn-sm btn-primary admin-media-edit-btn admin-avatar-edit-btn" id="admin-avatar-edit-btn" aria-label="Edit avatar">
-                    <i class="bi bi-pencil" aria-hidden="true"></i>
-                  </button>
-                  <div class="admin-avatar-action-menu" id="admin-avatar-action-menu">
-                    <button type="button" id="admin-avatar-change-btn">Change</button>
-                    <button type="button" class="danger" id="admin-avatar-delete-btn">Delete</button>
-                  </div>
-                </div>
-                <h2 class="h5 mt-3 mb-1" id="admin-profile-display-name">Admin Hasan</h2>
-                <p class="text-muted mb-3" id="admin-profile-username">Product Administrator</p>
-                <div class="d-flex justify-content-center gap-2">
-                  <span class="badge text-bg-primary" id="admin-profile-role-badge">Admin</span>
-                  <span class="badge text-bg-success" id="admin-profile-status-badge">Online</span>
-                </div>
-                <div class="info-list mt-4 text-start">
-                  <div><span>ID Telegram</span><strong id="admin-profile-tele-card">admin@example.com</strong></div>
-                  <div><span>Roles</span><strong id="admin-profile-role-card">Product Ops</strong></div>
-                  <div><span>Time Zone</span><strong id="admin-profile-timezone-card">Asia/Dhaka</strong></div>
-                </div>
+          <section class="panel terminal-console" id="terminal-console" aria-label="Owner terminal console">
+            <div class="terminal-toolbar">
+              <div class="terminal-tabs">
+                <button class="terminal-tab active" type="button" data-terminal-filter="all">View All (0)</button>
+                <button class="terminal-tab" type="button" data-terminal-filter="error">Error (0)</button>
+              </div>
+              <div class="terminal-tools">
+                <button class="terminal-tool" type="button" id="terminal-clear" title="Clear console" aria-label="Clear console"><i class="bi bi-trash" aria-hidden="true"></i></button>
+                <button class="terminal-tool" type="button" id="terminal-copy" title="Copy logs" aria-label="Copy logs"><i class="bi bi-clipboard" aria-hidden="true"></i></button>
+                <button class="terminal-tool" type="button" id="terminal-expand" title="Expand terminal" aria-label="Expand terminal"><i class="bi bi-arrows-fullscreen" aria-hidden="true"></i></button>
               </div>
             </div>
-            <div class="col-12 col-xl-8">
-              <form class="panel needs-validation" id="admin-profile-form" novalidate>
-                <div class="panel-header">
-                  <div>
-                    <h2 class="h5 mb-1 section-title"><i class="bi bi-person-gear" aria-hidden="true"></i><span>Profile Settings</span></h2>
-                    <p class="text-muted mb-0">Update nickname dan bio akun. Username, role, dan Telegram hanya dibaca.</p>
-                  </div>
+
+            <div class="terminal-screen" id="terminal-screen" role="log" aria-live="polite">
+              <div class="terminal-line info">[BOOT] Loading console logs...</div>
+            </div>
+
+            <form class="terminal-command-bar" id="terminal-command-form">
+              <span class="terminal-prompt">&gt;&gt;</span>
+              <input class="terminal-command-input" id="terminal-command-input" type="text" placeholder="Type a command..." autocomplete="off" spellcheck="false">
+            </form>
+          </section>
+
+          <section class="row g-3 mt-1" aria-label="Terminal server stats">
+            <div class="col-12 col-lg-4">
+              <article class="terminal-stat-card">
+                <div>
+                  <div class="terminal-stat-label">CPU Usage:</div>
+                  <div class="terminal-stat-value" id="terminal-cpu-value">-</div>
                 </div>
-                <div class="row g-3">
-                  <div class="col-md-6">
-                    <label class="form-label" for="profileName">Nickname</label>
-                    <input class="form-control" id="profileName" type="text" value="Admin Hasan" required>
-                    <div class="invalid-feedback">Nickname wajib diisi.</div>
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label" for="profileTelegram">ID Telegram</label>
-                    <input class="form-control" id="profileTelegram" type="text" value="admin@example.com" readonly>
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label" for="profileUsername">Username</label>
-                    <input class="form-control" id="profileUsername" type="text" value="Product Administrator" readonly>
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label" for="profileRole">Roles</label>
-                    <input class="form-control" id="profileRole" type="text" value="Owner" readonly>
-                  </div>
-                  <div class="col-12">
-                    <label class="form-label" for="profileBio">Bio</label>
-                    <textarea class="form-control" id="profileBio" rows="5">Focused on clean admin workflows, reusable UI systems, and reliable operations.</textarea>
-                  </div>
+                <span class="terminal-stat-icon"><i class="bi bi-cpu" aria-hidden="true"></i></span>
+              </article>
+            </div>
+            <div class="col-12 col-lg-4">
+              <article class="terminal-stat-card">
+                <div>
+                  <div class="terminal-stat-label">Memory Usage:</div>
+                  <div class="terminal-stat-value" id="terminal-memory-value">-</div>
                 </div>
-                <div class="d-flex justify-content-end mt-4">
-                  <button class="btn btn-primary" type="submit" id="admin-profile-save"><i class="bi bi-check2-circle" aria-hidden="true"></i> Save Profile</button>
+                <span class="terminal-stat-icon"><i class="bi bi-memory" aria-hidden="true"></i></span>
+              </article>
+            </div>
+            <div class="col-12 col-lg-4">
+              <article class="terminal-stat-card">
+                <div>
+                  <div class="terminal-stat-label">Server Uptime:</div>
+                  <div class="terminal-stat-value" id="terminal-uptime-value">-</div>
                 </div>
-              </form>
+                <span class="terminal-stat-icon"><i class="bi bi-hdd" aria-hidden="true"></i></span>
+              </article>
             </div>
           </section>
         </div>
       </main>
 
-      <input type="file" id="admin-avatar-file-input" accept="image/png,image/jpeg,image/webp" hidden>
-      <input type="file" id="admin-cover-file-input" accept="image/png,image/jpeg,image/webp" hidden>
-
-      <div class="admin-crop-modal" id="admin-avatar-crop-modal" aria-hidden="true">
-        <div class="admin-crop-card">
-          <div>
-            <h2 class="h5 mb-1">Atur Foto Profil</h2>
-            <p class="text-muted mb-0">Geser foto dan atur zoom sebelum dijadikan avatar.</p>
-          </div>
-          <div class="admin-crop-stage" id="admin-avatar-crop-stage">
-            <img id="admin-avatar-crop-image" alt="Preview crop avatar">
-            <div class="admin-crop-mask"></div>
-          </div>
-          <label class="form-label mb-0" for="admin-avatar-crop-zoom">Zoom</label>
-          <input class="form-range" type="range" id="admin-avatar-crop-zoom" min="1" max="3" step="0.01" value="1">
-          <div class="d-flex justify-content-end gap-2">
-            <button type="button" class="btn btn-light" id="admin-avatar-crop-cancel">Cancel</button>
-            <button type="button" class="btn btn-primary" id="admin-avatar-crop-save">Update Profil</button>
-          </div>
-        </div>
-      </div>
-
       <footer class="admin-footer">
         <div class="container-fluid px-3 px-lg-4">
           <span>Copyright 2026 XWB - XENON WEB. <br> Developed by <span class="fw-bold text-success">SantaX &amp; Xenon</span></span>
-          <span>Owner profile workspace.</span>
-          <span>Realtime profile management page.</span>
+          <span>Owner workspace terminal.</span>
         </div>
       </footer>
     </div>
