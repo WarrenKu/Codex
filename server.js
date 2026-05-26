@@ -3313,6 +3313,8 @@ function buildDashboardData(store) {
 
   return {
     totalUsers: users.filter((user) => user.status !== "deleted").length,
+    uptimeSeconds: Math.max(1, Math.floor(process.uptime())),
+    serverTime: Date.now(),
     users,
     roleCounts: Object.fromEntries(Object.entries(roleGroups).map(([role, items]) => [role, items.length])),
     roles: roleGroups,

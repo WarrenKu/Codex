@@ -6102,12 +6102,19 @@
       justify-content: center;
       background: #eff4ff;
       font-size: 18px;
+      font-weight: 900;
     }
 
     body.dashboard-theme-v2 #owner-dashboard .adminhmd-metric-value {
       color: var(--adminhmd-text);
       font-size: clamp(42px, 4vw, 56px);
       margin: 24px 0 8px;
+      transition: transform .24s ease, color .24s ease, text-shadow .24s ease;
+      will-change: transform;
+    }
+
+    body.dashboard-theme-v2 #owner-dashboard .adminhmd-metric-value.metric-pulse {
+      animation: metricValuePulse .58s cubic-bezier(.22, 1, .36, 1);
     }
 
     body.dashboard-theme-v2 #owner-dashboard .adminhmd-metric-meta {
@@ -6121,6 +6128,42 @@
     body.dashboard-theme-v2 #owner-dashboard .adminhmd-metric-emphasis {
       font-weight: 800;
       color: var(--metric-color);
+    }
+
+    body.dashboard-theme-v2 #owner-dashboard .adminhmd-metric {
+      animation: metricCardWake .62s cubic-bezier(.22, 1, .36, 1) both;
+    }
+
+    body.dashboard-theme-v2 #owner-dashboard .owner-stats-grid .adminhmd-metric:nth-child(1) { animation-delay: .02s; }
+    body.dashboard-theme-v2 #owner-dashboard .owner-stats-grid .adminhmd-metric:nth-child(2) { animation-delay: .08s; }
+    body.dashboard-theme-v2 #owner-dashboard .owner-stats-grid .adminhmd-metric:nth-child(3) { animation-delay: .14s; }
+    body.dashboard-theme-v2 #owner-dashboard .owner-stats-grid .adminhmd-metric:nth-child(4) { animation-delay: .20s; }
+
+    @keyframes metricCardWake {
+      from {
+        opacity: 0;
+        transform: translateY(12px) scale(.985);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes metricValuePulse {
+      0% {
+        transform: translateY(0) scale(1);
+      }
+
+      45% {
+        transform: translateY(-2px) scale(1.045);
+        text-shadow: 0 0 22px color-mix(in srgb, var(--metric-color) 38%, transparent);
+      }
+
+      100% {
+        transform: translateY(0) scale(1);
+      }
     }
 
     body.dashboard-theme-v2 #owner-dashboard .adminhmd-analytics-grid {
@@ -9986,17 +10029,17 @@
       <div class="stats-grid owner-stats-grid">
         <div class="home-card adminhmd-metric adminhmd-metric-primary">
           <div class="adminhmd-metric-top">
-            <span class="adminhmd-metric-label">Users</span>
-            <span class="adminhmd-metric-icon" aria-hidden="true">👥</span>
+            <span class="adminhmd-metric-label">Members (all)</span>
+            <span class="adminhmd-metric-icon" aria-hidden="true">M</span>
           </div>
           <div class="stat-number adminhmd-metric-value" id="total-users">0</div>
-          <p class="adminhmd-metric-meta"><span class="adminhmd-metric-emphasis" id="owner-metric-active">0 aktif</span><span>dari workspace saat ini</span></p>
+          <p class="adminhmd-metric-meta"><span class="adminhmd-metric-emphasis" id="owner-metric-active">0 aktif</span><span>workspace user realtime</span></p>
         </div>
 
         <div class="home-card adminhmd-metric adminhmd-metric-success">
           <div class="adminhmd-metric-top">
             <span class="adminhmd-metric-label">Roles</span>
-            <span class="adminhmd-metric-icon" aria-hidden="true">🧩</span>
+            <span class="adminhmd-metric-icon" aria-hidden="true">R</span>
           </div>
           <div class="stat-number adminhmd-metric-value" id="owner-total-roles">0</div>
           <p class="adminhmd-metric-meta"><span class="adminhmd-metric-emphasis" id="owner-role-focus">visitor</span><span>role terdeteksi realtime</span></p>
@@ -10004,20 +10047,20 @@
 
         <div class="home-card adminhmd-metric adminhmd-metric-warning">
           <div class="adminhmd-metric-top">
-            <span class="adminhmd-metric-label">Online</span>
-            <span class="adminhmd-metric-icon" aria-hidden="true">🟢</span>
+            <span class="adminhmd-metric-label">Ping</span>
+            <span class="adminhmd-metric-icon" aria-hidden="true">P</span>
           </div>
-          <div class="stat-number adminhmd-metric-value" id="owner-online-users">0</div>
-          <p class="adminhmd-metric-meta"><span class="adminhmd-metric-emphasis" id="owner-online-percent">0%</span><span>perangkat aktif terhubung</span></p>
+          <div class="stat-number adminhmd-metric-value" id="owner-dashboard-ping">0ms</div>
+          <p class="adminhmd-metric-meta"><span class="adminhmd-metric-emphasis" id="owner-ping-label">cek</span><span>latency dashboard realtime</span></p>
         </div>
 
         <div class="home-card adminhmd-metric adminhmd-metric-danger">
           <div class="adminhmd-metric-top">
-            <span class="adminhmd-metric-label">Alerts</span>
-            <span class="adminhmd-metric-icon" aria-hidden="true">⚠️</span>
+            <span class="adminhmd-metric-label">Uptime Server</span>
+            <span class="adminhmd-metric-icon" aria-hidden="true">U</span>
           </div>
-          <div class="stat-number adminhmd-metric-value" id="owner-alert-users">0</div>
-          <p class="adminhmd-metric-meta"><span class="adminhmd-metric-emphasis" id="owner-alert-label">tidak ada</span><span>blocked, hold, atau deleted</span></p>
+          <div class="stat-number adminhmd-metric-value" id="owner-server-uptime">0s</div>
+          <p class="adminhmd-metric-meta"><span class="adminhmd-metric-emphasis" id="owner-uptime-label">online</span><span>waktu server aktif</span></p>
         </div>
       </div>
 
@@ -10514,7 +10557,7 @@
               <button type="button" id="profile-avatar-change-btn">Change</button>
               <button type="button" class="danger" id="profile-avatar-delete-btn">Delete</button>
             </div>
-            <button type="button" class="profile-edit-badge" id="profile-avatar-edit-btn" aria-label="Edit foto profil">✎</button>
+            <button type="button" class="profile-edit-badge" id="profile-avatar-edit-btn" aria-label="Edit foto profil">âœŽ</button>
           </div>
           <div class="profile-head-copy">
             <h2 id="profile-panel-title">Profil Account</h2>
@@ -10994,12 +11037,12 @@
     const profileLogoutBtn = document.getElementById("profile-logout-btn");
     const totalUsers = document.getElementById("total-users");
     const ownerTotalRoles = document.getElementById("owner-total-roles");
-    const ownerOnlineUsers = document.getElementById("owner-online-users");
-    const ownerAlertUsers = document.getElementById("owner-alert-users");
+    const ownerDashboardPing = document.getElementById("owner-dashboard-ping");
+    const ownerServerUptime = document.getElementById("owner-server-uptime");
     const ownerMetricActive = document.getElementById("owner-metric-active");
     const ownerRoleFocus = document.getElementById("owner-role-focus");
-    const ownerOnlinePercent = document.getElementById("owner-online-percent");
-    const ownerAlertLabel = document.getElementById("owner-alert-label");
+    const ownerPingLabel = document.getElementById("owner-ping-label");
+    const ownerUptimeLabel = document.getElementById("owner-uptime-label");
     const ownerActivityList = document.getElementById("owner-activity-list");
     const graphWrap = document.getElementById("graph-wrap");
     const roleUserList = document.getElementById("role-user-list");
@@ -11246,6 +11289,7 @@
     let slowFetchTimer = null;
     let postComposerClosingTimer = null;
     let dashboardCache = { roles: {} };
+    let dashboardMetricValues = {};
     let selectedHoldUser = "";
     let selectedDeleteUser = "";
     let selectedDeleteStatus = "active";
@@ -11285,15 +11329,15 @@
     let recentEmojis = [];
     const EMOJI_CACHE_KEY = "emoji_picker_data_v16";
     const emojiGroupConfig = {
-      "Smileys & Emotion": { icon: "😀", label: "Senyum" },
-      "People & Body": { icon: "🙋", label: "Orang" },
-      "Animals & Nature": { icon: "🌿", label: "Alam" },
-      "Food & Drink": { icon: "🍔", label: "Makan" },
-      "Travel & Places": { icon: "✈️", label: "Tempat" },
-      "Activities": { icon: "⚽", label: "Aktivitas" },
-      "Objects": { icon: "💡", label: "Benda" },
-      "Symbols": { icon: "❤️", label: "Simbol" },
-      "Flags": { icon: "🏁", label: "Bendera" }
+      "Smileys & Emotion": { icon: "ðŸ˜€", label: "Senyum" },
+      "People & Body": { icon: "ðŸ™‹", label: "Orang" },
+      "Animals & Nature": { icon: "ðŸŒ¿", label: "Alam" },
+      "Food & Drink": { icon: "ðŸ”", label: "Makan" },
+      "Travel & Places": { icon: "âœˆï¸", label: "Tempat" },
+      "Activities": { icon: "âš½", label: "Aktivitas" },
+      "Objects": { icon: "ðŸ’¡", label: "Benda" },
+      "Symbols": { icon: "â¤ï¸", label: "Simbol" },
+      "Flags": { icon: "ðŸ", label: "Bendera" }
     };
     let activePostMenuId = "";
     let activeCommentMenuId = "";
@@ -11777,7 +11821,7 @@
       if (role === "owner") {
         refreshDashboard({ silent: true });
         refreshConsole({ silent: true });
-        dashboardTimer = setInterval(() => refreshDashboard({ silent: true }), 15000);
+        dashboardTimer = setInterval(() => refreshDashboard({ silent: true, skipFiles: true }), 5000);
         consoleTimer = setInterval(() => refreshConsole({ silent: true }), 5000);
       }
       clearInterval(sessionPollTimer);
@@ -14961,7 +15005,7 @@
           </div>
           <div class="profile-item">
             <div class="profile-label">Status</div>
-            <div class="profile-value">${escapeHtml(`${onlineLabel} • ${accountLabel}`)}</div>
+            <div class="profile-value">${escapeHtml(`${onlineLabel} â€¢ ${accountLabel}`)}</div>
             <div class="profile-sub">Hijau online, merah offline.</div>
           </div>
           <div class="profile-item">
@@ -15016,7 +15060,7 @@
       searchResultsList.innerHTML = results.map((item, index) => {
         const isUser = item.type === "user";
         const title = isUser ? (item.displayName || item.user || "User") : (item.title || "Artikel");
-        const subtitle = isUser ? `@${item.user || "-"} • ${item.role || "visitor"}` : (item.body || "Artikel");
+        const subtitle = isUser ? `@${item.user || "-"} â€¢ ${item.role || "visitor"}` : (item.body || "Artikel");
         const statusText = isUser ? getOnlineLabel(item) : "Artikel";
         const dotClass = isUser ? getStatusDot(item) : "article";
         const footerLeft = isUser ? getReadableAccountStatus(item.status) : `slug: ${item.slug || "-"}`;
@@ -15645,22 +15689,77 @@
       `).join("");
     }
 
+    function formatUptime(seconds = 0) {
+      const total = Math.max(0, Math.floor(Number(seconds || 0)));
+      const days = Math.floor(total / 86400);
+      const hours = Math.floor((total % 86400) / 3600);
+      const minutes = Math.floor((total % 3600) / 60);
+      const secs = total % 60;
+      if (days > 0) {
+        return `${days}d ${hours}h`;
+      }
+      if (hours > 0) {
+        return `${hours}h ${minutes}m`;
+      }
+      if (minutes > 0) {
+        return `${minutes}m ${secs}s`;
+      }
+      return `${secs}s`;
+    }
+
+    function setMetricTextAnimated(el, value, options = {}) {
+      if (!el) {
+        return;
+      }
+      const key = el.id || options.key || "";
+      const numericValue = Number(value || 0);
+      const suffix = options.suffix || "";
+      const formatter = typeof options.formatter === "function"
+        ? options.formatter
+        : (next) => `${Math.round(next)}${suffix}`;
+      const previous = Number.isFinite(Number(dashboardMetricValues[key]))
+        ? Number(dashboardMetricValues[key])
+        : numericValue;
+      dashboardMetricValues[key] = numericValue;
+      if (previous === numericValue) {
+        el.textContent = formatter(numericValue);
+        return;
+      }
+      const start = performance.now();
+      const duration = options.duration || 520;
+      el.classList.remove("metric-pulse");
+      void el.offsetWidth;
+      el.classList.add("metric-pulse");
+      const tick = (now) => {
+        const progress = Math.min(1, (now - start) / duration);
+        const eased = 1 - ((1 - progress) ** 3);
+        el.textContent = formatter(previous + ((numericValue - previous) * eased));
+        if (progress < 1) {
+          requestAnimationFrame(tick);
+        } else {
+          el.textContent = formatter(numericValue);
+        }
+      };
+      requestAnimationFrame(tick);
+    }
+
     function renderOwnerMetrics(data = {}) {
       const users = Object.values(data.roles || {}).flat();
       const roleCount = Object.keys(data.roleCounts || {}).length;
       const onlineCount = users.filter((item) => item.online).length;
       const alertUsers = users.filter((item) => ["blocked", "held", "deleted"].includes(item.status));
-      if (totalUsers) totalUsers.textContent = Number(data.totalUsers || 0);
-      if (ownerTotalRoles) ownerTotalRoles.textContent = roleCount;
-      if (ownerOnlineUsers) ownerOnlineUsers.textContent = onlineCount;
-      if (ownerAlertUsers) ownerAlertUsers.textContent = alertUsers.length;
+      const pingMs = Math.max(0, Math.round(Number(data.pingMs || 0)));
+      setMetricTextAnimated(totalUsers, Number(data.totalUsers || 0));
+      setMetricTextAnimated(ownerTotalRoles, roleCount);
+      setMetricTextAnimated(ownerDashboardPing, pingMs, { suffix: "ms" });
+      setMetricTextAnimated(ownerServerUptime, Number(data.uptimeSeconds || 0), { formatter: (next) => formatUptime(next) });
       if (ownerMetricActive) ownerMetricActive.textContent = `${Math.max(0, users.filter((item) => item.status !== "deleted").length)} aktif`;
       if (ownerRoleFocus) {
         const topRole = Object.entries(data.roleCounts || {}).sort((a, b) => b[1] - a[1])[0];
         ownerRoleFocus.textContent = topRole ? topRole[0] : "visitor";
       }
-      if (ownerOnlinePercent) ownerOnlinePercent.textContent = `${users.length ? Math.round((onlineCount / users.length) * 100) : 0}%`;
-      if (ownerAlertLabel) ownerAlertLabel.textContent = alertUsers.length ? alertUsers[0].status : "aman";
+      if (ownerPingLabel) ownerPingLabel.textContent = pingMs < 180 ? "cepat" : pingMs < 450 ? "normal" : "lambat";
+      if (ownerUptimeLabel) ownerUptimeLabel.textContent = alertUsers.length ? `${alertUsers.length} alert` : "online";
       renderOwnerActivity(data);
     }
 
@@ -15675,7 +15774,7 @@
         <div class="user-item">
           <div>
             <strong>${item.user}</strong>
-            <span>${item.role} • ${item.status}${item.previousUsers?.length ? ` • sebelumnya: ${item.previousUsers.join(", ")}` : ""}</span>
+            <span>${item.role} â€¢ ${item.status}${item.previousUsers?.length ? ` â€¢ sebelumnya: ${item.previousUsers.join(", ")}` : ""}</span>
           </div>
           <div style="text-align:right; min-width: 180px;">
             <strong style="font-size:15px;">Terakhir Login</strong>
@@ -15954,11 +16053,14 @@
         if (useSkeleton) {
           startSlowFetchSkeleton();
         }
+        const requestStartedAt = performance.now();
         const response = await fetch("/api/dashboard");
+        const pingMs = Math.max(1, Math.round(performance.now() - requestStartedAt));
         if (!response.ok) {
           throw new Error("Gagal memuat dashboard.");
         }
         const data = await response.json();
+        data.pingMs = pingMs;
         dashboardCache = data;
         renderOwnerMetrics(data);
         renderGraph(data.chart || []);
@@ -15966,7 +16068,9 @@
         renderRoleUsers(data);
         renderConsoleSuggestions();
         renderConsoleHintChips();
-        await refreshFileManager(currentFilePath, { animate: !options.silent });
+        if (!options.skipFiles) {
+          await refreshFileManager(currentFilePath, { animate: !options.silent });
+        }
       } catch (error) {
         console.error(error);
       } finally {
