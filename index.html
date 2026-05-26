@@ -6447,6 +6447,50 @@
       box-shadow: 6px 6px 0 rgba(var(--neo-ink-rgb), 0.92) !important;
     }
 
+    body.neo-theme .mobile-menu-panel {
+      background: var(--neo-panel) !important;
+      border: 3px solid var(--neo-ink) !important;
+      box-shadow: 7px 7px 0 rgba(var(--neo-ink-rgb), 0.92) !important;
+    }
+
+    body.neo-theme .mobile-menu-link {
+      background: var(--neo-panel-2) !important;
+      color: var(--neo-on-surface) !important;
+      border: 3px solid var(--neo-ink) !important;
+      box-shadow: 4px 4px 0 rgba(var(--neo-ink-rgb), 0.82) !important;
+      text-shadow: none !important;
+    }
+
+    body.neo-theme .mobile-menu-link:hover,
+    body.neo-theme .mobile-menu-link:focus-visible {
+      background: var(--neo-accent) !important;
+      color: var(--neo-on-accent) !important;
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0 rgba(var(--neo-ink-rgb), 0.92) !important;
+    }
+
+    body.neo-theme .mobile-menu-link.mobile-post-accent {
+      background: color-mix(in srgb, var(--neo-accent) 22%, var(--neo-panel-2)) !important;
+      color: var(--neo-on-surface) !important;
+      border-color: var(--neo-ink) !important;
+    }
+
+    body.neo-theme .mobile-menu-link *,
+    body.neo-theme .mobile-menu-link:hover *,
+    body.neo-theme .mobile-menu-link:focus-visible * {
+      color: currentColor !important;
+      fill: currentColor !important;
+      stroke: currentColor !important;
+    }
+
+    body.neo-theme .mobile-menu-panel .logout-btn {
+      background: #ff6268 !important;
+      color: #ffffff !important;
+      border: 3px solid var(--neo-ink) !important;
+      box-shadow: 4px 4px 0 rgba(var(--neo-ink-rgb), 0.82) !important;
+      text-shadow: none !important;
+    }
+
     body.neo-theme .home-card:hover,
     body.neo-theme .post-card:hover,
     body.neo-theme .sidebar-card:hover,
