@@ -140,6 +140,25 @@
         border: 1px solid rgba(255,255,255,.08);
         box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
       }
+      .metric-card {
+        position: relative;
+        overflow: hidden;
+      }
+      .metric-card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0;
+        transform: translateX(-70%);
+        background: linear-gradient(105deg, transparent 20%, rgba(255,255,255,.12) 48%, transparent 76%);
+      }
+      .metric-card.metric-live::after {
+        animation: adminMetricSweep .78s ease;
+      }
+      .metric-value.metric-pulse {
+        animation: adminMetricPulse .5s cubic-bezier(.16,1,.3,1);
+      }
       .metric-card.metric-primary .metric-icon {
         background: linear-gradient(135deg, rgba(93,168,255,.22), rgba(80,106,255,.14));
         color: #8fc3ff;
@@ -354,6 +373,16 @@
       @keyframes adminBarIn {
         from { opacity: 0; transform: translateY(22px) scaleY(.82); filter: blur(10px); }
         to { opacity: 1; transform: translateY(0) scaleY(1); filter: blur(0); }
+      }
+      @keyframes adminMetricPulse {
+        0% { transform: translateY(3px) scale(.98); filter: brightness(1); }
+        55% { transform: translateY(0) scale(1.035); filter: brightness(1.22); }
+        100% { transform: translateY(0) scale(1); filter: brightness(1); }
+      }
+      @keyframes adminMetricSweep {
+        0% { opacity: 0; transform: translateX(-70%); }
+        30% { opacity: 1; }
+        100% { opacity: 0; transform: translateX(70%); }
       }
       @media (max-width: 1100px) {
         #admin-chart-bars {
@@ -868,14 +897,61 @@
     }
   }
 
+  function replayMetricAnimation(element, className) {
+    if (!element) {
+      return;
+    }
+    element.classList.remove(className);
+    void element.offsetWidth;
+    element.classList.add(className);
+  }
+
+  function formatUptime(seconds) {
+    const total = Math.max(0, Math.floor(Number(seconds || 0)));
+    const days = Math.floor(total / 86400);
+    const hours = Math.floor((total % 86400) / 3600);
+    const minutes = Math.floor((total % 3600) / 60);
+    const secs = total % 60;
+    if (days > 0) {
+      return `${days}d ${hours}h`;
+    }
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    }
+    if (minutes > 0) {
+      return `${minutes}m ${secs}s`;
+    }
+    return `${secs}s`;
+  }
+
+  function getPingStatus(ms) {
+    const value = Number(ms || 0);
+    if (value <= 0) {
+      return "cek koneksi";
+    }
+    if (value < 180) {
+      return "cepat";
+    }
+    if (value < 450) {
+      return "normal";
+    }
+    return "lambat";
+  }
+
   function updateMetricCard(card, value, metaA, metaB) {
     if (!card) {
       return;
     }
     const valueEl = card.querySelector(".metric-value");
     const metaParts = card.querySelectorAll(".metric-meta span");
+    const nextValue = String(value);
     if (valueEl) {
-      valueEl.textContent = value;
+      const changed = valueEl.textContent !== nextValue;
+      valueEl.textContent = nextValue;
+      if (changed) {
+        replayMetricAnimation(valueEl, "metric-pulse");
+        replayMetricAnimation(card, "metric-live");
+      }
     }
     if (metaParts[0]) {
       metaParts[0].textContent = metaA;
@@ -893,11 +969,12 @@
     const alertUsers = users.filter((item) => ["blocked", "hold", "deleted"].includes(String(item.status || "").toLowerCase())).length;
     const totalUsers = Number(data.totalUsers || users.length || 0);
     const totalRoleKinds = Array.isArray(chart) ? chart.length : 0;
+    const pingMs = Math.max(1, Math.round(Number(data.pingMs || 0)));
 
-    updateMetricCard(document.querySelector('[data-admin-metric="users"]'), String(totalUsers), `${onlineUsers} aktif`, "workspace user");
-    updateMetricCard(document.querySelector('[data-admin-metric="roles"]'), String(totalRoleKinds), chart[0] ? chart[0].label : "visitor", "role terdeteksi");
-    updateMetricCard(document.querySelector('[data-admin-metric="online"]'), String(onlineUsers), `${totalUsers ? Math.round((onlineUsers / totalUsers) * 100) : 0}%`, "sedang online");
-    updateMetricCard(document.querySelector('[data-admin-metric="alerts"]'), String(alertUsers), alertUsers ? "butuh review" : "aman", "status kritis");
+    updateMetricCard(document.querySelector('[data-admin-metric="users"]'), String(totalUsers), `${onlineUsers} aktif`, "workspace user realtime");
+    updateMetricCard(document.querySelector('[data-admin-metric="roles"]'), String(totalRoleKinds), chart[0] ? chart[0].label : "visitor", "role terdeteksi realtime");
+    updateMetricCard(document.querySelector('[data-admin-metric="online"]'), `${pingMs}ms`, getPingStatus(pingMs), "latency dashboard");
+    updateMetricCard(document.querySelector('[data-admin-metric="alerts"]'), formatUptime(data.uptimeSeconds), data.serverTime ? "online" : "sinkron", "waktu server aktif");
 
     const chartBars = document.getElementById("admin-chart-bars");
     if (chartBars) {
@@ -948,9 +1025,12 @@
       `).join("");
     }
 
-    document.getElementById("admin-dash-add-user")?.addEventListener("click", () => {
-      window.location.href = buildAdminRoute("add");
-    });
+    const addUserButton = document.getElementById("admin-dash-add-user");
+    if (addUserButton) {
+      addUserButton.onclick = () => {
+        window.location.href = buildAdminRoute("add");
+      };
+    }
   }
 
   function renderUsers(data) {
@@ -1043,11 +1123,14 @@
   }
 
   async function loadDashboardData() {
-    const response = await fetch("/api/dashboard");
+    const startedAt = performance.now();
+    const response = await fetch("/api/dashboard", { cache: "no-store" });
     if (!response.ok) {
       throw new Error("Dashboard gagal dimuat.");
     }
-    return response.json();
+    const data = await response.json();
+    data.pingMs = Math.max(1, Math.round(performance.now() - startedAt));
+    return data;
   }
 
   async function loadProfileData() {
@@ -1070,6 +1153,7 @@
     injectAdminEnhancements();
     withOwnerRoute();
     initAddUserPage();
+    let dashRefreshTimer = null;
     if (routePage === "dash" || routePage === "user" || routePage === "users" || routePage === "profile") {
       try {
         adminDataCache = await loadDashboardData();
@@ -1079,6 +1163,14 @@
         hydrateChrome();
         if (routePage === "dash") {
           renderDash(adminDataCache);
+          dashRefreshTimer = window.setInterval(async () => {
+            try {
+              adminDataCache = await loadDashboardData();
+              renderDash(adminDataCache);
+            } catch (error) {
+              console.error(error);
+            }
+          }, 5000);
         } else if (routePage === "profile") {
           renderProfile(profileDataCache);
         } else {
@@ -1095,6 +1187,11 @@
       document.body.classList.remove("admin-loading-data");
       document.body.classList.add("admin-ready");
     }
+    window.addEventListener("beforeunload", () => {
+      if (dashRefreshTimer) {
+        window.clearInterval(dashRefreshTimer);
+      }
+    }, { once: true });
   }
 
   init();
