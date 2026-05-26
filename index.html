@@ -6434,6 +6434,38 @@
       color: var(--neo-on-surface) !important;
     }
 
+    body.neo-theme .search-toggle-btn,
+    body.neo-theme .mobile-menu-btn {
+      background: var(--neo-panel-2) !important;
+      color: var(--neo-on-surface) !important;
+      border: 3px solid var(--neo-ink) !important;
+      box-shadow: 4px 4px 0 rgba(var(--neo-ink-rgb), 0.82) !important;
+      border-radius: 14px !important;
+      text-shadow: none !important;
+    }
+
+    body.neo-theme .search-toggle-btn svg,
+    body.neo-theme .mobile-menu-btn svg {
+      color: currentColor !important;
+      fill: currentColor !important;
+      stroke: currentColor !important;
+    }
+
+    body.neo-theme .search-toggle-btn:hover,
+    body.neo-theme .search-toggle-btn:focus-visible,
+    body.neo-theme .mobile-menu-btn:hover,
+    body.neo-theme .mobile-menu-btn:focus-visible {
+      background: var(--neo-accent) !important;
+      color: var(--neo-on-accent) !important;
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0 rgba(var(--neo-ink-rgb), 0.92) !important;
+    }
+
+    body.neo-theme .nav-search.expanded .search-toggle-btn {
+      background: var(--neo-ink) !important;
+      color: #ffffff !important;
+    }
+
     body.neo-theme .sidebar-link.active,
     body.neo-theme .sidebar-link:hover,
     body.neo-theme .sidebar-link:focus-visible,
