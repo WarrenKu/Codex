@@ -282,18 +282,20 @@
         display: flex;
         align-items: center;
         gap: 10px;
-        min-height: 48px;
-        padding: 0 14px;
+        min-height: 46px;
+        padding: 6px 10px 6px 14px;
         border-radius: 8px;
       }
       .terminal-command-bar .terminal-prompt {
         color: #e9eeff;
         font-family: "Consolas", "Courier New", monospace;
         font-weight: 900;
+        line-height: 1;
       }
       .terminal-command-input {
         flex: 1;
         min-width: 0;
+        height: 34px;
         border: 0;
         outline: 0;
         background: transparent;
@@ -304,12 +306,14 @@
         color: rgba(200, 211, 255, .48);
       }
       .terminal-run-button {
+        align-self: stretch;
         border: 1px solid rgba(129, 212, 255, .28);
         border-radius: 10px;
-        padding: 7px 14px;
+        padding: 0 14px;
         background: rgba(19, 92, 138, .42);
         color: #d9f4ff;
         font-weight: 800;
+        line-height: 1;
       }
       .terminal-run-button:hover {
         background: rgba(48, 154, 215, .5);
