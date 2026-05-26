@@ -6523,6 +6523,174 @@
       text-shadow: none !important;
     }
 
+    body.neo-theme .post-author-link {
+      color: var(--neo-on-surface) !important;
+      text-shadow: none !important;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+    }
+
+    body.neo-theme .post-author-link:hover,
+    body.neo-theme .post-author-link:focus-visible {
+      color: var(--neo-accent) !important;
+    }
+
+    body.neo-theme .post-user-meta,
+    body.neo-theme .post-user-meta button {
+      color: var(--neo-muted) !important;
+      text-shadow: none !important;
+    }
+
+    body.neo-theme .post-user-meta span:last-child {
+      color: var(--neo-on-surface) !important;
+      background: color-mix(in srgb, var(--neo-panel-2) 72%, transparent) !important;
+      border: 2px solid var(--neo-ink) !important;
+      border-radius: 999px !important;
+      padding: 2px 7px !important;
+      font-weight: 900 !important;
+      box-shadow: 2px 2px 0 rgba(var(--neo-ink-rgb), 0.7) !important;
+    }
+
+    body.neo-theme .post-card-body,
+    body.neo-theme .post-rich-text {
+      color: var(--neo-on-surface) !important;
+      text-shadow: none !important;
+    }
+
+    body.neo-theme .post-code-block {
+      background: #11151d !important;
+      border: 3px solid var(--neo-ink) !important;
+      border-radius: 18px !important;
+      box-shadow: 6px 6px 0 rgba(var(--neo-ink-rgb), 0.9) !important;
+      overflow: hidden !important;
+    }
+
+    body.neo-theme .post-code-head {
+      background: #171c25 !important;
+      border-bottom: 2px solid rgba(255,255,255,0.1) !important;
+    }
+
+    body.neo-theme .post-code-lang,
+    body.neo-theme .post-code-lang::before {
+      color: #f8fbff !important;
+      text-shadow: none !important;
+    }
+
+    body.neo-theme .post-code-body {
+      background: #0f131a !important;
+      color: #eef8ff !important;
+    }
+
+    body.neo-theme .post-code-lines,
+    body.neo-theme .post-code-line-text,
+    body.neo-theme .code-view-lines,
+    body.neo-theme .code-view-line-text {
+      color: #eef8ff !important;
+      text-shadow: none !important;
+    }
+
+    body.neo-theme .post-code-line-no,
+    body.neo-theme .code-view-line-no {
+      color: rgba(205, 225, 242, 0.62) !important;
+      border-right-color: rgba(255,255,255,0.12) !important;
+    }
+
+    body.neo-theme .post-code-btn {
+      background: rgba(255,255,255,0.08) !important;
+      color: #f8fbff !important;
+      border: 2px solid rgba(255,255,255,0.16) !important;
+      box-shadow: none !important;
+    }
+
+    body.neo-theme .post-code-btn.run {
+      background: rgba(82, 186, 255, 0.18) !important;
+    }
+
+    body.neo-theme .post-code-more {
+      background: linear-gradient(180deg, rgba(230, 244, 255, 0.92), rgba(196, 222, 241, 0.88)) !important;
+      color: #16202a !important;
+      border: 2px solid rgba(255,255,255,0.48) !important;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.34) !important;
+      backdrop-filter: blur(16px) saturate(1.22) !important;
+      -webkit-backdrop-filter: blur(16px) saturate(1.22) !important;
+    }
+
+    body.neo-theme .post-code-more-label,
+    body.neo-theme .post-code-more-sub {
+      color: currentColor !important;
+      text-shadow: none !important;
+    }
+
+    body.neo-theme .post-card-actions-main .post-action-btn,
+    body.neo-theme .post-card-actions-owner .post-action-btn,
+    body.neo-theme .post-menu-btn {
+      background: var(--neo-panel-2) !important;
+      color: var(--neo-on-surface) !important;
+      border: 3px solid var(--neo-ink) !important;
+      box-shadow: 3px 3px 0 rgba(var(--neo-ink-rgb), 0.82) !important;
+      text-shadow: none !important;
+    }
+
+    body.neo-theme .post-card-actions-main .post-action-btn svg,
+    body.neo-theme .post-card-actions-owner .post-action-btn svg,
+    body.neo-theme .post-menu-btn svg {
+      color: currentColor !important;
+      stroke: currentColor !important;
+      fill: none !important;
+    }
+
+    body.neo-theme .post-card-actions-main .post-action-btn.active.like svg {
+      fill: currentColor !important;
+    }
+
+    body.neo-theme .post-action-count {
+      color: currentColor !important;
+    }
+
+    body.neo-theme .post-card-actions-main .post-action-btn:hover,
+    body.neo-theme .post-card-actions-main .post-action-btn:focus-visible,
+    body.neo-theme .post-card-actions-owner .post-action-btn:hover,
+    body.neo-theme .post-card-actions-owner .post-action-btn:focus-visible,
+    body.neo-theme .post-menu-btn:hover,
+    body.neo-theme .post-menu-btn:focus-visible {
+      background: var(--neo-accent) !important;
+      color: var(--neo-on-accent) !important;
+      transform: translate(-2px, -2px);
+      box-shadow: 5px 5px 0 rgba(var(--neo-ink-rgb), 0.9) !important;
+    }
+
+    body.neo-theme .mobile-post-fab {
+      background:
+        radial-gradient(circle at 28% 22%, rgba(255,255,255,0.76), rgba(255,255,255,0.18) 36%, transparent 58%),
+        linear-gradient(145deg, rgba(255,255,255,0.42), rgba(222, 239, 248, 0.16) 48%, rgba(139, 181, 196, 0.2)),
+        rgba(240, 248, 252, 0.24) !important;
+      color: var(--neo-ink) !important;
+      border: 2px solid rgba(255,255,255,0.7) !important;
+      border-radius: 18px !important;
+      box-shadow:
+        0 16px 32px rgba(0, 0, 0, 0.24),
+        inset 0 1px 0 rgba(255,255,255,0.72),
+        inset 0 -10px 20px rgba(67, 93, 106, 0.18),
+        0 0 0 1px rgba(var(--neo-ink-rgb), 0.18) !important;
+      backdrop-filter: blur(18px) saturate(1.35) !important;
+      -webkit-backdrop-filter: blur(18px) saturate(1.35) !important;
+    }
+
+    body.neo-theme .mobile-post-fab-inner {
+      background: rgba(255,255,255,0.2) !important;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.58),
+        inset 0 -8px 16px rgba(35, 51, 61, 0.16) !important;
+      backdrop-filter: blur(10px) saturate(1.25) !important;
+      -webkit-backdrop-filter: blur(10px) saturate(1.25) !important;
+    }
+
+    body.neo-theme .mobile-post-fab-plus {
+      color: var(--neo-ink) !important;
+      text-shadow: 0 1px 10px rgba(255,255,255,0.62) !important;
+      font-weight: 700 !important;
+    }
+
     body.neo-theme .home-card:hover,
     body.neo-theme .post-card:hover,
     body.neo-theme .sidebar-card:hover,
