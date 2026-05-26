@@ -39,7 +39,7 @@ const PASSWORD_MIN = 1;
 const PASSWORD_MAX = 64;
 const TELEGRAM_TARGET_MAX = 32;
 const POST_TEXT_MAX = 900;
-const POST_CODE_MAX = 9000;
+const POST_CODE_MAX = 20000;
 const POST_COMMENT_MAX = 280;
 const EMPTY_STORE = {
   reg: {},
@@ -1159,7 +1159,7 @@ function getPostContentLimitError(content = "") {
     return `Teks biasa di luar blok kode maksimal ${POST_TEXT_MAX} karakter.`;
   }
   if (codeLength > POST_CODE_MAX) {
-    return `Kode dalam blok \`\`\`bahasa maksimal ${POST_CODE_MAX} karakter.`;
+    return `Kode dalam blok \`\`\`bahasa maksimal ${POST_CODE_MAX} karakter. Jika lebih dari itu, sebaiknya upload dalam bentuk file HTML saja.`;
   }
   return "";
 }

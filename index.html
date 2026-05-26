@@ -10687,7 +10687,7 @@
     const postContentInput = document.getElementById("post-content-input");
     const postCategoryChips = Array.from(document.querySelectorAll("[data-post-category]"));
     const POST_TEXT_MAX = 900;
-    const POST_CODE_MAX = 9000;
+    const POST_CODE_MAX = 20000;
     let loadingTimer = null;
     let activeRole = "visitor";
     let dashboardTimer = null;
@@ -12346,7 +12346,7 @@
         return `Teks biasa di luar blok kode maksimal ${POST_TEXT_MAX} karakter.`;
       }
       if (codeLength > POST_CODE_MAX) {
-        return `Kode dalam blok \`\`\`bahasa maksimal ${POST_CODE_MAX} karakter.`;
+        return `Kode dalam blok \`\`\`bahasa maksimal ${POST_CODE_MAX} karakter. Jika lebih dari itu, sebaiknya upload dalam bentuk file HTML saja.`;
       }
       return "";
     }
