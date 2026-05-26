@@ -3312,6 +3312,19 @@
       animation: postModalPop .4s cubic-bezier(.22, 1, .36, 1);
       display: grid;
       gap: 18px;
+      max-height: min(92vh, 760px);
+      overflow: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(122, 196, 255, 0.42) transparent;
+    }
+
+    .post-modal-card::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .post-modal-card::-webkit-scrollbar-thumb {
+      background: rgba(122, 196, 255, 0.28);
+      border-radius: 999px;
     }
 
     #post-modal.closing {
@@ -3338,8 +3351,8 @@
     }
 
     .post-modal-close {
-      width: 48px;
-      height: 48px;
+      width: 44px;
+      height: 44px;
       border: none;
       border-radius: 16px;
       background: rgba(255,255,255,0.08);
@@ -3365,6 +3378,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
+      min-width: 0;
     }
 
     .post-category-chip {
@@ -3378,6 +3392,7 @@
       letter-spacing: .08em;
       cursor: pointer;
       transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+      white-space: nowrap;
     }
 
     .post-category-chip.active {
@@ -3388,6 +3403,7 @@
     .post-content-input {
       width: 100%;
       min-height: 220px;
+      max-height: 42vh;
       resize: vertical;
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 24px;
@@ -3395,7 +3411,7 @@
       color: #f2f7ff;
       padding: 18px 20px;
       font: inherit;
-      font-size: 22px;
+      font-size: 18px;
       line-height: 1.6;
       outline: none;
       transition: border-color .22s ease, box-shadow .22s ease, transform .22s ease;
@@ -3410,6 +3426,12 @@
     .post-modal-bottom {
       display: grid;
       gap: 12px;
+    }
+
+    .post-modal-actions .secondary,
+    .post-modal-actions .primary {
+      min-height: 44px;
+      flex: 1 1 0;
     }
 
     .profile-posts-card {
@@ -6691,6 +6713,58 @@
       font-weight: 700 !important;
     }
 
+    body.neo-theme .post-modal-card {
+      background: var(--neo-panel) !important;
+      color: var(--neo-on-surface) !important;
+      border: 3px solid var(--neo-ink) !important;
+      box-shadow: 8px 8px 0 rgba(var(--neo-ink-rgb), 0.92) !important;
+    }
+
+    body.neo-theme .post-modal-card h3,
+    body.neo-theme .post-modal-user strong,
+    body.neo-theme .post-modal-meta,
+    body.neo-theme .post-modal-hint {
+      color: var(--neo-on-surface) !important;
+      text-shadow: none !important;
+    }
+
+    body.neo-theme .post-modal-meta,
+    body.neo-theme .post-modal-hint {
+      color: var(--neo-muted) !important;
+    }
+
+    body.neo-theme .post-content-input {
+      background: var(--neo-panel-2) !important;
+      color: var(--neo-on-surface) !important;
+      border: 3px solid var(--neo-ink) !important;
+      box-shadow: 4px 4px 0 rgba(var(--neo-ink-rgb), 0.78) !important;
+      text-shadow: none !important;
+    }
+
+    body.neo-theme .post-content-input::placeholder {
+      color: var(--neo-muted) !important;
+      opacity: .82;
+    }
+
+    body.neo-theme .post-category-chip {
+      border: 3px solid var(--neo-ink) !important;
+      box-shadow: 3px 3px 0 rgba(var(--neo-ink-rgb), 0.78) !important;
+      color: var(--neo-on-surface) !important;
+      text-shadow: none !important;
+    }
+
+    body.neo-theme .post-category-chip.active {
+      color: var(--neo-on-accent) !important;
+      background: var(--neo-accent) !important;
+    }
+
+    body.neo-theme .post-modal-close {
+      background: var(--neo-panel-2) !important;
+      color: var(--neo-on-surface) !important;
+      border: 3px solid var(--neo-ink) !important;
+      box-shadow: 3px 3px 0 rgba(var(--neo-ink-rgb), 0.78) !important;
+    }
+
     body.neo-theme .home-card:hover,
     body.neo-theme .post-card:hover,
     body.neo-theme .sidebar-card:hover,
@@ -8944,6 +9018,9 @@
         align-items: stretch;
         flex-direction: column;
       }
+      .post-modal-actions {
+        flex-direction: column-reverse;
+      }
       .search-results {
         width: auto;
         max-width: none;
@@ -9251,7 +9328,60 @@
         grid-template-columns: 1fr;
       }
       .post-modal-card {
-        padding: 20px;
+        width: min(100%, calc(100vw - 12px));
+        max-height: calc(100dvh - 24px);
+        padding: 18px;
+        border-radius: 24px;
+        gap: 14px;
+      }
+      .post-modal-head h3 {
+        font-size: 18px;
+      }
+      .post-modal-close {
+        width: 40px;
+        height: 40px;
+        border-radius: 14px;
+      }
+      .post-modal-user {
+        gap: 10px;
+      }
+      .post-modal-user .post-avatar.large {
+        width: 52px;
+        height: 52px;
+        border-radius: 18px;
+      }
+      .post-category-row {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 2px;
+        scrollbar-width: none;
+      }
+      .post-category-row::-webkit-scrollbar {
+        display: none;
+      }
+      .post-category-chip {
+        padding: 9px 12px;
+        font-size: 11px;
+      }
+      .post-content-input {
+        min-height: min(34vh, 250px);
+        max-height: 38vh;
+        padding: 15px 16px;
+        border-radius: 20px;
+        font-size: 16px;
+        line-height: 1.55;
+      }
+      .post-modal-hint {
+        font-size: 12px;
+        line-height: 1.45;
+      }
+      .post-modal-actions {
+        gap: 10px;
+      }
+      .post-modal-actions .secondary,
+      .post-modal-actions .primary {
+        width: 100%;
+        min-height: 42px;
       }
     }
 
@@ -12760,7 +12890,7 @@
         return;
       }
       postModalHint.textContent = authed
-        ? `Teks biasa maksimal ${POST_TEXT_MAX} karakter. Kode di blok \`\`\`bahasa\`\`\` maksimal ${POST_CODE_MAX} karakter.`
+        ? `Teks biasa maksimal ${POST_TEXT_MAX} karakter. Kode fenced maksimal ${POST_CODE_MAX} karakter.`
         : "Kamu perlu login dulu supaya posting bisa dikirim ke homepage.";
     }
 
