@@ -183,9 +183,13 @@
             </div>
 
             <form class="terminal-command-bar" id="terminal-command-form">
-              <span class="terminal-prompt">&gt;&gt;</span>
-              <input class="terminal-command-input" id="terminal-command-input" type="text" placeholder="Type a command..." autocomplete="off" spellcheck="false">
+              <span class="terminal-prompt">xenon@xwb:~$</span>
+              <input class="terminal-command-input" id="terminal-command-input" type="text" placeholder="[name] $ help" autocomplete="off" spellcheck="false" list="terminal-command-suggest">
+              <datalist id="terminal-command-suggest"></datalist>
+              <button class="terminal-run-button" type="submit">Run</button>
             </form>
+            <div class="terminal-chip-row" id="terminal-chip-row"></div>
+            <div class="terminal-command-help">help, clear, users, roles, check user &lt;nama&gt;, set-role &lt;user&gt; &lt;role&gt;, block, unblock, delete, undelete, delete-perm, hold, release-hold, edit user, notify test/global/role:nama/user:nama | text | durasi | color | block, export log txt/json, ping, status, git clone</div>
           </section>
 
           <section class="row g-3 mt-1" aria-label="Terminal server stats">

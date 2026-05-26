@@ -250,7 +250,27 @@
         scrollbar-color: rgba(129, 212, 255, .42) transparent;
       }
       .terminal-line {
+        display: grid;
+        grid-template-columns: 92px 76px minmax(0, 1fr);
+        gap: 18px;
+        align-items: start;
+        padding: 3px 0;
         animation: terminalLineIn .22s ease both;
+      }
+      .terminal-line + .terminal-line {
+        margin-top: 3px;
+      }
+      .terminal-time {
+        color: #72c9ff;
+        opacity: .9;
+      }
+      .terminal-level {
+        font-weight: 900;
+        letter-spacing: .06em;
+      }
+      .terminal-message {
+        min-width: 0;
+        overflow-wrap: anywhere;
       }
       .terminal-line.cmd { color: #ffd166; }
       .terminal-line.output { color: #f3f6ff; }
@@ -282,6 +302,45 @@
       }
       .terminal-command-input::placeholder {
         color: rgba(200, 211, 255, .48);
+      }
+      .terminal-run-button {
+        border: 1px solid rgba(129, 212, 255, .28);
+        border-radius: 10px;
+        padding: 7px 14px;
+        background: rgba(19, 92, 138, .42);
+        color: #d9f4ff;
+        font-weight: 800;
+      }
+      .terminal-run-button:hover {
+        background: rgba(48, 154, 215, .5);
+        color: #fff;
+      }
+      .terminal-chip-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        padding: 0 2px;
+      }
+      .terminal-chip {
+        border: 1px solid rgba(142,156,210,.18);
+        border-radius: 999px;
+        padding: 5px 10px;
+        background: rgba(35, 42, 77, .82);
+        color: #c8d8ff;
+        font-size: 11px;
+        font-weight: 800;
+      }
+      .terminal-chip:hover {
+        border-color: rgba(129, 212, 255, .36);
+        background: rgba(61, 77, 128, .88);
+        color: #fff;
+      }
+      .terminal-command-help {
+        color: #8ea8d6;
+        font-family: "Consolas", "Courier New", monospace;
+        font-size: 11px;
+        line-height: 1.45;
+        padding: 0 4px 2px;
       }
       .terminal-stat-card {
         display: flex;
@@ -343,6 +402,19 @@
         .terminal-screen {
           min-height: 360px;
           font-size: 11px;
+        }
+        .terminal-line {
+          grid-template-columns: 78px 58px minmax(0, 1fr);
+          gap: 8px;
+        }
+        .terminal-command-bar {
+          flex-wrap: wrap;
+          padding-top: 10px;
+          padding-bottom: 10px;
+        }
+        .terminal-command-input {
+          flex-basis: 100%;
+          order: 3;
         }
       }
       .sidebar-user .avatar-img,
@@ -1244,11 +1316,96 @@
     return date.toLocaleTimeString("id-ID", { hour12: false });
   }
 
+  function getTerminalBaseCommands() {
+    return [
+      "help",
+      "clear",
+      "users",
+      "roles",
+      "ping",
+      "status",
+      "check user ",
+      "set-role ",
+      "block ",
+      "unblock ",
+      "delete ",
+      "undelete ",
+      "delete-perm ",
+      "hold ",
+      "release-hold ",
+      "edit user ",
+      "notify test | hallo | 4 | info",
+      "notify global | hallo semua | 4 | info",
+      "notify role:owner | hallo owner | 5 | success | block",
+      "notify user:",
+      "export log txt",
+      "export log json",
+      "git clone https://github.com/user/repo.git"
+    ];
+  }
+
+  function getTerminalUsernames() {
+    const users = getUsersFromData(adminDataCache);
+    return [...new Set(users.map((item) => item.user).filter(Boolean))].sort();
+  }
+
+  function getTerminalRoles() {
+    return [...new Set(getUsersFromData(adminDataCache).map((item) => item.role || "visitor"))].sort();
+  }
+
+  function renderTerminalHelpers(input) {
+    const suggest = document.getElementById("terminal-command-suggest");
+    const chipRow = document.getElementById("terminal-chip-row");
+    const userNames = getTerminalUsernames();
+    const roleNames = getTerminalRoles();
+    const values = [
+      ...getTerminalBaseCommands(),
+      ...userNames.map((name) => `check user ${name}`),
+      ...userNames.map((name) => `delete ${name}`),
+      ...userNames.map((name) => `undelete ${name}`),
+      ...userNames.map((name) => `delete-perm ${name}`),
+      ...userNames.map((name) => `block ${name}`),
+      ...userNames.map((name) => `unblock ${name}`),
+      ...userNames.map((name) => `release-hold ${name}`),
+      ...userNames.map((name) => `hold ${name} 60`),
+      ...userNames.flatMap((name) => roleNames.map((role) => `set-role ${name} ${role}`)),
+      ...userNames.map((name) => `edit user ${name} tele `),
+      ...userNames.map((name) => `edit user ${name} pass `),
+      ...userNames.map((name) => `edit user ${name} role visitor`),
+      ...userNames.map((name) => `notify user:${name} | hallo ${name} | 4 | info`),
+      ...roleNames.map((role) => `notify role:${role} | hallo ${role} | 4 | info`)
+    ];
+    if (suggest) {
+      suggest.innerHTML = [...new Set(values)].map((value) => `<option value="${escapeHtml(value)}"></option>`).join("");
+    }
+    if (chipRow && !chipRow.dataset.boundTerminalChips) {
+      const chips = ["help", "status", "ping", "users", "notify test | hallo | 4 | info", "export log txt", "clear"];
+      chipRow.innerHTML = chips.map((value) => `<button type="button" class="terminal-chip" data-terminal-chip="${escapeHtml(value)}">${escapeHtml(value)}</button>`).join("");
+      chipRow.querySelectorAll("[data-terminal-chip]").forEach((button) => {
+        button.addEventListener("click", () => {
+          if (!input) {
+            return;
+          }
+          input.value = button.dataset.terminalChip || "";
+          input.focus();
+        });
+      });
+      chipRow.dataset.boundTerminalChips = "true";
+    }
+  }
+
   function terminalLineHtml(log) {
     const level = String(log?.level || "info").toLowerCase();
-    const safeLevel = ["cmd", "output", "success", "warn", "error", "info"].includes(level) ? level : "info";
-    const prefix = safeLevel === "cmd" ? "container@xwb:~$ " : `[${formatConsoleTime(log?.ts)} ${safeLevel.toUpperCase()}] `;
-    return `<div class="terminal-line ${safeLevel}">${escapeHtml(prefix + String(log?.message || ""))}</div>`;
+    const safeLevel = ["cmd", "output", "success", "warn", "warning", "error", "info"].includes(level) ? level : "info";
+    const displayLevel = safeLevel === "cmd" ? "CMD" : safeLevel === "warn" ? "WARNING" : safeLevel.toUpperCase();
+    const message = safeLevel === "cmd"
+      ? `xenon@xwb:~$ ${String(log?.message || "")}`
+      : String(log?.message || "");
+    return `<div class="terminal-line ${safeLevel === "warning" ? "warn" : safeLevel}">
+      <span class="terminal-time">[${escapeHtml(formatConsoleTime(log?.ts))}]</span>
+      <span class="terminal-level">${escapeHtml(displayLevel)}</span>
+      <span class="terminal-message">${escapeHtml(message)}</span>
+    </div>`;
   }
 
   function renderTerminalLogs(logs, filter = "all") {
@@ -1262,7 +1419,7 @@
       : source;
     screen.innerHTML = visibleLogs.length
       ? visibleLogs.map(terminalLineHtml).join("")
-      : `<div class="terminal-line info">[${formatConsoleTime()} INFO] Belum ada log console.</div>`;
+      : terminalLineHtml({ level: "info", ts: Date.now(), message: "Belum ada log console." });
     screen.scrollTop = screen.scrollHeight;
 
     const allButton = document.querySelector('[data-terminal-filter="all"]');
@@ -1310,6 +1467,7 @@
     const expandButton = document.getElementById("terminal-expand");
     let terminalLogs = [];
     let terminalFilter = "all";
+    renderTerminalHelpers(input);
 
     const refreshLogs = async () => {
       try {
@@ -1335,7 +1493,7 @@
         return;
       }
       input.disabled = true;
-      terminalLogs.push({ level: "cmd", ts: Date.now(), message: command });
+      terminalLogs.push({ level: "cmd", ts: Date.now(), message: `[${trustedUser || "owner"}] $ ${command}` });
       renderTerminalLogs(terminalLogs, terminalFilter);
       try {
         const response = await fetch("/api/admin/console/command", {
@@ -1367,7 +1525,7 @@
     });
 
     copyButton?.addEventListener("click", async () => {
-      const text = terminalLogs.map((log) => `[${formatConsoleTime(log.ts)}] [${String(log.level || "info").toUpperCase()}] ${log.message}`).join("\n");
+      const text = terminalLogs.map((log) => `[${formatConsoleTime(log.ts)}] ${String(log.level || "info").toUpperCase().padEnd(7, " ")} ${log.message}`).join("\n");
       await navigator.clipboard?.writeText(text);
     });
 
@@ -1488,10 +1646,12 @@
           renderProfile(profileDataCache);
         } else if (routePage === "terminal") {
           updateTerminalStats(adminDataCache);
+          renderTerminalHelpers(document.getElementById("terminal-command-input"));
           dashRefreshTimer = window.setInterval(async () => {
             try {
               adminDataCache = await loadDashboardData();
               updateTerminalStats(adminDataCache);
+              renderTerminalHelpers(document.getElementById("terminal-command-input"));
             } catch (error) {
               console.error(error);
             }
