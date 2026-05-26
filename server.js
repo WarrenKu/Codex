@@ -67,6 +67,7 @@ const DEFAULT_THEME_CONFIG = {
     ink: "#101217",
     toast: "#ff8159",
     admin: "#7c5cff",
+    loader: "#33c1ff",
     mode: "light",
     dashboardTheme: "v1",
     typography: "grotesk",
@@ -411,6 +412,7 @@ function normalizeThemeConfigInput(raw = {}) {
       ink: isHexColor(neoSource.ink) ? String(neoSource.ink).trim() : DEFAULT_THEME_CONFIG.neo.ink,
       toast: isHexColor(neoSource.toast) ? String(neoSource.toast).trim() : DEFAULT_THEME_CONFIG.neo.toast,
       admin: isHexColor(neoSource.admin) ? String(neoSource.admin).trim() : DEFAULT_THEME_CONFIG.neo.admin,
+      loader: isHexColor(neoSource.loader) ? String(neoSource.loader).trim() : DEFAULT_THEME_CONFIG.neo.loader,
       mode: ["light", "dark"].includes(String(neoSource.mode || "").trim().toLowerCase())
         ? String(neoSource.mode).trim().toLowerCase()
         : DEFAULT_THEME_CONFIG.neo.mode,
