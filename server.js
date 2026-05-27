@@ -1191,9 +1191,24 @@ function normalizePostRecord(post) {
   const likes = Array.from(new Set((Array.isArray(safePost.likes) ? safePost.likes : [])
     .map((item) => String(item || "").trim())
     .filter(Boolean)));
-  const reposts = Array.from(new Set((Array.isArray(safePost.reposts) ? safePost.reposts : [])
-    .map((item) => String(item || "").trim())
-    .filter(Boolean)));
+  const repostUsers = new Set();
+  const reposts = (Array.isArray(safePost.reposts) ? safePost.reposts : [])
+    .map((item) => {
+      const repost = item && typeof item === "object"
+        ? item
+        : { user: item, createdAt: safePost.updatedAt || safePost.createdAt || Date.now(), comment: "" };
+      const user = String(repost?.user || "").trim();
+      if (!user || repostUsers.has(user.toLowerCase())) {
+        return null;
+      }
+      repostUsers.add(user.toLowerCase());
+      return {
+        user,
+        comment: String(repost?.comment || "").trim().slice(0, POST_COMMENT_MAX),
+        createdAt: Number(repost?.createdAt || safePost.updatedAt || safePost.createdAt || Date.now())
+      };
+    })
+    .filter(Boolean);
   const comments = (Array.isArray(safePost.comments) ? safePost.comments : [])
     .map((item) => ({
       id: String(item?.id || createCommentId(item?.user || safePost.user || "user")),
@@ -1344,8 +1359,13 @@ function toPublicPostPayload(store, post, viewer = "", mediaStore = null) {
     },
     reactions: {
       liked: !!safeViewer && safePost.likes.some((item) => item.toLowerCase() === safeViewer),
-      reposted: !!safeViewer && safePost.reposts.some((item) => item.toLowerCase() === safeViewer)
+      reposted: !!safeViewer && safePost.reposts.some((item) => String(item?.user || "").toLowerCase() === safeViewer)
     },
+    reposts: safePost.reposts.map((item) => ({
+      user: item.user,
+      comment: item.comment || "",
+      createdAt: Number(item.createdAt || 0)
+    })),
     comments
   };
 }
@@ -1380,6 +1400,26 @@ async function getPostsByUser(store, user, limit = 24, viewer = "") {
       return authorUser === safeUser;
     })
     .sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0))
+    .slice(0, Math.max(1, Math.min(Number(limit || 24), 60)));
+}
+
+async function getRepostsByUser(store, user, limit = 24, viewer = "") {
+  const safeUser = String(user || "").trim().toLowerCase();
+  if (!safeUser) {
+    return [];
+  }
+  const posts = await readPostStore();
+  const mediaStore = await readProfileMediaStore();
+  return posts
+    .filter((item) => item && typeof item === "object" && String(item.content || "").trim())
+    .map((item) => {
+      const payload = toPublicPostPayload(store, item, viewer, mediaStore);
+      const repost = (Array.isArray(payload.reposts) ? payload.reposts : [])
+        .find((entry) => String(entry?.user || "").trim().toLowerCase() === safeUser);
+      return repost ? { ...payload, repost } : null;
+    })
+    .filter(Boolean)
+    .sort((a, b) => Number(b.repost?.createdAt || 0) - Number(a.repost?.createdAt || 0))
     .slice(0, Math.max(1, Math.min(Number(limit || 24), 60)));
 }
 
@@ -3594,7 +3634,8 @@ async function handlePublicProfile(body, res) {
   }
   const viewer = getViewerFromSession(store, body?.user, body?.sessionToken);
   const posts = await getPostsByUser(store, profile.user, 24, viewer);
-  return json(res, 200, { profile, posts });
+  const reposts = await getRepostsByUser(store, profile.user, 24, viewer);
+  return json(res, 200, { profile, posts, reposts });
 }
 
 async function handlePostList(body, res) {
@@ -3681,11 +3722,16 @@ async function handlePostAction(body, res) {
   const { user, sessionToken, postId, action } = body;
   const safeUser = String(user || "").trim();
   const safeAction = String(action || "").trim().toLowerCase();
+  const safeRepostComment = String(body?.comment || "").trim();
+  const shouldSetRepost = safeAction === "repost" && String(body?.mode || "").trim().toLowerCase() === "set";
   if (!safeUser || !sessionToken || !postId) {
     return json(res, 400, { message: "User, session token, post, dan action wajib diisi." });
   }
   if (!["like", "repost"].includes(safeAction)) {
     return json(res, 400, { message: "Aksi post tidak valid." });
+  }
+  if (safeAction === "repost" && safeRepostComment.length > POST_COMMENT_MAX) {
+    return json(res, 400, { message: `Komentar repost maksimal ${POST_COMMENT_MAX} karakter.` });
   }
 
   const store = await readStore();
@@ -3696,13 +3742,28 @@ async function handlePostAction(body, res) {
   const post = await readPostEntry(postId);
   const collectionKey = safeAction === "like" ? "likes" : "reposts";
   const current = Array.isArray(post[collectionKey]) ? [...post[collectionKey]] : [];
-  const targetIndex = current.findIndex((item) => String(item || "").toLowerCase() === safeUser.toLowerCase());
+  const targetIndex = current.findIndex((item) => {
+    const itemUser = safeAction === "repost" && item && typeof item === "object" ? item.user : item;
+    return String(itemUser || "").toLowerCase() === safeUser.toLowerCase();
+  });
   let message = "";
   if (targetIndex >= 0) {
-    current.splice(targetIndex, 1);
-    message = safeAction === "like" ? "Like dibatalkan." : "Repost dibatalkan.";
+    if (shouldSetRepost) {
+      const existing = current[targetIndex] && typeof current[targetIndex] === "object" ? current[targetIndex] : {};
+      current[targetIndex] = {
+        user: safeUser,
+        comment: safeRepostComment,
+        createdAt: Number(existing.createdAt || Date.now())
+      };
+      message = "Repost diperbarui.";
+    } else {
+      current.splice(targetIndex, 1);
+      message = safeAction === "like" ? "Like dibatalkan." : "Repost dibatalkan.";
+    }
   } else {
-    current.push(safeUser);
+    current.push(safeAction === "repost"
+      ? { user: safeUser, comment: safeRepostComment, createdAt: Date.now() }
+      : safeUser);
     message = safeAction === "like" ? "Posting disukai." : "Posting direpost.";
   }
   post[collectionKey] = current;

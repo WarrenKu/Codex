@@ -2178,6 +2178,30 @@
       box-shadow: 0 12px 26px rgba(111, 240, 176, 0.12);
     }
 
+    .post-repost-note {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      background: rgba(111, 240, 176, 0.08);
+      border: 1px solid rgba(111, 240, 176, 0.16);
+      color: #dfffee;
+    }
+
+    .post-repost-note strong {
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #7cf2b6;
+    }
+
+    .post-repost-note p {
+      margin: 0;
+      color: #f3fff9;
+      line-height: 1.55;
+    }
+
     .post-action-btn.active.comment {
       color: #89d2ff;
       background: rgba(82, 186, 255, 0.12);
@@ -3473,6 +3497,32 @@
       border-color: rgba(51, 193, 255, 0.62);
       box-shadow: 0 18px 42px rgba(11, 46, 86, 0.24);
       transform: translateY(-1px);
+    }
+
+    .repost-preview-card {
+      display: grid;
+      gap: 8px;
+      padding: 14px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #dcecff;
+    }
+
+    .repost-preview-card strong {
+      color: #f5fbff;
+    }
+
+    .repost-preview-card p {
+      margin: 0;
+      color: #a9c2dc;
+      line-height: 1.55;
+      max-height: 96px;
+      overflow: hidden;
+    }
+
+    .repost-comment-input {
+      min-height: 140px;
     }
 
     .post-modal-bottom {
@@ -7579,7 +7629,10 @@
       justify-content: center;
       align-items: center;
       min-height: 48px;
+      border: 0;
+      background: transparent;
       color: #dceaff;
+      cursor: pointer;
       font-weight: 900;
       position: relative;
     }
@@ -11413,6 +11466,29 @@
     </div>
   </div>
 
+  <div class="admin-modal" id="repost-modal">
+    <div class="post-modal-card">
+      <div class="post-modal-head">
+        <h3 style="margin:0;">Repost</h3>
+        <button type="button" class="post-modal-close" id="close-repost-modal" aria-label="Tutup">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M18.3 5.71L12 12l6.3 6.29-1.41 1.41L10.59 13.41 4.29 19.7 2.88 18.29 9.17 12 2.88 5.71 4.29 4.3l6.3 6.29 6.29-6.3z"/>
+          </svg>
+        </button>
+      </div>
+      <div class="repost-preview-card" id="repost-preview-card"></div>
+      <textarea id="repost-comment-input" class="post-content-input repost-comment-input" maxlength="280" placeholder="Tambah komentar repost..."></textarea>
+      <div class="post-modal-bottom">
+        <div class="post-modal-hint" id="repost-modal-hint">Komentar opsional. Kosongkan kalau mau repost langsung.</div>
+        <div class="post-modal-actions">
+          <button type="button" class="secondary" id="cancel-repost-btn">Cancel</button>
+          <button type="button" class="secondary" id="delete-repost-btn" hidden>Hapus Repost</button>
+          <button type="button" class="primary" id="submit-repost-btn">Repost</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     const tabs = document.querySelectorAll(".tab-btn");
     const loginPanel = document.getElementById("login-panel");
@@ -11716,6 +11792,13 @@
     const postModalHint = document.getElementById("post-modal-hint");
     const postContentInput = document.getElementById("post-content-input");
     const postCategoryChips = Array.from(document.querySelectorAll("[data-post-category]"));
+    const repostModal = document.getElementById("repost-modal");
+    const closeRepostModal = document.getElementById("close-repost-modal");
+    const cancelRepostBtn = document.getElementById("cancel-repost-btn");
+    const deleteRepostBtn = document.getElementById("delete-repost-btn");
+    const submitRepostBtn = document.getElementById("submit-repost-btn");
+    const repostPreviewCard = document.getElementById("repost-preview-card");
+    const repostCommentInput = document.getElementById("repost-comment-input");
     const POST_TEXT_MAX = 900;
     const POST_CODE_MAX = 20000;
     let loadingTimer = null;
@@ -11762,8 +11845,11 @@
     let searchResultsCache = [];
     let postFeedCache = [];
     let profilePostCache = [];
+    let profileRepostCache = [];
+    let activePublicProfileCache = null;
     let openPostCommentPanels = new Set();
     let activeSharedPostId = "";
+    let activeRepostPostId = "";
     let postReplyTargets = {};
     let postCommentEditTargets = {};
     let emojiPickerPostId = "";
@@ -14104,8 +14190,8 @@
       if (!profilePanel.querySelector(".tiktok-profile-tabs") && profilePostsCardSection) {
         profilePostsCardSection.insertAdjacentHTML("beforebegin", `
           <div class="tiktok-profile-tabs">
-            <div class="tiktok-profile-tab active" aria-label="Posting">${getProfileTabIcon("posts")}</div>
-            <div class="tiktok-profile-tab" aria-label="Repost">${getProfileTabIcon("repost")}</div>
+            <button type="button" class="tiktok-profile-tab active" data-profile-tab="posts" aria-label="Posting">${getProfileTabIcon("posts")}</button>
+            <button type="button" class="tiktok-profile-tab" data-profile-tab="reposts" aria-label="Repost">${getProfileTabIcon("repost")}</button>
           </div>
         `);
       }
@@ -14633,6 +14719,14 @@
       `;
     }
 
+    function getPlainPostPreview(content = "", max = 140) {
+      return String(content || "")
+        .replace(/```[\s\S]*?```/g, "[kode]")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, max);
+    }
+
     function isOwnPost(item) {
       const trustedUser = String(localStorage.getItem("trusted_user") || "").trim().toLowerCase();
       const authorUser = String(item?.author?.user || "").trim().toLowerCase();
@@ -14769,8 +14863,16 @@
       const ownPost = isOwnPost(item);
       const isEdited = Number(item.updatedAt || 0) > Number(item.createdAt || 0);
       const sharedClass = activeSharedPostId && activeSharedPostId === postId ? " shared-target" : "";
+      const repostComment = String(item.repost?.comment || "").trim();
+      const repostNote = item.repost ? `
+        <div class="post-repost-note">
+          <strong>Direpost</strong>
+          <p>${escapeHtml(repostComment || "Tanpa komentar tambahan.")}</p>
+        </div>
+      ` : "";
       return `
         <article class="post-card${sharedClass}" data-post-id="${escapeHtml(postId)}">
+          ${repostNote}
           <div class="post-card-head">
             <div class="post-card-top">
               ${getAvatarMarkup(getPostInitial(displayName), author.avatarUrl || "", "post-avatar")}
@@ -14841,6 +14943,33 @@
         return;
       }
       targetEl.innerHTML = items.map((item) => buildPostCardMarkup(item)).join("");
+    }
+
+    function setProfileTabState(tabButton, tab = "posts") {
+      const tabs = tabButton?.closest(".tiktok-profile-tabs");
+      tabs?.querySelectorAll(".tiktok-profile-tab").forEach((button) => {
+        button.classList.toggle("active", button.dataset.profileTab === tab);
+      });
+    }
+
+    function switchProfilePostTab(tabButton) {
+      const tab = String(tabButton?.dataset.profileTab || "posts").trim();
+      const isReposts = tab === "reposts";
+      const inOwnProfile = !!tabButton?.closest("#profile-panel");
+      const feed = inOwnProfile
+        ? profilePostFeed
+        : tabButton?.closest(".tiktok-profile-layout")?.querySelector(".profile-post-feed");
+      if (!feed) {
+        return;
+      }
+      const source = inOwnProfile
+        ? (isReposts ? profileRepostCache : profilePostCache)
+        : (isReposts ? (activePublicProfileCache?.reposts || []) : (activePublicProfileCache?.posts || []));
+      setProfileTabState(tabButton, tab);
+      renderPostFeed(source, feed, {
+        emptyText: isReposts ? "Belum ada repost." : "User ini belum punya posting.",
+        instant: true
+      });
     }
 
     function renderPostFeedLoading(targetEl = postFeed, text = "Memuat postingan...") {
@@ -15140,6 +15269,11 @@
       if (updatedPost?.id) {
         postFeedCache = mergePostIntoCache(postFeedCache, updatedPost);
         profilePostCache = mergePostIntoCache(profilePostCache, updatedPost);
+        profileRepostCache = mergePostIntoCache(profileRepostCache, updatedPost);
+        if (activePublicProfileCache) {
+          activePublicProfileCache.posts = mergePostIntoCache(activePublicProfileCache.posts || [], updatedPost);
+          activePublicProfileCache.reposts = mergePostIntoCache(activePublicProfileCache.reposts || [], updatedPost);
+        }
       }
       if (postFeed.children.length) {
         renderPostFeed(postFeedCache, postFeed, {
@@ -15179,6 +15313,7 @@
       pendingRestorePost = previousPost ? JSON.parse(JSON.stringify(previousPost)) : null;
       postFeedCache = removePostFromCache(postFeedCache, result.postId);
       profilePostCache = removePostFromCache(profilePostCache, result.postId);
+      profileRepostCache = removePostFromCache(profileRepostCache, result.postId);
       openPostCommentPanels.delete(String(result.postId || ""));
       await syncPostCardState();
       const routeUser = getRouteProfileUser();
@@ -15209,7 +15344,7 @@
       await refreshPostFeed({ silent: true });
     }
 
-    async function performPostAction(postId, action) {
+    async function performPostAction(postId, action, options = {}) {
       if (!isAuthenticated() || isPublicMode) {
         showAuth({ routeToLogin: true, replaceRoute: true });
         return;
@@ -15220,7 +15355,9 @@
         user,
         sessionToken,
         postId,
-        action
+        action,
+        comment: options.comment || "",
+        mode: options.mode || ""
       });
       await syncPostCardState(result.post);
       notify("Posting", result.message, "success");
@@ -15332,6 +15469,81 @@
       setTimeout(() => postContentInput.focus(), 40);
     }
 
+    function closeRepostComposer() {
+      closeModal(repostModal);
+      activeRepostPostId = "";
+      repostCommentInput.value = "";
+      repostPreviewCard.innerHTML = "";
+      deleteRepostBtn.hidden = true;
+      submitRepostBtn.textContent = "Repost";
+    }
+
+    function openRepostComposer(postId = "") {
+      if (!isAuthenticated() || isPublicMode) {
+        showAuth({ routeToLogin: true, replaceRoute: true });
+        return;
+      }
+      const post = findPostInCaches(postId);
+      if (!post) {
+        notify("Repost", "Posting tidak ditemukan.", "error");
+        return;
+      }
+      activeRepostPostId = String(postId || "").trim();
+      const author = post.author || {};
+      const authorName = author.displayName || author.user || "User";
+      const existing = Array.isArray(post.reposts)
+        ? post.reposts.find((item) => String(item?.user || "").toLowerCase() === String(localStorage.getItem("trusted_user") || "").toLowerCase())
+        : null;
+      repostPreviewCard.innerHTML = `
+        <strong>${escapeHtml(authorName)} @${escapeHtml(author.user || "user")}</strong>
+        <p>${escapeHtml(getPlainPostPreview(post.content || "", 220) || "Posting tanpa preview.")}</p>
+      `;
+      repostCommentInput.value = existing?.comment || "";
+      deleteRepostBtn.hidden = !existing;
+      submitRepostBtn.textContent = existing ? "Update Repost" : "Repost";
+      openModal(repostModal);
+      setTimeout(() => repostCommentInput.focus(), 40);
+    }
+
+    async function submitRepost() {
+      if (!activeRepostPostId) {
+        return;
+      }
+      const comment = repostCommentInput.value.trim();
+      if (comment.length > 280) {
+        showErrorPopup("Repost Gagal", "Komentar repost maksimal 280 karakter.");
+        return;
+      }
+      await performPostAction(activeRepostPostId, "repost", { comment, mode: "set" });
+      closeRepostComposer();
+      const routeUser = getRouteProfileUser();
+      if (profilePanel.style.display !== "none") {
+        await loadProfile();
+      } else if (routeUser) {
+        try {
+          await openPublicProfileView(routeUser, { replace: true, updateRoute: false });
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    }
+
+    async function deleteActiveRepost() {
+      if (!activeRepostPostId) {
+        return;
+      }
+      await performPostAction(activeRepostPostId, "repost");
+      closeRepostComposer();
+      if (profilePanel.style.display !== "none") {
+        await loadProfile();
+      } else {
+        const routeUser = getRouteProfileUser();
+        if (routeUser) {
+          await openPublicProfileView(routeUser, { replace: true, updateRoute: false });
+        }
+      }
+    }
+
     async function submitPost() {
       if (!isAuthenticated() || isPublicMode) {
         showAuth({ routeToLogin: true, replaceRoute: true });
@@ -15362,6 +15574,7 @@
         showSuccess(isEditingPost ? "Posting Diperbarui" : "Posting Berhasil", result.message || "Posting berhasil dikirim.");
         await refreshPostFeed({ silent: true });
         profilePostCache = [];
+        profileRepostCache = [];
         goToHomeSection({ replaceRoute: true });
         setTimeout(() => postFeedCard.scrollIntoView({ behavior: "smooth", block: "start" }), 120);
       } catch (error) {
@@ -15393,7 +15606,8 @@
       const result = await sendJson("/api/profile/public", payload);
       return {
         profile: result.profile,
-        posts: Array.isArray(result.posts) ? result.posts : []
+        posts: Array.isArray(result.posts) ? result.posts : [],
+        reposts: Array.isArray(result.reposts) ? result.reposts : []
       };
     }
 
@@ -15407,6 +15621,7 @@
       const result = await loadPublicProfile(safeUser);
       const profile = result.profile;
       profile.posts = result.posts || [];
+      profile.reposts = result.reposts || [];
       selectedSearchResultId = profile.id || `user-${profile.user}`;
       renderSearchView(profile);
       if (options.updateRoute !== false) {
@@ -15718,6 +15933,10 @@
         const postsMarkup = buildPostFeedMarkup(item.posts || [], {
           emptyText: "User ini belum punya posting."
         });
+        activePublicProfileCache = {
+          posts: Array.isArray(item.posts) ? item.posts : [],
+          reposts: Array.isArray(item.reposts) ? item.reposts : []
+        };
         const trustedUser = String(localStorage.getItem("trusted_user") || "").trim().toLowerCase();
         const viewedUser = String(item.user || "").trim().toLowerCase();
         const isOwnPublicProfile = !!trustedUser && !!viewedUser && trustedUser === viewedUser && !isPublicMode;
@@ -15750,8 +15969,8 @@
               <div class="profile-nickname"><strong>${escapeHtml(accountLabel)}</strong></div>
             </div>
             <div class="tiktok-profile-tabs">
-              <div class="tiktok-profile-tab active" aria-label="Posting">${getProfileTabIcon("posts")}</div>
-              <div class="tiktok-profile-tab" aria-label="Repost">${getProfileTabIcon("repost")}</div>
+              <button type="button" class="tiktok-profile-tab active" data-profile-tab="posts" aria-label="Posting">${getProfileTabIcon("posts")}</button>
+              <button type="button" class="tiktok-profile-tab" data-profile-tab="reposts" aria-label="Repost">${getProfileTabIcon("repost")}</button>
             </div>
             <div class="profile-posts-card">
               <div class="post-feed-head">
@@ -15942,6 +16161,7 @@
         ? `Username sebelumnya: ${previousUsers.join(", ")}`
         : "Belum ada username sebelumnya.";
       profilePostCache = Array.isArray(profile.posts) ? profile.posts : [];
+      profileRepostCache = Array.isArray(profile.reposts) ? profile.reposts : [];
       renderOwnProfileStats(profilePostCache);
       renderPostFeed(profilePostCache, profilePostFeed, {
         emptyText: "User ini belum punya posting."
@@ -15961,7 +16181,8 @@
         ]);
         const profile = {
           ...profileResult.profile,
-          posts: Array.isArray(postResult.posts) ? postResult.posts : []
+          posts: Array.isArray(postResult.posts) ? postResult.posts : [],
+          reposts: Array.isArray(postResult.reposts) ? postResult.reposts : []
         };
         lastProfileLoadError = "";
         renderProfile(profile);
@@ -17133,6 +17354,12 @@
         openLinkConfirm(safeLink.dataset.safeLink || "");
         return;
       }
+      const profileTabButton = event.target.closest("[data-profile-tab]");
+      if (profileTabButton) {
+        event.preventDefault();
+        switchProfilePostTab(profileTabButton);
+        return;
+      }
       const postActionButton = event.target.closest("[data-post-action]");
       if (postActionButton) {
         event.preventDefault();
@@ -17154,6 +17381,10 @@
           sharePostById(postId).catch((error) => {
             notify("Share Post Gagal", error.message, "error");
           });
+          return;
+        }
+        if (action === "repost") {
+          openRepostComposer(postId);
           return;
         }
         performPostAction(postId, action).catch((error) => {
@@ -17466,6 +17697,31 @@
     postModal.addEventListener("click", (event) => {
       if (event.target === postModal) {
         closePostComposer();
+      }
+    });
+    closeRepostModal.addEventListener("click", closeRepostComposer);
+    cancelRepostBtn.addEventListener("click", closeRepostComposer);
+    repostModal.addEventListener("click", (event) => {
+      if (event.target === repostModal) {
+        closeRepostComposer();
+      }
+    });
+    submitRepostBtn.addEventListener("click", () => {
+      submitRepost().catch((error) => {
+        showErrorPopup("Repost Gagal", error.message);
+      });
+    });
+    deleteRepostBtn.addEventListener("click", () => {
+      deleteActiveRepost().catch((error) => {
+        showErrorPopup("Repost Gagal", error.message);
+      });
+    });
+    repostCommentInput.addEventListener("keydown", (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+        event.preventDefault();
+        submitRepost().catch((error) => {
+          showErrorPopup("Repost Gagal", error.message);
+        });
       }
     });
     confirmLinkOpen.addEventListener("click", () => {
