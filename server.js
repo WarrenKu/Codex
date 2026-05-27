@@ -3706,8 +3706,12 @@ async function handleProfileFollow(body, res) {
   const { user, sessionToken, targetUser } = body;
   const safeUser = String(user || "").trim();
   const safeTargetUser = String(targetUser || "").trim().replace(/^@+/, "");
+  const safeMode = String(body?.mode || "toggle").trim().toLowerCase();
   if (!safeUser || !sessionToken || !safeTargetUser) {
     return json(res, 400, { message: "User, session token, dan target user wajib diisi." });
+  }
+  if (!["toggle", "follow", "unfollow"].includes(safeMode)) {
+    return json(res, 400, { message: "Mode follow tidak valid." });
   }
   if (safeUser.toLowerCase() === safeTargetUser.toLowerCase()) {
     return json(res, 400, { message: "Tidak bisa follow profil sendiri." });
@@ -3727,10 +3731,11 @@ async function handleProfileFollow(body, res) {
     .find((item) => String(item || "").trim().toLowerCase() === safeUser.toLowerCase()) || safeUser;
   const current = [...getFollowTargets(social, safeUser)];
   const targetIndex = current.findIndex((item) => String(item || "").trim().toLowerCase() === targetProfile.user.toLowerCase());
-  let following = false;
-  if (targetIndex >= 0) {
+  let following = targetIndex >= 0;
+  if (targetIndex >= 0 && (safeMode === "unfollow" || (safeMode === "toggle" && following))) {
     current.splice(targetIndex, 1);
-  } else {
+    following = false;
+  } else if (safeMode === "follow" || (safeMode === "toggle" && !following)) {
     current.push(targetProfile.user);
     following = true;
   }

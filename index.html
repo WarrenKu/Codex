@@ -15394,8 +15394,9 @@
       openLinkConfirm(shareUrl);
     }
 
-    async function toggleProfileFollow(targetUser = "") {
+    async function toggleProfileFollow(targetUser = "", mode = "toggle") {
       const safeTargetUser = String(targetUser || "").trim().replace(/^@+/, "");
+      const safeMode = ["toggle", "follow", "unfollow"].includes(String(mode || "").trim()) ? String(mode || "").trim() : "toggle";
       if (!safeTargetUser) {
         notify("Follow", "Target user belum terbaca.", "error");
         return;
@@ -15414,9 +15415,18 @@
         const result = await sendJson("/api/profile/follow", {
           user: localStorage.getItem("trusted_user") || "",
           sessionToken: localStorage.getItem("session_token") || "",
-          targetUser: safeTargetUser
+          targetUser: safeTargetUser,
+          mode: safeMode
         });
         notify("Follow", result.message || "Status follow diperbarui.", "success");
+        if (safeMode === "follow") {
+          buttons.forEach((button) => {
+            button.textContent = result.social?.mutual ? "Teman ▼" : "Mengikuti ▼";
+            button.dataset.profileFollowOptions = safeTargetUser;
+            delete button.dataset.profileFollow;
+            button.classList.add("following", "compact");
+          });
+        }
         await openPublicProfileView(safeTargetUser, { replace: true, updateRoute: false });
       } finally {
         buttons.forEach((button) => {
@@ -17556,7 +17566,7 @@
       const profileFollowButton = event.target.closest("[data-profile-follow]");
       if (profileFollowButton) {
         event.preventDefault();
-        toggleProfileFollow(profileFollowButton.dataset.profileFollow || "").catch((error) => {
+        toggleProfileFollow(profileFollowButton.dataset.profileFollow || "", "follow").catch((error) => {
           notify("Follow Gagal", error.message, "error");
         });
         return;
@@ -17938,7 +17948,7 @@
     followSheetUnfollow.addEventListener("click", () => {
       const targetUser = activeFollowSheetUser;
       closeFollowSheet();
-      toggleProfileFollow(targetUser).catch((error) => {
+      toggleProfileFollow(targetUser, "unfollow").catch((error) => {
         notify("Follow Gagal", error.message, "error");
       });
     });
