@@ -3723,7 +3723,9 @@ async function handleProfileFollow(body, res) {
   }
 
   const social = normalizeSocialStore(store);
-  const current = Array.isArray(social.follows[safeUser]) ? [...social.follows[safeUser]] : [];
+  const sourceKey = Object.keys(social.follows)
+    .find((item) => String(item || "").trim().toLowerCase() === safeUser.toLowerCase()) || safeUser;
+  const current = [...getFollowTargets(social, safeUser)];
   const targetIndex = current.findIndex((item) => String(item || "").trim().toLowerCase() === targetProfile.user.toLowerCase());
   let following = false;
   if (targetIndex >= 0) {
@@ -3732,7 +3734,7 @@ async function handleProfileFollow(body, res) {
     current.push(targetProfile.user);
     following = true;
   }
-  social.follows[safeUser] = current;
+  social.follows[sourceKey] = current;
   await writeStore(store);
 
   const viewer = safeUser;

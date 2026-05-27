@@ -7579,6 +7579,13 @@
       box-shadow: none;
     }
 
+    .tiktok-profile-follow:disabled,
+    .tiktok-profile-follow.loading {
+      opacity: .72;
+      cursor: wait;
+      pointer-events: none;
+    }
+
     .tiktok-profile-follow.message {
       background: rgba(255,255,255,.1);
       color: #eff7ff;
@@ -15397,13 +15404,26 @@
         showAuth({ routeToLogin: true, replaceRoute: true });
         return;
       }
-      const result = await sendJson("/api/profile/follow", {
-        user: localStorage.getItem("trusted_user") || "",
-        sessionToken: localStorage.getItem("session_token") || "",
-        targetUser: safeTargetUser
+      const buttons = Array.from(document.querySelectorAll("[data-profile-follow], [data-profile-follow-options]"))
+        .filter((button) => String(button.dataset.profileFollow || button.dataset.profileFollowOptions || "").trim().toLowerCase() === safeTargetUser.toLowerCase());
+      buttons.forEach((button) => {
+        button.disabled = true;
+        button.classList.add("loading");
       });
-      notify("Follow", result.message || "Status follow diperbarui.", "success");
-      await openPublicProfileView(safeTargetUser, { replace: true, updateRoute: false });
+      try {
+        const result = await sendJson("/api/profile/follow", {
+          user: localStorage.getItem("trusted_user") || "",
+          sessionToken: localStorage.getItem("session_token") || "",
+          targetUser: safeTargetUser
+        });
+        notify("Follow", result.message || "Status follow diperbarui.", "success");
+        await openPublicProfileView(safeTargetUser, { replace: true, updateRoute: false });
+      } finally {
+        buttons.forEach((button) => {
+          button.disabled = false;
+          button.classList.remove("loading");
+        });
+      }
     }
 
     function getProfileFollowLabel(social = {}) {
