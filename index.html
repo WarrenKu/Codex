@@ -14752,14 +14752,13 @@
 
     function getProfileHeaderMarkup(user = "", name = "") {
       const safeUser = String(user || "").trim();
-      const safeName = String(name || safeUser || "Profil").trim();
       return `
         <div class="profile-page-header">
           <button type="button" class="profile-header-icon" data-profile-back aria-label="Kembali">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" aria-hidden="true"><path d="M560-240 320-480l240-240 56 56-184 184 184 184-56 56Z"></path></svg>
           </button>
-          <div class="profile-page-title">${escapeHtml(safeName)}</div>
-          <button type="button" class="profile-header-icon" data-profile-share-user="${escapeHtml(safeUser)}" data-profile-share-name="${escapeHtml(safeName)}" aria-label="Share User">
+          <div class="profile-page-title" aria-hidden="true"></div>
+          <button type="button" class="profile-header-icon" data-profile-share-user="${escapeHtml(safeUser)}" data-profile-share-name="${escapeHtml(name || safeUser || "User")}" aria-label="Share User">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" aria-hidden="true"><path d="M240-80q-33 0-56.5-23.5T160-160v-400q0-33 23.5-56.5T240-640h120v80H240v400h480v-400H600v-80h120q33 0 56.5 23.5T800-560v400q0 33-23.5 56.5T720-80H240Zm200-240v-447l-64 64-56-57 160-160 160 160-56 57-64-64v447h-80Z"></path></svg>
           </button>
         </div>
@@ -16006,14 +16005,14 @@
             || String(item.user || "").toLowerCase().includes(query);
         });
       socialListBody.innerHTML = users.length ? users.map((item, index) => {
-        const initial = getSearchPreviewInitial(item.displayName || item.user || "U");
+        const initial = getSearchPreviewInitial(item.user || item.displayName || "U");
         return `
           <div class="social-user-row" style="animation-delay:${Math.min(index * 0.035, 0.24)}s">
             <button type="button" class="social-user-avatar ${item.avatarUrl ? "has-photo" : ""}" data-post-user="${escapeHtml(item.user || "")}">
               ${item.avatarUrl ? `<img src="${escapeAttribute(item.avatarUrl)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : escapeHtml(initial)}
             </button>
             <button type="button" class="social-user-copy" data-post-user="${escapeHtml(item.user || "")}">
-              <strong>${escapeHtml(item.displayName || item.user || "User")}</strong>
+              <strong>${escapeHtml(item.user || "User")}</strong>
               <span>@${escapeHtml(item.user || "user")}</span>
             </button>
             <button type="button" class="social-user-action ${getSocialActionClass(item)}" data-social-row-follow="${escapeHtml(item.user || "")}" data-following="${item.viewerFollowing ? "1" : "0"}" data-self="${item.isViewer ? "1" : "0"}">
@@ -16042,7 +16041,7 @@
         payload.sessionToken = sessionToken;
       }
       const result = await sendJson("/api/profile/social-list", payload);
-      activeSocialListName = result.profile?.displayName || activeSocialListName || activeSocialListUser;
+      activeSocialListName = result.profile?.user || activeSocialListUser;
       socialListTitle.textContent = activeSocialListName;
       socialListCache = {
         counts: result.counts || {},
