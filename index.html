@@ -7579,6 +7579,116 @@
       box-shadow: none;
     }
 
+    .tiktok-profile-follow.message {
+      background: rgba(255,255,255,.1);
+      color: #eff7ff;
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: none;
+    }
+
+    .tiktok-profile-follow.compact {
+      flex: 0 0 auto;
+      min-width: 136px;
+      padding: 0 22px;
+    }
+
+    .follow-sheet {
+      position: fixed;
+      inset: 0;
+      z-index: 460;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      background: rgba(0,0,0,.48);
+      opacity: 0;
+      transition: opacity .24s ease;
+    }
+
+    .follow-sheet.show {
+      display: flex;
+      opacity: 1;
+    }
+
+    .follow-sheet-card {
+      width: min(560px, 100%);
+      margin: 0 auto;
+      padding: 22px;
+      border-radius: 28px 28px 0 0;
+      background: rgba(8, 18, 30, 0.98);
+      border: 1px solid rgba(255,255,255,.1);
+      box-shadow: 0 -24px 70px rgba(0,0,0,.38);
+      transform: translateY(110%);
+      animation: followSheetIn .28s cubic-bezier(.22, 1, .36, 1) forwards;
+    }
+
+    .follow-sheet-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .follow-sheet-title {
+      margin: 0;
+      color: #f5fbff;
+      font-size: 20px;
+    }
+
+    .follow-sheet-close {
+      width: 44px;
+      height: 44px;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,.1);
+      color: #eaf5ff;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+
+    .follow-sheet-close svg,
+    .follow-sheet-option svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .follow-sheet-options {
+      display: grid;
+      gap: 12px;
+    }
+
+    .follow-sheet-option {
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 18px;
+      background: rgba(255,255,255,.06);
+      color: #eff7ff;
+      min-height: 66px;
+      padding: 0 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      font-size: 18px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .follow-sheet-option.danger {
+      color: #ffc9d2;
+      background: rgba(255, 96, 124, .08);
+      border-color: rgba(255, 96, 124, .16);
+    }
+
+    @keyframes followSheetIn {
+      to { transform: translateY(0); }
+    }
+
     .tiktok-profile-action {
       width: 48px;
       height: 48px;
@@ -11375,6 +11485,27 @@
 
   <div class="passkey-copy-hint" id="passkey-copy-hint">copy at keyboard</div>
 
+  <div class="follow-sheet" id="follow-sheet" aria-hidden="true">
+    <div class="follow-sheet-card">
+      <div class="follow-sheet-head">
+        <h3 class="follow-sheet-title" id="follow-sheet-title">User</h3>
+        <button type="button" class="follow-sheet-close" id="follow-sheet-close" aria-label="Tutup">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6 6 18"></path></svg>
+        </button>
+      </div>
+      <div class="follow-sheet-options">
+        <button type="button" class="follow-sheet-option" id="follow-sheet-nickname">
+          <span>Sesuaikan nama</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5-10.5a2.12 2.12 0 1 0-3-3L5 17v3Z"></path><path d="m13.5 6.5 3 3"></path></svg>
+        </button>
+        <button type="button" class="follow-sheet-option danger" id="follow-sheet-unfollow">
+          <span>Batal ikuti</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-8 0v2"></path><circle cx="12" cy="7" r="4"></circle><path d="M18 11h5"></path></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <input type="file" id="profile-avatar-file-input" accept="image/png,image/jpeg,image/webp" hidden>
 
   <div class="admin-modal" id="avatar-crop-modal">
@@ -11748,6 +11879,11 @@
     const linkConfirmHint = document.getElementById("link-confirm-hint");
     const closeLinkConfirm = document.getElementById("close-link-confirm");
     const confirmLinkOpen = document.getElementById("confirm-link-open");
+    const followSheet = document.getElementById("follow-sheet");
+    const followSheetTitle = document.getElementById("follow-sheet-title");
+    const followSheetClose = document.getElementById("follow-sheet-close");
+    const followSheetNickname = document.getElementById("follow-sheet-nickname");
+    const followSheetUnfollow = document.getElementById("follow-sheet-unfollow");
     const emojiPicker = document.getElementById("emoji-picker");
     const emojiPickerClose = document.getElementById("emoji-picker-close");
     const emojiPickerSearch = document.getElementById("emoji-picker-search");
@@ -11784,6 +11920,7 @@
     let consoleTimer = null;
     let activeProfileSectionMode = "profile";
     let activeSettingsSubpage = "main";
+    let activeFollowSheetUser = "";
     let activeTextSizeMode = localStorage.getItem("site_textsize_mode") || "default";
     let activeTextSizeValue = Number(localStorage.getItem("site_textsize_value") || 100) || 100;
     let killAnimationsEnabled = localStorage.getItem("site_kill_animations") === "1";
@@ -15269,6 +15406,29 @@
       await openPublicProfileView(safeTargetUser, { replace: true, updateRoute: false });
     }
 
+    function getProfileFollowLabel(social = {}) {
+      if (social?.mutual) {
+        return "Teman";
+      }
+      return social?.viewerFollowing ? "Mengikuti" : "Ikuti";
+    }
+
+    function openFollowSheet(targetUser = "", displayName = "") {
+      activeFollowSheetUser = String(targetUser || "").trim().replace(/^@+/, "");
+      if (!activeFollowSheetUser) {
+        return;
+      }
+      followSheetTitle.textContent = displayName || activeFollowSheetUser;
+      followSheet.classList.add("show");
+      followSheet.setAttribute("aria-hidden", "false");
+    }
+
+    function closeFollowSheet() {
+      followSheet.classList.remove("show");
+      followSheet.setAttribute("aria-hidden", "true");
+      activeFollowSheetUser = "";
+    }
+
     async function loadSharedPost(targetUser, shareCode) {
       const payload = {
         targetUser,
@@ -15943,6 +16103,16 @@
         const trustedUser = String(localStorage.getItem("trusted_user") || "").trim().toLowerCase();
         const viewedUser = String(item.user || "").trim().toLowerCase();
         const isOwnPublicProfile = !!trustedUser && !!viewedUser && trustedUser === viewedUser && !isPublicMode;
+        const followLabel = getProfileFollowLabel(item.social || {});
+        const isFollowingUser = !!item.social?.viewerFollowing;
+        const followButtonMarkup = isOwnPublicProfile
+          ? `<button type="button" class="tiktok-profile-follow editing" data-profile-self-edit="true">Edit profil</button>`
+          : isFollowingUser
+            ? `
+              <button type="button" class="tiktok-profile-follow message" data-profile-message="${escapeHtml(item.user || "")}">Kirim pesan</button>
+              <button type="button" class="tiktok-profile-follow following compact" data-profile-follow-options="${escapeHtml(item.user || "")}" data-profile-follow-name="${escapeHtml(item.displayName || item.user || "User")}">${escapeHtml(followLabel)} <span aria-hidden="true">▼</span></button>
+            `
+            : `<button type="button" class="tiktok-profile-follow" data-profile-follow="${escapeHtml(item.user || "")}">Ikuti</button>`;
         searchViewPanel.innerHTML = `
           <div class="search-account-layout tiktok-profile-layout">
             <div class="search-account-top tiktok-profile-head">
@@ -15955,7 +16125,7 @@
               ${getAvatarMarkup(getSearchPreviewInitial(item.displayName || item.user), item.avatarUrl || "", "profile-avatar tiktok-profile-avatar")}
             </div>
             <div class="tiktok-profile-actions">
-              <button type="button" class="tiktok-profile-follow ${isOwnPublicProfile ? "editing" : ""} ${item.social?.viewerFollowing ? "following" : ""}" ${isOwnPublicProfile ? 'data-profile-self-edit="true"' : `data-profile-follow="${escapeHtml(item.user || "")}"`}>${escapeHtml(isOwnPublicProfile ? "Edit profil" : item.social?.viewerFollowing ? "Mengikuti" : "Ikuti")}</button>
+              ${followButtonMarkup}
               <button type="button" class="tiktok-profile-action" data-profile-share-user="${escapeHtml(item.user || "")}" data-profile-share-name="${escapeHtml(item.displayName || item.user || "User")}" aria-label="Share User">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"></path><path d="M16 6l-4-4-4 4"></path><path d="M12 2v14"></path></svg>
               </button>
@@ -17371,6 +17541,18 @@
         });
         return;
       }
+      const profileFollowOptions = event.target.closest("[data-profile-follow-options]");
+      if (profileFollowOptions) {
+        event.preventDefault();
+        openFollowSheet(profileFollowOptions.dataset.profileFollowOptions || "", profileFollowOptions.dataset.profileFollowName || "");
+        return;
+      }
+      const profileMessageButton = event.target.closest("[data-profile-message]");
+      if (profileMessageButton) {
+        event.preventDefault();
+        notify("Pesan", "Fitur kirim pesan belum tersedia.", "info");
+        return;
+      }
       const postActionButton = event.target.closest("[data-post-action]");
       if (postActionButton) {
         event.preventDefault();
@@ -17723,6 +17905,22 @@
       pendingDeleteCommentPostId = "";
       pendingDeleteCommentId = "";
       linkConfirmMode = "link";
+    });
+    followSheetClose.addEventListener("click", closeFollowSheet);
+    followSheet.addEventListener("click", (event) => {
+      if (event.target === followSheet) {
+        closeFollowSheet();
+      }
+    });
+    followSheetNickname.addEventListener("click", () => {
+      notify("Sesuaikan Nama", "Fitur nama khusus akan dibuat setelah sistem pesan/friend siap.", "info");
+    });
+    followSheetUnfollow.addEventListener("click", () => {
+      const targetUser = activeFollowSheetUser;
+      closeFollowSheet();
+      toggleProfileFollow(targetUser).catch((error) => {
+        notify("Follow Gagal", error.message, "error");
+      });
     });
     closeTelegramBridge.addEventListener("click", () => {
       closeTelegramBridgeModal();

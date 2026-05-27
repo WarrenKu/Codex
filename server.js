@@ -1382,27 +1382,38 @@ function normalizeSocialStore(store) {
   return store.social;
 }
 
+function getFollowTargets(social, user = "") {
+  const safeUserLower = String(user || "").trim().toLowerCase();
+  const key = Object.keys(social?.follows || {}).find((item) => String(item || "").trim().toLowerCase() === safeUserLower);
+  return key ? social.follows[key] : [];
+}
+
 function getSocialStats(store, user = "", viewer = "", posts = [], likesOverride = null) {
   const safeUser = String(user || "").trim();
   const safeUserLower = safeUser.toLowerCase();
   const safeViewerLower = String(viewer || "").trim().toLowerCase();
   const social = normalizeSocialStore(store);
-  const following = Array.isArray(social.follows[safeUser]) ? social.follows[safeUser] : [];
+  const following = getFollowTargets(social, safeUser);
+  const viewerFollowingTargets = getFollowTargets(social, viewer);
   const followers = Object.entries(social.follows)
     .filter(([sourceUser, targets]) => String(sourceUser || "").trim().toLowerCase() !== safeUserLower
       && Array.isArray(targets)
       && targets.some((target) => String(target || "").trim().toLowerCase() === safeUserLower))
     .length;
   const likedPosts = Array.isArray(posts) ? posts : [];
+  const viewerFollowing = !!safeViewerLower && safeViewerLower !== safeUserLower
+    && viewerFollowingTargets.some((target) => String(target || "").trim().toLowerCase() === safeUserLower);
+  const viewerFollowedBy = !!safeViewerLower && safeViewerLower !== safeUserLower
+    && following.some((target) => String(target || "").trim().toLowerCase() === safeViewerLower);
   return {
     following: following.length,
     followers,
     likes: likesOverride === null
       ? likedPosts.reduce((total, post) => total + Number(post?.stats?.likes || 0), 0)
       : Number(likesOverride || 0),
-    viewerFollowing: !!safeViewerLower && safeViewerLower !== safeUserLower
-      && (Array.isArray(social.follows[viewer]) ? social.follows[viewer] : [])
-        .some((target) => String(target || "").trim().toLowerCase() === safeUserLower)
+    viewerFollowing,
+    viewerFollowedBy,
+    mutual: viewerFollowing && viewerFollowedBy
   };
 }
 
