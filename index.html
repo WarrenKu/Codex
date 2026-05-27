@@ -7732,14 +7732,14 @@
       width: 100%;
       min-height: 560px;
       max-height: none;
-      border-radius: 22px;
-      background: rgba(14, 29, 48, .98);
+      border-radius: 0;
+      background: transparent;
       color: #f4fbff;
-      border: 1px solid rgba(255,255,255,.08);
-      box-shadow: 0 24px 70px rgba(0,0,0,.18);
+      border: 0;
+      box-shadow: none;
       display: grid;
       grid-template-rows: auto auto auto 1fr;
-      overflow: hidden;
+      overflow: visible;
       transform: none;
       animation: none;
     }
@@ -7774,6 +7774,12 @@
       cursor: pointer;
       font-size: 28px;
       line-height: 1;
+    }
+
+    .social-list-back svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
     }
 
     .social-list-tabs {
@@ -11800,7 +11806,9 @@
   <div class="social-list-sheet" id="social-list-sheet" aria-hidden="true">
     <div class="social-list-card">
       <div class="social-list-head">
-        <button type="button" class="social-list-back" id="social-list-close" aria-label="Kembali">&lt;</button>
+        <button type="button" class="social-list-back" id="social-list-close" aria-label="Kembali">
+          <svg viewBox="0 -960 960 960" aria-hidden="true"><path d="M560-240 320-480l240-240 56 56-184 184 184 184-56 56Z"/></svg>
+        </button>
         <h3 class="social-list-title" id="social-list-title">User</h3>
         <div></div>
       </div>
