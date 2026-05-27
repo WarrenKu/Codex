@@ -307,12 +307,15 @@
       }
       .terminal-run-button {
         align-self: stretch;
+        min-width: 38px;
         border: 1px solid rgba(129, 212, 255, .28);
         border-radius: 10px;
-        padding: 0 14px;
+        padding: 0 12px;
         background: rgba(19, 92, 138, .42);
         color: #d9f4ff;
-        font-weight: 800;
+        font-family: "Consolas", "Courier New", monospace;
+        font-size: 18px;
+        font-weight: 900;
         line-height: 1;
       }
       .terminal-run-button:hover {

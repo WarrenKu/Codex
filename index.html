@@ -2888,8 +2888,9 @@
     @media (max-width: 640px) {
       .post-card {
         gap: 12px;
-        padding: 14px;
-        border-radius: 18px;
+        width: 100%;
+        padding: 14px 12px;
+        border-radius: 20px;
       }
 
       .post-card-actions {
@@ -2924,22 +2925,53 @@
       }
 
       .post-card-body {
-        font-size: 15px;
+        font-size: 16px;
         line-height: 1.65;
       }
 
       .post-code-block {
-        border-radius: 20px;
+        margin-inline: -2px;
+        border-radius: 18px;
       }
 
       .post-code-head,
       .post-code-body {
-        padding-inline: 14px;
+        padding-inline: 12px;
+      }
+
+      .post-code-lines {
+        font-size: 13px;
+      }
+
+      .post-code-line {
+        grid-template-columns: 36px minmax(0, 1fr);
+      }
+
+      .post-code-line-no {
+        padding-right: 9px;
+      }
+
+      .post-code-line-text {
+        padding-left: 11px;
       }
 
       .post-code-more {
-        max-width: calc(100% - 28px);
-        padding-inline: 15px;
+        left: 50%;
+        right: auto;
+        bottom: 10px;
+        width: auto;
+        max-width: calc(100% - 24px);
+        min-height: 34px;
+        padding: 7px 14px;
+        justify-content: center;
+        gap: 8px;
+        transform: translateX(-50%);
+        white-space: nowrap;
+      }
+
+      .post-code-more:hover,
+      .post-code-more:focus-visible {
+        transform: translateX(-50%) translateY(-1px) scale(1.01);
       }
 
       .post-card-tag {
@@ -2963,7 +2995,7 @@
       .post-card-actions-main .post-action-btn {
         flex: 0 0 auto;
         justify-content: center;
-        min-width: 52px;
+        min-width: 50px;
       }
 
       .post-card-actions-owner {
@@ -3199,7 +3231,7 @@
         justify-content: flex-end;
         margin-left: 0;
         align-self: start;
-        padding-left: 54px;
+        padding-left: 0;
         gap: 6px;
       }
 
@@ -3223,7 +3255,7 @@
       }
 
       .post-card-actions-main .post-action-btn {
-        min-width: 48px;
+        min-width: 46px;
         padding: 8px 9px;
       }
 
@@ -9166,12 +9198,27 @@
       .hero,
       .forms,
       .home-body {
-        padding: 16px;
+        padding: 14px 10px;
       }
       .panel,
       .home-card {
-        padding: 18px;
+        padding: 16px;
         border-radius: 20px;
+      }
+      #post-feed-card,
+      #profile-panel {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+      .profile-posts-card {
+        padding: 12px 8px;
+        gap: 14px;
+        border-radius: 18px;
+      }
+      .post-feed,
+      .profile-post-feed {
+        width: 100%;
+        gap: 14px;
       }
       .hero h1,
       .panel h2 {
@@ -9179,7 +9226,7 @@
       }
       .post-content-input,
       .post-card-body {
-        font-size: 17px;
+        font-size: 16px;
       }
       .search-preview-title strong {
         font-size: 26px;
@@ -9636,7 +9683,20 @@
       .home-body,
       .panel,
       .home-card {
-        padding: 14px;
+        padding: 12px;
+      }
+      .home-body {
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+      #post-feed-card,
+      #profile-panel {
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+      .profile-posts-card {
+        padding: 10px 6px;
+        margin-inline: -2px;
       }
       .home-card,
       .panel,
@@ -9673,11 +9733,11 @@
         border-radius: 18px;
       }
       .post-card {
-        padding: 15px;
+        padding: 12px 10px;
         border-radius: 18px;
       }
       .post-author-link {
-        font-size: 17px;
+        font-size: 18px;
       }
       .post-content-input {
         min-height: 180px;
