@@ -1103,18 +1103,70 @@
       right: max(10px, env(safe-area-inset-right));
       bottom: max(10px, env(safe-area-inset-bottom));
       z-index: 130;
+      --mobile-tab-index: 0;
+      --mobile-tab-count: 5;
+      --mobile-tab-gap: 6px;
+      --mobile-tab-pad: 8px;
       grid-template-columns: repeat(5, 1fr);
-      gap: 6px;
-      padding: 8px;
+      gap: var(--mobile-tab-gap);
+      padding: var(--mobile-tab-pad);
       border-radius: 24px;
-      border: 1px solid rgba(147, 200, 255, 0.16);
-      background: rgba(7, 16, 28, 0.88);
-      backdrop-filter: blur(18px) saturate(1.22);
-      -webkit-backdrop-filter: blur(18px) saturate(1.22);
-      box-shadow: 0 18px 42px rgba(0,0,0,.34);
+      border: 1px solid rgba(183, 225, 255, 0.18);
+      background:
+        radial-gradient(circle at 18% 12%, rgba(255,255,255,0.13), transparent 34%),
+        radial-gradient(circle at 82% 92%, rgba(72, 177, 255, 0.12), transparent 30%),
+        linear-gradient(180deg, rgba(255,255,255,0.09), rgba(255,255,255,0.025)),
+        rgba(4, 12, 22, 0.82);
+      backdrop-filter: blur(22px) saturate(1.38);
+      -webkit-backdrop-filter: blur(22px) saturate(1.38);
+      box-shadow:
+        0 18px 42px rgba(0,0,0,.36),
+        inset 0 1px 0 rgba(255,255,255,.13),
+        inset 0 -14px 28px rgba(0,0,0,.18);
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .mobile-bottom-nav::before {
+      content: "";
+      position: absolute;
+      z-index: 0;
+      left: var(--mobile-tab-pad);
+      top: var(--mobile-tab-pad);
+      bottom: var(--mobile-tab-pad);
+      width: calc((100% - (var(--mobile-tab-pad) * 2) - (var(--mobile-tab-gap) * (var(--mobile-tab-count) - 1))) / var(--mobile-tab-count));
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at 28% 18%, rgba(255,255,255,.28), transparent 34%),
+        radial-gradient(circle at 82% 88%, rgba(77, 184, 255,.2), transparent 36%),
+        linear-gradient(145deg, rgba(90, 185, 255,.28), rgba(29, 92, 150,.22));
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.22),
+        inset 0 -10px 20px rgba(0,0,0,.18),
+        0 10px 24px rgba(27, 119, 190,.24);
+      transform: translateX(calc(var(--mobile-tab-index) * (100% + var(--mobile-tab-gap))));
+      transition: transform .48s cubic-bezier(.2, 1.45, .35, 1), border-radius .28s ease;
+      will-change: transform;
+    }
+
+    .mobile-bottom-nav::after {
+      content: "";
+      position: absolute;
+      inset: -46% -16%;
+      z-index: 0;
+      background: linear-gradient(105deg, transparent 34%, rgba(255,255,255,.14) 48%, transparent 62%);
+      transform: translateX(-60%) rotate(6deg);
+      animation: mobileNavLiquidSheen 7s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .mobile-bottom-nav.jelly-shift::before {
+      animation: mobileNavJelly .52s cubic-bezier(.2, 1.55, .35, 1);
     }
 
     .mobile-bottom-nav-btn {
+      position: relative;
+      z-index: 1;
       min-width: 0;
       min-height: 48px;
       border: 0;
@@ -1127,17 +1179,38 @@
       font-size: 10px;
       font-weight: 900;
       cursor: pointer;
+      transition: color .22s ease, transform .28s cubic-bezier(.2, 1.25, .35, 1), text-shadow .22s ease;
     }
 
     .mobile-bottom-nav-btn svg {
       width: 24px;
       height: 24px;
       fill: currentColor;
+      transition: transform .3s cubic-bezier(.2, 1.35, .35, 1), filter .22s ease;
     }
 
     .mobile-bottom-nav-btn.active {
       color: #f4fbff;
-      background: rgba(82, 186, 255, 0.16);
+      text-shadow: 0 2px 12px rgba(152, 222, 255, .16);
+      transform: translateY(-1px);
+    }
+
+    .mobile-bottom-nav-btn.active svg {
+      transform: translateY(-1px) scale(1.06);
+      filter: drop-shadow(0 5px 12px rgba(99, 194, 255, .22));
+    }
+
+    @keyframes mobileNavJelly {
+      0% { transform: translateX(calc(var(--mobile-tab-index) * (100% + var(--mobile-tab-gap)))) scaleX(.82) scaleY(1.08); }
+      44% { transform: translateX(calc(var(--mobile-tab-index) * (100% + var(--mobile-tab-gap)))) scaleX(1.13) scaleY(.9); }
+      70% { transform: translateX(calc(var(--mobile-tab-index) * (100% + var(--mobile-tab-gap)))) scaleX(.96) scaleY(1.03); }
+      100% { transform: translateX(calc(var(--mobile-tab-index) * (100% + var(--mobile-tab-gap)))) scaleX(1) scaleY(1); }
+    }
+
+    @keyframes mobileNavLiquidSheen {
+      0%, 62% { transform: translateX(-60%) rotate(6deg); opacity: .28; }
+      76% { opacity: .42; }
+      100% { transform: translateX(62%) rotate(6deg); opacity: .18; }
     }
 
     .brand {
@@ -12355,6 +12428,7 @@
     const mobileMenuBtn = document.getElementById("mobile-menu-btn");
     const mobileMenuPanel = document.getElementById("mobile-menu-panel");
     let activeMobileTab = "home";
+    let mobileNavJellyTimer = null;
     const logoutBtn = document.getElementById("logout-btn");
     const mobileLogoutBtn = document.getElementById("mobile-logout-btn");
     const profileLogoutBtn = document.getElementById("profile-logout-btn");
@@ -16656,9 +16730,22 @@
 
     function setMobileTabActive(tab = "home") {
       activeMobileTab = tab;
-      document.querySelectorAll("[data-mobile-tab]").forEach((button) => {
-        button.classList.toggle("active", button.dataset.mobileTab === tab);
+      let activeIndex = 0;
+      document.querySelectorAll("[data-mobile-tab]").forEach((button, index) => {
+        const isActive = button.dataset.mobileTab === tab;
+        if (isActive) {
+          activeIndex = index;
+        }
+        button.classList.toggle("active", isActive);
       });
+      if (mobileBottomNav) {
+        mobileBottomNav.style.setProperty("--mobile-tab-index", String(activeIndex));
+        mobileBottomNav.classList.remove("jelly-shift");
+        void mobileBottomNav.offsetWidth;
+        mobileBottomNav.classList.add("jelly-shift");
+        clearTimeout(mobileNavJellyTimer);
+        mobileNavJellyTimer = setTimeout(() => mobileBottomNav.classList.remove("jelly-shift"), 560);
+      }
       updateMobileFabVisibility();
     }
 
