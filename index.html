@@ -976,6 +976,170 @@
       display: none;
     }
 
+    .mobile-bottom-nav,
+    .mobile-app-page {
+      display: none;
+    }
+
+    .mobile-app-page {
+      gap: 16px;
+    }
+
+    .mobile-app-card {
+      padding: 18px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .mobile-app-title {
+      margin: 0;
+      color: #f8fbff;
+      font-size: 24px;
+      line-height: 1.1;
+    }
+
+    .mobile-app-desc {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .mobile-global-search-box,
+    .mobile-global-results,
+    .mobile-popular-list,
+    .mobile-chat-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .mobile-global-search-input {
+      min-height: 50px;
+      width: 100%;
+      border: 1px solid rgba(82, 186, 255, 0.28);
+      border-radius: 18px;
+      background: rgba(4, 11, 20, 0.72);
+      color: var(--text);
+      padding: 0 16px;
+      font: inherit;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .mobile-mini-label {
+      margin: 4px 0 0;
+      color: #9ec9ee;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .mobile-search-result,
+    .mobile-chat-item {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 48px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 18px;
+      background: rgba(255,255,255,0.045);
+      color: var(--text);
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .mobile-result-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: rgba(82, 186, 255, 0.13);
+      color: #dff3ff;
+      font-weight: 950;
+      overflow: hidden;
+    }
+
+    .mobile-result-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .mobile-result-copy {
+      min-width: 0;
+      display: grid;
+      gap: 4px;
+    }
+
+    .mobile-result-copy strong,
+    .mobile-result-copy span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .mobile-result-copy span {
+      color: #9fb5d1;
+      font-size: 13px;
+    }
+
+    .mobile-result-badge {
+      border-radius: 999px;
+      padding: 6px 9px;
+      background: rgba(82, 186, 255, 0.13);
+      color: #cceeff;
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .mobile-bottom-nav {
+      position: fixed;
+      left: max(10px, env(safe-area-inset-left));
+      right: max(10px, env(safe-area-inset-right));
+      bottom: max(10px, env(safe-area-inset-bottom));
+      z-index: 130;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      padding: 8px;
+      border-radius: 24px;
+      border: 1px solid rgba(147, 200, 255, 0.16);
+      background: rgba(7, 16, 28, 0.88);
+      backdrop-filter: blur(18px) saturate(1.22);
+      -webkit-backdrop-filter: blur(18px) saturate(1.22);
+      box-shadow: 0 18px 42px rgba(0,0,0,.34);
+    }
+
+    .mobile-bottom-nav-btn {
+      min-width: 0;
+      min-height: 48px;
+      border: 0;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      gap: 2px;
+      background: transparent;
+      color: #9fb5d1;
+      font-size: 10px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .mobile-bottom-nav-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+
+    .mobile-bottom-nav-btn.active {
+      color: #f4fbff;
+      background: rgba(82, 186, 255, 0.16);
+    }
+
     .brand {
       font-size: 22px;
       font-weight: 800;
@@ -9808,7 +9972,7 @@
       .mobile-post-fab {
         position: fixed;
         right: 16px;
-        bottom: 18px;
+        bottom: 92px;
         width: 62px;
         height: 62px;
         border: 1px solid rgba(170, 227, 255, 0.18);
@@ -9836,6 +10000,15 @@
       .mobile-post-fab.show {
         display: grid;
         animation: fabFloatIn .34s cubic-bezier(.22, 1, .36, 1);
+      }
+      .mobile-bottom-nav {
+        display: grid;
+      }
+      .home-body {
+        padding-bottom: 96px;
+      }
+      .mobile-app-page.show {
+        display: grid;
       }
       .mobile-post-fab.is-open {
         border-color: rgba(189, 235, 255, 0.24);
@@ -10989,6 +11162,23 @@
         <span class="mobile-post-fab-plus">+</span>
       </span>
     </button>
+    <nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="Navigasi Android">
+      <button type="button" class="mobile-bottom-nav-btn active" data-mobile-tab="home" aria-label="Home">
+        <svg viewBox="0 -960 960 960" aria-hidden="true"><path d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z"></path></svg><span>Home</span>
+      </button>
+      <button type="button" class="mobile-bottom-nav-btn" data-mobile-tab="chat" aria-label="Chat">
+        <svg viewBox="0 -960 960 960" aria-hidden="true"><path d="M80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240L80-80Zm126-240h594v-480H160v525l46-45Zm-46 0v-480 480Z"></path></svg><span>Chat</span>
+      </button>
+      <button type="button" class="mobile-bottom-nav-btn" data-mobile-tab="account" aria-label="Account">
+        <svg viewBox="0 -960 960 960" aria-hidden="true"><path d="M234-276q51-39 114-61.5T480-360q69 0 132 22.5T726-276q35-41 54.5-93T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 59 19.5 111t54.5 93Zm146.5-204.5Q340-521 340-580t40.5-99.5Q421-720 480-720t99.5 40.5Q620-639 620-580t-40.5 99.5Q539-440 480-440t-99.5-40.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm100-95.5q47-15.5 86-44.5-39-29-86-44.5T480-280q-53 0-100 15.5T294-220q39 29 86 44.5T480-160q53 0 100-15.5ZM523-537q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm-43-43Zm0 360Z"></path></svg><span>Akun</span>
+      </button>
+      <button type="button" class="mobile-bottom-nav-btn" data-mobile-tab="settings" aria-label="Settings">
+        <svg viewBox="0 -960 960 960" aria-hidden="true"><path d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm70-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z"></path></svg><span>Set</span>
+      </button>
+      <button type="button" class="mobile-bottom-nav-btn" data-mobile-tab="search" aria-label="Search">
+        <svg viewBox="0 -960 960 960" aria-hidden="true"><path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"></path></svg><span>Cari</span>
+      </button>
+    </nav>
 
     <section class="home-body">
       <aside class="home-sidebar" id="home-sidebar">
@@ -11196,6 +11386,29 @@
       </div>
 
       <div class="home-card profile-panel home-section-anchor" id="search-view-panel" style="display:none;"></div>
+
+      <div class="home-card mobile-app-page home-section-anchor" id="mobile-chat-page">
+        <div class="mobile-app-card">
+          <h2 class="mobile-app-title">Chat teman</h2>
+          <p class="mobile-app-desc">Chat khusus untuk user yang sudah saling follow. Versi ini menyiapkan daftar teman dulu agar alurnya jelas untuk user baru.</p>
+        </div>
+        <div class="mobile-chat-list" id="mobile-chat-list"></div>
+      </div>
+
+      <div class="home-card mobile-app-page home-section-anchor" id="mobile-search-page">
+        <div class="mobile-app-card mobile-global-search-box">
+          <h2 class="mobile-app-title">Search global</h2>
+          <input class="mobile-global-search-input" id="mobile-global-search-input" type="search" placeholder="Cari account, artikel, atau postingan">
+        </div>
+        <div class="mobile-app-card">
+          <div class="mobile-mini-label">Top populer hari ini</div>
+          <div class="mobile-popular-list" id="mobile-popular-list"></div>
+        </div>
+        <div class="mobile-app-card">
+          <div class="mobile-mini-label">Hasil pencarian</div>
+          <div class="mobile-global-results" id="mobile-global-results"></div>
+        </div>
+      </div>
 
       <div class="home-card profile-panel home-section-anchor" id="profile-panel" style="display:none;">
         <div class="settings-hero" id="settings-hero">
@@ -12204,6 +12417,13 @@
     const codePreviewFrame = document.getElementById("code-preview-frame");
     const closeCodePreviewBtn = document.getElementById("close-code-preview-btn");
     const searchViewPanel = document.getElementById("search-view-panel");
+    const mobileBottomNav = document.getElementById("mobile-bottom-nav");
+    const mobileChatPage = document.getElementById("mobile-chat-page");
+    const mobileChatList = document.getElementById("mobile-chat-list");
+    const mobileSearchPage = document.getElementById("mobile-search-page");
+    const mobileGlobalSearchInput = document.getElementById("mobile-global-search-input");
+    const mobileGlobalResults = document.getElementById("mobile-global-results");
+    const mobilePopularList = document.getElementById("mobile-popular-list");
     const profilePanel = document.getElementById("profile-panel");
     const settingsHero = document.getElementById("settings-hero");
     const settingsStack = document.getElementById("settings-stack");
@@ -12946,6 +13166,7 @@
       const routePost = getRoutePostDetail();
       isPublicMode = true;
       updateProfileSectionMode("profile");
+      hideMobileAppPages();
       stopTelegramBridgePolling();
       clearBlockNotifications();
       hideScreenLock();
@@ -16410,6 +16631,122 @@
       setTimeout(() => searchInput.focus(), 40);
     }
 
+    function setMobileTabActive(tab = "home") {
+      document.querySelectorAll("[data-mobile-tab]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.mobileTab === tab);
+      });
+    }
+
+    function hideMobileAppPages() {
+      mobileChatPage?.classList.remove("show");
+      mobileSearchPage?.classList.remove("show");
+    }
+
+    function renderMobileResultItem(item = {}, index = 0) {
+      const type = String(item.type || "article");
+      const isUser = type === "user";
+      const isPost = type === "post";
+      const title = isUser
+        ? (item.displayName || item.user || "User")
+        : isPost
+          ? (item.author?.displayName || item.author?.user || "Posting")
+          : (item.title || "Artikel");
+      const subtitle = isUser
+        ? `@${item.user || "-"}`
+        : isPost
+          ? `${item.category || "POST"} | ${formatPostTime(item.createdAt)} | ${Number(item.stats?.likes || 0)} suka`
+          : (item.body || "Artikel");
+      const avatarUrl = isUser ? item.avatarUrl : isPost ? item.author?.avatarUrl : "";
+      const initial = getSearchPreviewInitial(isUser ? (item.user || title) : title);
+      return `
+        <button type="button" class="mobile-search-result" data-mobile-result="${escapeHtml(String(item.id || ""))}" style="animation-delay:${Math.min(index * 0.04, 0.28)}s">
+          <span class="mobile-result-icon">${avatarUrl ? `<img src="${escapeAttribute(avatarUrl)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : escapeHtml(initial)}</span>
+          <span class="mobile-result-copy">
+            <strong>${escapeHtml(title)}</strong>
+            <span>${escapeHtml(subtitle)}</span>
+          </span>
+          <span class="mobile-result-badge">${escapeHtml(isPost ? "Post" : isUser ? "User" : "Artikel")}</span>
+        </button>
+      `;
+    }
+
+    let mobileSearchCache = { results: [], popularToday: [] };
+    let mobileSearchTimer = null;
+
+    function bindMobileResultClicks(container) {
+      container?.querySelectorAll("[data-mobile-result]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const id = button.dataset.mobileResult || "";
+          const item = [...(mobileSearchCache.results || []), ...(mobileSearchCache.popularToday || [])].find((entry) => String(entry.id || "") === id);
+          if (!item) {
+            return;
+          }
+          if (item.type === "post") {
+            goToHomeSection({ skipFeedRefresh: true });
+            setTimeout(() => document.querySelector(`[data-post-id="${CSS.escape(String(item.id || ""))}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" }), 180);
+            return;
+          }
+          renderSearchView(item);
+        });
+      });
+    }
+
+    async function loadMobileSearch(query = "") {
+      if (!mobileGlobalResults || !mobilePopularList) {
+        return;
+      }
+      mobileGlobalResults.innerHTML = `<div class="post-empty">Mencari...</div>`;
+      const payload = { query };
+      const user = localStorage.getItem("trusted_user");
+      const sessionToken = localStorage.getItem("session_token");
+      if (user && sessionToken && !isPublicMode) {
+        payload.user = user;
+        payload.sessionToken = sessionToken;
+      }
+      const data = await sendJson("/api/mobile/search", payload);
+      mobileSearchCache = {
+        results: Array.isArray(data.results) ? data.results : [],
+        popularToday: Array.isArray(data.popularToday) ? data.popularToday : []
+      };
+      mobilePopularList.innerHTML = mobileSearchCache.popularToday.length
+        ? mobileSearchCache.popularToday.map(renderMobileResultItem).join("")
+        : `<div class="post-empty">Belum ada posting populer hari ini.</div>`;
+      mobileGlobalResults.innerHTML = query.trim()
+        ? (mobileSearchCache.results.length ? mobileSearchCache.results.map(renderMobileResultItem).join("") : `<div class="post-empty">Tidak ada hasil.</div>`)
+        : `<div class="post-empty">Ketik untuk mencari account, artikel, atau postingan.</div>`;
+      bindMobileResultClicks(mobilePopularList);
+      bindMobileResultClicks(mobileGlobalResults);
+    }
+
+    async function goToMobileChatPage() {
+      hideMobileAppPages();
+      homeMainSection.style.display = "none";
+      searchViewPanel.style.display = "none";
+      profilePanel.style.display = "none";
+      ownerDashboard.style.display = "none";
+      mobileChatPage?.classList.add("show");
+      setMobileTabActive("chat");
+      setSidebarActive("home");
+      setMobileTabActive("home");
+      if (mobileChatList) {
+        mobileChatList.innerHTML = isAuthenticated() && !isPublicMode
+          ? `<div class="mobile-chat-item"><span class="mobile-result-icon">C</span><span class="mobile-result-copy"><strong>Chat teman</strong><span>Fitur ruang chat real-time siap disambungkan ke data mutual follow.</span></span><span class="mobile-result-badge">Soon</span></div>`
+          : `<div class="post-empty">Login dulu untuk melihat chat teman.</div>`;
+      }
+    }
+
+    async function goToMobileSearchPage() {
+      hideMobileAppPages();
+      homeMainSection.style.display = "none";
+      searchViewPanel.style.display = "none";
+      profilePanel.style.display = "none";
+      ownerDashboard.style.display = "none";
+      mobileSearchPage?.classList.add("show");
+      setMobileTabActive("search");
+      setSidebarActive("home");
+      await loadMobileSearch(mobileGlobalSearchInput?.value || "");
+    }
+
     async function loadPublicProfile(targetUser) {
       const user = localStorage.getItem("trusted_user");
       const sessionToken = localStorage.getItem("session_token");
@@ -16525,6 +16862,7 @@
     }
 
     function renderSearchView(item) {
+      hideMobileAppPages();
       clearSocialListPageMode();
       if (!item) {
         searchViewPanel.style.display = "none";
@@ -16636,6 +16974,7 @@
       homeMainSection.style.display = "none";
       profilePanel.style.display = "none";
       searchViewPanel.style.display = "grid";
+      setMobileTabActive("search");
       searchViewPanel.classList.remove("flash");
       void searchViewPanel.offsetWidth;
       searchViewPanel.classList.add("flash");
@@ -17022,6 +17361,7 @@
     function goToHomeSection(options = {}) {
       showSkeleton(true);
       clearSocialListPageMode();
+      hideMobileAppPages();
       searchViewPanel.style.display = "none";
       profilePanel.style.display = "none";
       homeMainSection.style.display = "grid";
@@ -17032,6 +17372,7 @@
       void homeMainSection.offsetWidth;
       homeMainSection.classList.add("flash");
       setSidebarActive("home");
+      setMobileTabActive("home");
       homeMainSection.scrollIntoView({ behavior: "smooth", block: "start" });
       if (options.replaceRoute) {
         clearProfileRoute(true);
@@ -17056,6 +17397,7 @@
       }
       showSkeleton(true);
       clearSocialListPageMode();
+      hideMobileAppPages();
       homeMainSection.style.display = "grid";
       searchViewPanel.style.display = "none";
       profilePanel.style.display = "none";
@@ -17082,6 +17424,7 @@
     async function goToProfileSection(options = {}) {
       showSkeleton(true);
       clearSocialListPageMode();
+      hideMobileAppPages();
       updateProfileSectionMode("profile");
       const loaded = await loadProfile();
       if (!loaded) {
@@ -17093,6 +17436,7 @@
       ownerDashboard.style.display = "none";
       profilePanel.style.display = "grid";
       setSidebarActive("user");
+      setMobileTabActive("account");
       profilePanel.classList.remove("flash");
       void profilePanel.offsetWidth;
       profilePanel.classList.add("flash");
@@ -17109,6 +17453,7 @@
       await goToProfileSection(options);
       openSettingsSubpage("main");
       setSidebarActive("settings");
+      setMobileTabActive("settings");
     }
 
     function openProfileEditor(field) {
@@ -18102,6 +18447,56 @@
         selectedSearchResultId = "";
         renderSearchResults([], "");
         setSearchExpanded(false);
+      }
+    });
+
+    mobileGlobalSearchInput?.addEventListener("input", () => {
+      clearTimeout(mobileSearchTimer);
+      mobileSearchTimer = setTimeout(() => {
+        loadMobileSearch(mobileGlobalSearchInput.value || "").catch((error) => {
+          mobileGlobalResults.innerHTML = `<div class="post-empty">${escapeHtml(error.message || "Search gagal.")}</div>`;
+        });
+      }, 220);
+    });
+
+    mobileBottomNav?.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-mobile-tab]");
+      if (!button) {
+        return;
+      }
+      const tab = button.dataset.mobileTab || "home";
+      mobileMenuPanel.classList.remove("show");
+      if (tab === "home") {
+        if (isAuthenticated() && !isPublicMode) {
+          goToHomeSection();
+        } else {
+          showPublicHome({ clearRoute: true, replaceRoute: true });
+          setMobileTabActive("home");
+        }
+        return;
+      }
+      if (tab === "chat") {
+        goToMobileChatPage();
+        return;
+      }
+      if (tab === "account") {
+        if (isAuthenticated() && !isPublicMode) {
+          goToProfileSection();
+        } else {
+          showAuth({ routeToLogin: true, replaceRoute: true });
+        }
+        return;
+      }
+      if (tab === "settings") {
+        if (isAuthenticated() && !isPublicMode) {
+          goToSettingsSection();
+        } else {
+          showAuth({ routeToLogin: true, replaceRoute: true });
+        }
+        return;
+      }
+      if (tab === "search") {
+        goToMobileSearchPage().catch((error) => notify("Search Gagal", error.message, "error"));
       }
     });
 

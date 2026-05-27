@@ -1680,6 +1680,45 @@ function buildSearchData(store, query) {
   };
 }
 
+function getPostEngagementScore(post = {}) {
+  const stats = post?.stats || {};
+  return Number(stats.likes || 0) * 3
+    + Number(stats.reposts || 0) * 4
+    + Number(stats.comments || 0) * 2;
+}
+
+async function buildMobileSearchData(store, query = "", viewer = "") {
+  const base = buildSearchData(store, query);
+  const rawQuery = String(query || "").trim();
+  const normalized = rawQuery.toLowerCase();
+  const mediaStore = await readProfileMediaStore();
+  const posts = (await readPostStore())
+    .map((item) => toPublicPostPayload(store, item, viewer, mediaStore))
+    .sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0));
+  const postResults = normalized
+    ? posts.filter((post) => {
+      const hay = [
+        post.content,
+        post.category,
+        post.author?.user,
+        post.author?.displayName
+      ].join(" ").toLowerCase();
+      return hay.includes(normalized);
+    })
+    : [];
+  const since = Date.now() - 24 * 60 * 60 * 1000;
+  const popularToday = posts
+    .filter((post) => Number(post.createdAt || 0) >= since)
+    .map((post) => ({ ...post, engagementScore: getPostEngagementScore(post) }))
+    .sort((a, b) => (Number(b.engagementScore || 0) - Number(a.engagementScore || 0)) || (Number(b.createdAt || 0) - Number(a.createdAt || 0)))
+    .slice(0, 10);
+  return {
+    query: rawQuery,
+    results: [...base.results, ...postResults.slice(0, 12)].slice(0, 30),
+    popularToday
+  };
+}
+
 function listAllRoles(store) {
   return Object.keys(buildDashboardData(store).roles || {}).sort();
 }
@@ -3554,6 +3593,13 @@ async function handlePublicSearch(body, res) {
   return json(res, 200, buildSearchData(store, query));
 }
 
+async function handleMobileSearch(body, res) {
+  const { user, sessionToken, query } = body;
+  const store = await readStore();
+  const viewer = getViewerFromSession(store, user, sessionToken);
+  return json(res, 200, await buildMobileSearchData(store, query, viewer));
+}
+
 async function handleConsoleLogs(res) {
   const store = await readStore();
   return json(res, 200, {
@@ -4787,6 +4833,10 @@ async function handleRequest(req, res) {
 
     if (req.method === "POST" && parsedUrl.pathname === "/api/search/public") {
       return handlePublicSearch(await parseBody(req), res);
+    }
+
+    if (req.method === "POST" && parsedUrl.pathname === "/api/mobile/search") {
+      return handleMobileSearch(await parseBody(req), res);
     }
 
     if (req.method === "POST" && parsedUrl.pathname === "/api/session/status") {
