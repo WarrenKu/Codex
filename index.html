@@ -9183,6 +9183,11 @@
       body {
         padding: 0;
       }
+      input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]),
+      textarea,
+      select {
+        font-size: 16px !important;
+      }
       .shell,
       .home-screen {
         width: 100%;
@@ -9636,6 +9641,11 @@
     @media (max-width: 420px) {
       body {
         padding: 0;
+      }
+      input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]),
+      textarea,
+      select {
+        font-size: 16px !important;
       }
       .home-screen {
         border-radius: 0;
@@ -16196,10 +16206,39 @@
       }
     }
 
+    function installIosInputZoomGuard() {
+      const isIosLike = /iPad|iPhone|iPod/.test(navigator.userAgent)
+        || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      if (!isIosLike) {
+        return;
+      }
+      const editableSelector = "input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']):not([type='file']), textarea, select";
+      document.documentElement.style.webkitTextSizeAdjust = "100%";
+      document.addEventListener("focusin", (event) => {
+        const target = event.target;
+        if (target?.matches?.(editableSelector)) {
+          target.style.fontSize = "16px";
+        }
+      }, true);
+      document.addEventListener("focusout", (event) => {
+        const target = event.target;
+        if (!target?.matches?.(editableSelector)) {
+          return;
+        }
+        window.setTimeout(() => {
+          const left = window.scrollX || document.documentElement.scrollLeft || 0;
+          if (left || (window.visualViewport && Math.abs(window.visualViewport.scale - 1) > 0.01)) {
+            window.scrollTo({ left: 0, top: window.scrollY, behavior: "auto" });
+          }
+        }, 80);
+      }, true);
+    }
+
     tabs.forEach((tab) => {
       tab.addEventListener("click", () => setPanel(tab.dataset.tab));
     });
 
+    installIosInputZoomGuard();
     attachPointerGlow(".check-row, button.primary, button.secondary, .field input, .field textarea");
 
     updateSearchRotatorVisibility();
