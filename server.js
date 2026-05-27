@@ -1461,6 +1461,18 @@ function toSocialUserPayload(store, mediaStore, user = "", viewer = "") {
   };
 }
 
+function uniqueSocialUsers(source = []) {
+  const seen = new Set();
+  return (Array.isArray(source) ? source : []).filter((item) => {
+    const key = String(item || "").trim().toLowerCase();
+    if (!key || seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
+}
+
 async function getPostLikeCountByUser(user = "") {
   const safeUser = String(user || "").trim();
   if (!safeUser) {
@@ -3818,24 +3830,19 @@ async function handleProfileSocialList(body, res) {
   const following = getFollowTargets(social, profile.user);
   const followers = getSocialFollowers(social, profile.user);
   const followingSet = new Set(following.map((item) => String(item || "").trim().toLowerCase()));
-  const suggested = ["sd", "azee", "azee"];
+  const suggested = uniqueSocialUsers(["sd", "azee", "azee"])
+    .filter((item) => getPublicProfilePayload(store, item, mediaStore));
+  const friends = uniqueSocialUsers(followers.filter((item) => followingSet.has(String(item || "").trim().toLowerCase())));
+  const followingList = uniqueSocialUsers(following);
+  const followersList = uniqueSocialUsers(followers);
   const source = safeList === "suggested"
     ? suggested
     : safeList === "following"
-    ? following
+    ? followingList
     : safeList === "followers"
-      ? followers
-      : followers.filter((item) => followingSet.has(String(item || "").trim().toLowerCase()));
-  const seen = new Set();
+      ? followersList
+      : friends;
   const users = source
-    .filter((item) => {
-      const key = String(item || "").trim().toLowerCase();
-      if (!key || seen.has(key)) {
-        return false;
-      }
-      seen.add(key);
-      return true;
-    })
     .map((item) => toSocialUserPayload(store, mediaStore, item, viewer))
     .filter(Boolean);
 
@@ -3845,9 +3852,9 @@ async function handleProfileSocialList(body, res) {
       displayName: profile.displayName || profile.user
     },
     counts: {
-      following: following.length,
-      followers: followers.length,
-      friends: followers.filter((item) => followingSet.has(String(item || "").trim().toLowerCase())).length,
+      following: followingList.length,
+      followers: followersList.length,
+      friends: friends.length,
       suggested: suggested.length
     },
     activeList: safeList,

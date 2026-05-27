@@ -7269,6 +7269,16 @@
       gap: 22px;
     }
 
+    #search-view-panel.social-list-page {
+      display: block;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      animation: none;
+    }
+
     .search-account-layout {
       display: grid;
       gap: 26px;
@@ -7478,6 +7488,47 @@
     .tiktok-profile-layout {
       display: grid;
       gap: 18px;
+    }
+
+    .profile-page-header {
+      display: grid;
+      grid-template-columns: 48px minmax(0, 1fr) 48px;
+      align-items: center;
+      gap: 12px;
+      min-height: 52px;
+    }
+
+    .profile-page-title {
+      min-width: 0;
+      text-align: center;
+      color: #f8fbff;
+      font-size: 18px;
+      line-height: 1.15;
+      font-weight: 950;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .profile-header-icon {
+      width: 44px;
+      height: 44px;
+      border: 0;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,.08);
+      color: #ecf5ff;
+      font-size: 24px;
+      font-weight: 950;
+      cursor: pointer;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
+    }
+
+    .profile-header-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
     }
 
     .tiktok-profile-head,
@@ -7730,7 +7781,7 @@
 
     .social-list-card {
       width: 100%;
-      min-height: 560px;
+      min-height: min(680px, calc(100vh - 170px));
       max-height: none;
       border-radius: 0;
       background: transparent;
@@ -7745,10 +7796,9 @@
     }
 
     .social-list-head {
-      display: grid;
-      grid-template-columns: 48px minmax(0, 1fr) 48px;
+      display: flex;
       align-items: center;
-      padding: 18px 20px 12px;
+      padding: 0 0 14px;
       gap: 12px;
     }
 
@@ -7756,15 +7806,17 @@
       margin: 0;
       font-size: 22px;
       color: #f6fbff;
-      text-align: center;
+      text-align: left;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      min-width: 0;
     }
 
     .social-list-back {
       width: 44px;
       height: 44px;
+      flex: 0 0 auto;
       border: 0;
       border-radius: 14px;
       background: rgba(255,255,255,.07);
@@ -7786,7 +7838,7 @@
       display: flex;
       gap: 18px;
       overflow-x: auto;
-      padding: 0 20px;
+      padding: 0;
       border-bottom: 1px solid rgba(255,255,255,.09);
       scrollbar-width: none;
     }
@@ -7823,7 +7875,7 @@
     }
 
     .social-list-search {
-      margin: 16px 20px 8px;
+      margin: 16px 0 8px;
       min-height: 48px;
       border-radius: 16px;
       background: rgba(255,255,255,.08);
@@ -7847,7 +7899,7 @@
 
     .social-list-body {
       overflow: auto;
-      padding: 8px 20px 22px;
+      padding: 8px 0 22px;
       display: grid;
       align-content: start;
       gap: 12px;
@@ -7875,6 +7927,11 @@
       color: #fff;
       font-size: 24px;
       font-weight: 950;
+    }
+
+    .social-user-avatar.has-photo {
+      background: transparent;
+      color: transparent;
     }
 
     .social-user-avatar img {
@@ -12245,6 +12302,7 @@
     let activeSocialListUser = "";
     let activeSocialListName = "";
     let activeSocialListType = "following";
+    let socialListReturnView = "public";
     let socialListCache = { counts: {}, users: [] };
     let activeTextSizeMode = localStorage.getItem("site_textsize_mode") || "default";
     let activeTextSizeValue = Number(localStorage.getItem("site_textsize_value") || 100) || 100;
@@ -14614,6 +14672,20 @@
       `;
     }
 
+    function getProfileHeaderMarkup(user = "", name = "") {
+      const safeUser = String(user || "").trim();
+      const safeName = String(name || safeUser || "Profil").trim();
+      return `
+        <div class="profile-page-header">
+          <button type="button" class="profile-header-icon" data-profile-back aria-label="Kembali">&lt;</button>
+          <div class="profile-page-title">${escapeHtml(safeName)}</div>
+          <button type="button" class="profile-header-icon" data-profile-share-user="${escapeHtml(safeUser)}" data-profile-share-name="${escapeHtml(safeName)}" aria-label="Share User">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" aria-hidden="true"><path d="M240-80q-33 0-56.5-23.5T160-160v-400q0-33 23.5-56.5T240-640h120v80H240v400h480v-400H600v-80h120q33 0 56.5 23.5T800-560v400q0 33-23.5 56.5T720-80H240Zm200-240v-447l-64 64-56-57 160-160 160 160-56 57-64-64v447h-80Z"></path></svg>
+          </button>
+        </div>
+      `;
+    }
+
     function renderOwnProfileStats(posts = [], social = {}, user = "") {
       let statsNode = profilePanel?.querySelector(".tiktok-profile-stats");
       if (!profilePanel || !profilePanelDesc) {
@@ -15777,19 +15849,28 @@
       activeFollowSheetUser = "";
     }
 
-    function closeSocialListSheet(options = {}) {
-      const targetUser = activeSocialListUser;
+    function clearSocialListPageMode() {
+      searchViewPanel.classList.remove("social-list-page");
       socialListSheet.classList.remove("show");
       socialListSheet.setAttribute("aria-hidden", "true");
+    }
+
+    function closeSocialListSheet(options = {}) {
+      const targetUser = activeSocialListUser;
       socialListSearch.value = "";
       if (options.skipReturn) {
+        clearSocialListPageMode();
         return;
       }
-      const trustedUser = String(localStorage.getItem("trusted_user") || "").trim().toLowerCase();
-      if (targetUser && trustedUser && targetUser.toLowerCase() === trustedUser && !isPublicMode) {
+      if (targetUser && socialListReturnView === "profile") {
         goToProfileSection().catch((error) => notify("Profil Gagal Dibuka", error.message, "error"));
       } else if (targetUser) {
-        openPublicProfileView(targetUser, { replace: true, updateRoute: false }).catch((error) => notify("Profil Gagal Dibuka", error.message, "error"));
+        openPublicProfileView(targetUser, { replace: true, updateRoute: false }).catch((error) => {
+          clearSocialListPageMode();
+          notify("Profil Gagal Dibuka", error.message, "error");
+        });
+      } else {
+        clearSocialListPageMode();
       }
     }
 
@@ -15844,7 +15925,7 @@
         const initial = getSearchPreviewInitial(item.displayName || item.user || "U");
         return `
           <div class="social-user-row" style="animation-delay:${Math.min(index * 0.035, 0.24)}s">
-            <button type="button" class="social-user-avatar" data-post-user="${escapeHtml(item.user || "")}">
+            <button type="button" class="social-user-avatar ${item.avatarUrl ? "has-photo" : ""}" data-post-user="${escapeHtml(item.user || "")}">
               ${item.avatarUrl ? `<img src="${escapeAttribute(item.avatarUrl)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : escapeHtml(initial)}
             </button>
             <button type="button" class="social-user-copy" data-post-user="${escapeHtml(item.user || "")}">
@@ -15892,15 +15973,19 @@
       if (!activeSocialListUser) {
         return;
       }
+      const trustedUser = String(localStorage.getItem("trusted_user") || "").trim().toLowerCase();
+      const viewedUser = activeSocialListUser.toLowerCase();
+      const openedFromOwnProfilePanel = profilePanel.style.display !== "none" && trustedUser && viewedUser === trustedUser && !isPublicMode;
+      socialListReturnView = openedFromOwnProfilePanel ? "profile" : "public";
       homeMainSection.style.display = "none";
       profilePanel.style.display = "none";
-      searchViewPanel.style.display = "grid";
-      searchViewPanel.innerHTML = "";
-      searchViewPanel.appendChild(socialListSheet);
+      searchViewPanel.style.display = "block";
+      searchViewPanel.classList.add("social-list-page");
+      searchViewPanel.replaceChildren(socialListSheet);
       searchViewPanel.classList.remove("flash");
       void searchViewPanel.offsetWidth;
       searchViewPanel.classList.add("flash");
-      setSidebarActive(String(activeSocialListUser).toLowerCase() === String(localStorage.getItem("trusted_user") || "").toLowerCase() ? "user" : "home");
+      setSidebarActive(viewedUser === trustedUser ? "user" : "home");
       socialListTitle.textContent = activeSocialListName;
       socialListSheet.classList.add("show");
       socialListSheet.setAttribute("aria-hidden", "false");
@@ -16352,6 +16437,7 @@
     }
 
     function renderSearchView(item) {
+      clearSocialListPageMode();
       if (!item) {
         searchViewPanel.style.display = "none";
         searchViewPanel.innerHTML = "";
@@ -16401,6 +16487,7 @@
       });
       searchViewPanel.innerHTML = `
         <div class="search-account-layout">
+          ${getProfileHeaderMarkup(item.user || "", item.displayName || item.user || "Account")}
           <div class="search-account-top">
           ${getAvatarMarkup(getSearchPreviewInitial(item.displayName || item.user), item.avatarUrl || "", "profile-avatar")}
           <div class="search-account-hero">
@@ -16594,6 +16681,7 @@
             : `<button type="button" class="tiktok-profile-follow" data-profile-follow="${escapeHtml(item.user || "")}">Ikuti</button>`;
         searchViewPanel.innerHTML = `
           <div class="search-account-layout tiktok-profile-layout">
+            ${getProfileHeaderMarkup(item.user || "", item.displayName || item.user || "Account")}
             <div class="search-account-top tiktok-profile-head">
               <div class="tiktok-profile-copy">
                 <h2 class="tiktok-profile-title">${escapeHtml(item.displayName || item.user || "Account")}</h2>
@@ -16605,12 +16693,6 @@
             </div>
             <div class="tiktok-profile-actions">
               ${followButtonMarkup}
-              <button type="button" class="tiktok-profile-action" data-profile-share-user="${escapeHtml(item.user || "")}" data-profile-share-name="${escapeHtml(item.displayName || item.user || "User")}" aria-label="Share User">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"></path><path d="M16 6l-4-4-4 4"></path><path d="M12 2v14"></path></svg>
-              </button>
-              <button type="button" class="tiktok-profile-action" data-post-user="${escapeHtml(item.user || "")}" aria-label="Buka profil">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-8 0v2"></path><circle cx="12" cy="7" r="4"></circle><path d="M19 8v6"></path><path d="M22 11h-6"></path></svg>
-              </button>
             </div>
             <div class="search-account-pill-row">
               <div class="profile-role-badge">Role: ${escapeHtml(item.role || "visitor")}</div>
@@ -16851,6 +16933,7 @@
 
     function goToHomeSection(options = {}) {
       showSkeleton(true);
+      clearSocialListPageMode();
       searchViewPanel.style.display = "none";
       profilePanel.style.display = "none";
       homeMainSection.style.display = "grid";
@@ -16884,6 +16967,7 @@
         return;
       }
       showSkeleton(true);
+      clearSocialListPageMode();
       homeMainSection.style.display = "grid";
       searchViewPanel.style.display = "none";
       profilePanel.style.display = "none";
@@ -16909,6 +16993,7 @@
 
     async function goToProfileSection(options = {}) {
       showSkeleton(true);
+      clearSocialListPageMode();
       updateProfileSectionMode("profile");
       const loaded = await loadProfile();
       if (!loaded) {
@@ -18306,6 +18391,16 @@
         });
         return;
       }
+      const profileBackButton = event.target.closest("[data-profile-back]");
+      if (profileBackButton) {
+        event.preventDefault();
+        if (window.history.length > 1) {
+          window.history.back();
+        } else {
+          goToHomeSection({ skipFeedRefresh: true });
+        }
+        return;
+      }
       const profileShareButton = event.target.closest("[data-profile-share-user]");
       if (profileShareButton) {
         event.preventDefault();
@@ -18409,12 +18504,7 @@
         notify("Follow Gagal", error.message, "error");
       });
     });
-    socialListClose.addEventListener("click", closeSocialListSheet);
-    socialListSheet.addEventListener("click", (event) => {
-      if (event.target === socialListSheet) {
-        closeSocialListSheet();
-      }
-    });
+    socialListClose.addEventListener("click", () => closeSocialListSheet());
     socialListTabs.addEventListener("click", (event) => {
       const tab = event.target.closest("[data-social-list-tab]");
       if (!tab) {
