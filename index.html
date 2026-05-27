@@ -7738,11 +7738,28 @@
       animation: followSheetIn .28s cubic-bezier(.22, 1, .36, 1) forwards;
     }
 
+    .social-list-card.expanded {
+      max-height: 100vh;
+      height: 100vh;
+      border-radius: 0;
+    }
+
+    .social-list-drag {
+      width: 54px;
+      height: 5px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(255,255,255,.35);
+      justify-self: center;
+      margin-top: 10px;
+      cursor: ns-resize;
+    }
+
     .social-list-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 18px 20px 10px;
+      padding: 10px 20px;
       gap: 12px;
     }
 
@@ -7852,6 +7869,22 @@
 
     .social-user-copy {
       min-width: 0;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      padding: 0;
+      text-align: left;
+      min-height: auto;
+      box-shadow: none;
+      border-radius: 0;
+      cursor: pointer;
+    }
+
+    .social-user-copy:hover,
+    .social-user-copy:focus-visible {
+      background: transparent;
+      box-shadow: none;
+      transform: none;
     }
 
     .social-user-copy strong,
@@ -7895,6 +7928,11 @@
       color: #9fb5d1;
       font-size: 24px;
       cursor: pointer;
+    }
+
+    .social-user-action.profile {
+      background: rgba(255,255,255,.1);
+      color: #f7fbff;
     }
 
     .social-empty {
@@ -11739,6 +11777,7 @@
 
   <div class="social-list-sheet" id="social-list-sheet" aria-hidden="true">
     <div class="social-list-card">
+      <button type="button" class="social-list-drag" id="social-list-drag" aria-label="Perbesar list"></button>
       <div class="social-list-head">
         <h3 class="social-list-title" id="social-list-title">User</h3>
         <button type="button" class="follow-sheet-close" id="social-list-close" aria-label="Tutup">
@@ -12133,6 +12172,8 @@
     const followSheetNickname = document.getElementById("follow-sheet-nickname");
     const followSheetUnfollow = document.getElementById("follow-sheet-unfollow");
     const socialListSheet = document.getElementById("social-list-sheet");
+    const socialListCard = socialListSheet?.querySelector(".social-list-card");
+    const socialListDrag = document.getElementById("social-list-drag");
     const socialListTitle = document.getElementById("social-list-title");
     const socialListClose = document.getElementById("social-list-close");
     const socialListTabs = document.getElementById("social-list-tabs");
@@ -15713,10 +15754,14 @@
     function closeSocialListSheet() {
       socialListSheet.classList.remove("show");
       socialListSheet.setAttribute("aria-hidden", "true");
+      socialListCard?.classList.remove("expanded");
       socialListSearch.value = "";
     }
 
     function getSocialActionLabel(user = {}) {
+      if (user.isViewer) {
+        return "Profil";
+      }
       if (user.mutual) {
         return "Teman";
       }
@@ -15730,6 +15775,9 @@
     }
 
     function getSocialActionClass(user = {}) {
+      if (user.isViewer) {
+        return "profile";
+      }
       if (user.viewerFollowing || user.mutual) {
         return "following";
       }
@@ -15766,7 +15814,7 @@
               <strong>${escapeHtml(item.displayName || item.user || "User")}</strong>
               <span>@${escapeHtml(item.user || "user")}</span>
             </button>
-            <button type="button" class="social-user-action ${getSocialActionClass(item)}" data-social-row-follow="${escapeHtml(item.user || "")}" data-following="${item.viewerFollowing ? "1" : "0"}">
+            <button type="button" class="social-user-action ${getSocialActionClass(item)}" data-social-row-follow="${escapeHtml(item.user || "")}" data-following="${item.viewerFollowing ? "1" : "0"}" data-self="${item.isViewer ? "1" : "0"}">
               ${escapeHtml(getSocialActionLabel(item))}
             </button>
             <button type="button" class="social-user-menu" aria-label="Menu">...</button>
@@ -18337,10 +18385,18 @@
         return;
       }
       const targetUser = followButton.dataset.socialRowFollow || "";
+      if (followButton.dataset.self === "1") {
+        closeSocialListSheet();
+        goToProfileSection().catch((error) => notify("Profil Gagal Dibuka", error.message, "error"));
+        return;
+      }
       const mode = followButton.dataset.following === "1" ? "unfollow" : "follow";
       toggleProfileFollow(targetUser, mode)
         .then(() => loadSocialList(activeSocialListType))
         .catch((error) => notify("Follow Gagal", error.message, "error"));
+    });
+    socialListDrag.addEventListener("click", () => {
+      socialListCard?.classList.toggle("expanded");
     });
     closeTelegramBridge.addEventListener("click", () => {
       closeTelegramBridgeModal();

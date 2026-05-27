@@ -1456,6 +1456,7 @@ function toSocialUserPayload(store, mediaStore, user = "", viewer = "") {
     role: profile.role || "visitor",
     online: !!profile.online,
     avatarUrl: profile.avatarUrl || "",
+    isViewer: !!viewer && String(profile.user || "").trim().toLowerCase() === String(viewer || "").trim().toLowerCase(),
     ...getSocialRelationship(social, profile.user, viewer)
   };
 }
