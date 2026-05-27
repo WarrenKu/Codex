@@ -1555,6 +1555,8 @@
     .post-avatar.has-photo,
     .search-result-avatar.has-photo,
     .settings-account-avatar.has-photo {
+      background: transparent !important;
+      background-image: none !important;
       color: transparent;
     }
 
@@ -7435,6 +7437,7 @@
     }
 
     .profile-avatar.has-photo {
+      background: transparent !important;
       background-image: none !important;
     }
 
@@ -7711,9 +7714,9 @@
       inset: 0;
       z-index: 470;
       display: none;
-      align-items: flex-end;
+      align-items: stretch;
       justify-content: center;
-      background: rgba(0,0,0,.5);
+      background: #08121e;
       opacity: 0;
       transition: opacity .24s ease;
     }
@@ -7724,42 +7727,26 @@
     }
 
     .social-list-card {
-      width: min(720px, 100%);
-      max-height: min(88vh, 820px);
-      border-radius: 28px 28px 0 0;
-      background: rgba(8, 18, 30, .99);
+      width: min(100%, 1120px);
+      height: 100vh;
+      max-height: 100vh;
+      border-radius: 0;
+      background: #0d1b2d;
       color: #f4fbff;
-      border: 1px solid rgba(255,255,255,.1);
-      box-shadow: 0 -24px 80px rgba(0,0,0,.42);
+      border: 0;
+      box-shadow: none;
       display: grid;
       grid-template-rows: auto auto auto 1fr;
       overflow: hidden;
-      transform: translateY(110%);
-      animation: followSheetIn .28s cubic-bezier(.22, 1, .36, 1) forwards;
-    }
-
-    .social-list-card.expanded {
-      max-height: 100vh;
-      height: 100vh;
-      border-radius: 0;
-    }
-
-    .social-list-drag {
-      width: 54px;
-      height: 5px;
-      border: 0;
-      border-radius: 999px;
-      background: rgba(255,255,255,.35);
-      justify-self: center;
-      margin-top: 10px;
-      cursor: ns-resize;
+      transform: none;
+      animation: none;
     }
 
     .social-list-head {
-      display: flex;
+      display: grid;
+      grid-template-columns: 48px minmax(0, 1fr) 48px;
       align-items: center;
-      justify-content: space-between;
-      padding: 10px 20px;
+      padding: 18px 20px 10px;
       gap: 12px;
     }
 
@@ -7767,6 +7754,24 @@
       margin: 0;
       font-size: 22px;
       color: #f6fbff;
+      text-align: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .social-list-back {
+      width: 44px;
+      height: 44px;
+      border: 0;
+      border-radius: 14px;
+      background: rgba(255,255,255,.07);
+      color: #eaf5ff;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      font-size: 28px;
+      line-height: 1;
     }
 
     .social-list-tabs {
@@ -7851,6 +7856,8 @@
     .social-user-avatar {
       width: 58px;
       height: 58px;
+      border: 0;
+      padding: 0;
       border-radius: 50%;
       overflow: hidden;
       display: grid;
@@ -7865,6 +7872,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
+      display: block;
     }
 
     .social-user-copy {
@@ -11777,12 +11785,10 @@
 
   <div class="social-list-sheet" id="social-list-sheet" aria-hidden="true">
     <div class="social-list-card">
-      <button type="button" class="social-list-drag" id="social-list-drag" aria-label="Perbesar list"></button>
       <div class="social-list-head">
+        <button type="button" class="social-list-back" id="social-list-close" aria-label="Kembali">&lt;</button>
         <h3 class="social-list-title" id="social-list-title">User</h3>
-        <button type="button" class="follow-sheet-close" id="social-list-close" aria-label="Tutup">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6 6 18"></path></svg>
-        </button>
+        <div></div>
       </div>
       <div class="social-list-tabs" id="social-list-tabs"></div>
       <label class="social-list-search">
@@ -12172,8 +12178,6 @@
     const followSheetNickname = document.getElementById("follow-sheet-nickname");
     const followSheetUnfollow = document.getElementById("follow-sheet-unfollow");
     const socialListSheet = document.getElementById("social-list-sheet");
-    const socialListCard = socialListSheet?.querySelector(".social-list-card");
-    const socialListDrag = document.getElementById("social-list-drag");
     const socialListTitle = document.getElementById("social-list-title");
     const socialListClose = document.getElementById("social-list-close");
     const socialListTabs = document.getElementById("social-list-tabs");
@@ -15754,7 +15758,6 @@
     function closeSocialListSheet() {
       socialListSheet.classList.remove("show");
       socialListSheet.setAttribute("aria-hidden", "true");
-      socialListCard?.classList.remove("expanded");
       socialListSearch.value = "";
     }
 
@@ -18394,9 +18397,6 @@
       toggleProfileFollow(targetUser, mode)
         .then(() => loadSocialList(activeSocialListType))
         .catch((error) => notify("Follow Gagal", error.message, "error"));
-    });
-    socialListDrag.addEventListener("click", () => {
-      socialListCard?.classList.toggle("expanded");
     });
     closeTelegramBridge.addEventListener("click", () => {
       closeTelegramBridgeModal();
