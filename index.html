@@ -7519,6 +7519,11 @@
       display: grid;
       gap: 2px;
       min-width: 62px;
+      border: 0;
+      background: transparent;
+      padding: 0;
+      text-align: left;
+      cursor: pointer;
     }
 
     .tiktok-profile-stat strong {
@@ -7533,6 +7538,11 @@
       font-size: 14px;
       line-height: 1.1;
       font-weight: 700;
+    }
+
+    .tiktok-profile-stat[disabled] {
+      cursor: default;
+      opacity: .9;
     }
 
     .tiktok-profile-actions {
@@ -7694,6 +7704,220 @@
 
     @keyframes followSheetIn {
       to { transform: translateY(0); }
+    }
+
+    .social-list-sheet {
+      position: fixed;
+      inset: 0;
+      z-index: 470;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      background: rgba(0,0,0,.5);
+      opacity: 0;
+      transition: opacity .24s ease;
+    }
+
+    .social-list-sheet.show {
+      display: flex;
+      opacity: 1;
+    }
+
+    .social-list-card {
+      width: min(720px, 100%);
+      max-height: min(88vh, 820px);
+      border-radius: 28px 28px 0 0;
+      background: rgba(8, 18, 30, .99);
+      color: #f4fbff;
+      border: 1px solid rgba(255,255,255,.1);
+      box-shadow: 0 -24px 80px rgba(0,0,0,.42);
+      display: grid;
+      grid-template-rows: auto auto auto 1fr;
+      overflow: hidden;
+      transform: translateY(110%);
+      animation: followSheetIn .28s cubic-bezier(.22, 1, .36, 1) forwards;
+    }
+
+    .social-list-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 20px 10px;
+      gap: 12px;
+    }
+
+    .social-list-title {
+      margin: 0;
+      font-size: 22px;
+      color: #f6fbff;
+    }
+
+    .social-list-tabs {
+      display: flex;
+      gap: 18px;
+      overflow-x: auto;
+      padding: 0 20px;
+      border-bottom: 1px solid rgba(255,255,255,.09);
+      scrollbar-width: none;
+    }
+
+    .social-list-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .social-list-tab {
+      border: 0;
+      background: transparent;
+      color: #8fa1b8;
+      padding: 14px 0;
+      font-size: 16px;
+      font-weight: 900;
+      white-space: nowrap;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .social-list-tab.active {
+      color: #f7fbff;
+    }
+
+    .social-list-tab.active::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      height: 3px;
+      border-radius: 999px;
+      background: #f7fbff;
+    }
+
+    .social-list-search {
+      margin: 16px 20px 8px;
+      min-height: 48px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.08);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 14px;
+      color: #8fa1b8;
+    }
+
+    .social-list-search input {
+      flex: 1;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: #f6fbff;
+      font: inherit;
+      font-size: 16px;
+      min-width: 0;
+    }
+
+    .social-list-body {
+      overflow: auto;
+      padding: 8px 20px 22px;
+      display: grid;
+      align-content: start;
+      gap: 12px;
+    }
+
+    .social-user-row {
+      display: grid;
+      grid-template-columns: 58px minmax(0, 1fr) auto auto;
+      align-items: center;
+      gap: 12px;
+      min-height: 72px;
+    }
+
+    .social-user-avatar {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #33c1ff, #2374ff);
+      color: #fff;
+      font-size: 24px;
+      font-weight: 950;
+    }
+
+    .social-user-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .social-user-copy {
+      min-width: 0;
+    }
+
+    .social-user-copy strong,
+    .social-user-copy span {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .social-user-copy strong {
+      color: #f8fbff;
+      font-size: 16px;
+    }
+
+    .social-user-copy span {
+      color: #9fb5d1;
+      margin-top: 3px;
+    }
+
+    .social-user-action {
+      border: 0;
+      border-radius: 999px;
+      min-height: 38px;
+      padding: 0 18px;
+      background: rgba(255,255,255,.12);
+      color: #f7fbff;
+      font-weight: 900;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .social-user-action.follow-back,
+    .social-user-action.follow {
+      background: linear-gradient(135deg, #ff2b62, #ff1f58);
+    }
+
+    .social-user-menu {
+      border: 0;
+      background: transparent;
+      color: #9fb5d1;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .social-empty {
+      padding: 28px 0;
+      color: #9fb5d1;
+      text-align: center;
+      font-weight: 800;
+    }
+
+    @media (max-width: 560px) {
+      .social-user-row {
+        grid-template-columns: 52px minmax(0, 1fr) auto;
+      }
+      .social-user-avatar {
+        width: 52px;
+        height: 52px;
+      }
+      .social-user-menu {
+        display: none;
+      }
+      .social-user-action {
+        padding: 0 14px;
+      }
     }
 
     .tiktok-profile-action {
@@ -11513,6 +11737,23 @@
     </div>
   </div>
 
+  <div class="social-list-sheet" id="social-list-sheet" aria-hidden="true">
+    <div class="social-list-card">
+      <div class="social-list-head">
+        <h3 class="social-list-title" id="social-list-title">User</h3>
+        <button type="button" class="follow-sheet-close" id="social-list-close" aria-label="Tutup">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6 6 18"></path></svg>
+        </button>
+      </div>
+      <div class="social-list-tabs" id="social-list-tabs"></div>
+      <label class="social-list-search">
+        <span>⌕</span>
+        <input id="social-list-search" type="search" placeholder="Cari Pengguna">
+      </label>
+      <div class="social-list-body" id="social-list-body"></div>
+    </div>
+  </div>
+
   <input type="file" id="profile-avatar-file-input" accept="image/png,image/jpeg,image/webp" hidden>
 
   <div class="admin-modal" id="avatar-crop-modal">
@@ -11891,6 +12132,12 @@
     const followSheetClose = document.getElementById("follow-sheet-close");
     const followSheetNickname = document.getElementById("follow-sheet-nickname");
     const followSheetUnfollow = document.getElementById("follow-sheet-unfollow");
+    const socialListSheet = document.getElementById("social-list-sheet");
+    const socialListTitle = document.getElementById("social-list-title");
+    const socialListClose = document.getElementById("social-list-close");
+    const socialListTabs = document.getElementById("social-list-tabs");
+    const socialListSearch = document.getElementById("social-list-search");
+    const socialListBody = document.getElementById("social-list-body");
     const emojiPicker = document.getElementById("emoji-picker");
     const emojiPickerClose = document.getElementById("emoji-picker-close");
     const emojiPickerSearch = document.getElementById("emoji-picker-search");
@@ -11928,6 +12175,10 @@
     let activeProfileSectionMode = "profile";
     let activeSettingsSubpage = "main";
     let activeFollowSheetUser = "";
+    let activeSocialListUser = "";
+    let activeSocialListName = "";
+    let activeSocialListType = "following";
+    let socialListCache = { counts: {}, users: [] };
     let activeTextSizeMode = localStorage.getItem("site_textsize_mode") || "default";
     let activeTextSizeValue = Number(localStorage.getItem("site_textsize_value") || 100) || 100;
     let killAnimationsEnabled = localStorage.getItem("site_kill_animations") === "1";
@@ -14261,18 +14512,18 @@
       };
     }
 
-    function buildTiktokStatsItemsMarkup(posts = [], social = {}) {
+    function buildTiktokStatsItemsMarkup(posts = [], social = {}, user = "") {
       const stats = getProfilePostStats(posts, social);
       return `
-        <div class="tiktok-profile-stat"><strong>${escapeHtml(formatCompactNumber(stats.following))}</strong><span>Mengikuti</span></div>
-        <div class="tiktok-profile-stat"><strong>${escapeHtml(formatCompactNumber(stats.followers))}</strong><span>Pengikut</span></div>
-        <div class="tiktok-profile-stat"><strong>${escapeHtml(formatCompactNumber(stats.likes))}</strong><span>Suka</span></div>
+        <button type="button" class="tiktok-profile-stat" data-social-list-user="${escapeHtml(user)}" data-social-list-type="following"><strong>${escapeHtml(formatCompactNumber(stats.following))}</strong><span>Mengikuti</span></button>
+        <button type="button" class="tiktok-profile-stat" data-social-list-user="${escapeHtml(user)}" data-social-list-type="followers"><strong>${escapeHtml(formatCompactNumber(stats.followers))}</strong><span>Pengikut</span></button>
+        <button type="button" class="tiktok-profile-stat" disabled><strong>${escapeHtml(formatCompactNumber(stats.likes))}</strong><span>Suka</span></button>
       `;
     }
 
-    function buildTiktokStatsMarkup(posts = [], social = {}) {
+    function buildTiktokStatsMarkup(posts = [], social = {}, user = "") {
       return `
-        <div class="tiktok-profile-stats">${buildTiktokStatsItemsMarkup(posts, social)}</div>
+        <div class="tiktok-profile-stats">${buildTiktokStatsItemsMarkup(posts, social, user)}</div>
       `;
     }
 
@@ -14296,7 +14547,7 @@
       `;
     }
 
-    function renderOwnProfileStats(posts = [], social = {}) {
+    function renderOwnProfileStats(posts = [], social = {}, user = "") {
       let statsNode = profilePanel?.querySelector(".tiktok-profile-stats");
       if (!profilePanel || !profilePanelDesc) {
         return;
@@ -14307,7 +14558,7 @@
         statsNode.className = "tiktok-profile-stats";
         profilePanelDesc?.insertAdjacentElement("afterend", statsNode);
       }
-      statsNode.innerHTML = buildTiktokStatsItemsMarkup(posts, social);
+      statsNode.innerHTML = buildTiktokStatsItemsMarkup(posts, social, user);
       if (!profilePanel.querySelector(".tiktok-profile-tabs") && profilePostsCardSection) {
         profilePostsCardSection.insertAdjacentHTML("beforebegin", `
           <div class="tiktok-profile-tabs">
@@ -15459,6 +15710,110 @@
       activeFollowSheetUser = "";
     }
 
+    function closeSocialListSheet() {
+      socialListSheet.classList.remove("show");
+      socialListSheet.setAttribute("aria-hidden", "true");
+      socialListSearch.value = "";
+    }
+
+    function getSocialActionLabel(user = {}) {
+      if (user.mutual) {
+        return "Teman";
+      }
+      if (user.viewerFollowing) {
+        return "Mengikuti";
+      }
+      if (user.followedByUser) {
+        return "Ikuti balik";
+      }
+      return "Ikuti";
+    }
+
+    function getSocialActionClass(user = {}) {
+      if (user.viewerFollowing || user.mutual) {
+        return "following";
+      }
+      return user.followedByUser ? "follow-back" : "follow";
+    }
+
+    function renderSocialList() {
+      const counts = socialListCache.counts || {};
+      const tabItems = [
+        ["following", `Mengikuti ${formatCompactNumber(counts.following || 0)}`],
+        ["followers", `Pengikut ${formatCompactNumber(counts.followers || 0)}`],
+        ["friends", `Teman ${formatCompactNumber(counts.friends || 0)}`]
+      ];
+      socialListTabs.innerHTML = tabItems.map(([type, label]) => `
+        <button type="button" class="social-list-tab ${type === activeSocialListType ? "active" : ""}" data-social-list-tab="${type}">${escapeHtml(label)}</button>
+      `).join("");
+      const query = socialListSearch.value.trim().toLowerCase();
+      const users = (Array.isArray(socialListCache.users) ? socialListCache.users : [])
+        .filter((item) => {
+          if (!query) {
+            return true;
+          }
+          return String(item.displayName || "").toLowerCase().includes(query)
+            || String(item.user || "").toLowerCase().includes(query);
+        });
+      socialListBody.innerHTML = users.length ? users.map((item) => {
+        const initial = getSearchPreviewInitial(item.displayName || item.user || "U");
+        return `
+          <div class="social-user-row">
+            <button type="button" class="social-user-avatar" data-post-user="${escapeHtml(item.user || "")}">
+              ${item.avatarUrl ? `<img src="${escapeAttribute(item.avatarUrl)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : escapeHtml(initial)}
+            </button>
+            <button type="button" class="social-user-copy" data-post-user="${escapeHtml(item.user || "")}">
+              <strong>${escapeHtml(item.displayName || item.user || "User")}</strong>
+              <span>@${escapeHtml(item.user || "user")}</span>
+            </button>
+            <button type="button" class="social-user-action ${getSocialActionClass(item)}" data-social-row-follow="${escapeHtml(item.user || "")}" data-following="${item.viewerFollowing ? "1" : "0"}">
+              ${escapeHtml(getSocialActionLabel(item))}
+            </button>
+            <button type="button" class="social-user-menu" aria-label="Menu">...</button>
+          </div>
+        `;
+      }).join("") : `<div class="social-empty">Belum ada user di list ini.</div>`;
+    }
+
+    async function loadSocialList(type = activeSocialListType) {
+      if (!activeSocialListUser) {
+        return;
+      }
+      activeSocialListType = ["following", "followers", "friends"].includes(type) ? type : "following";
+      socialListBody.innerHTML = `<div class="social-empty">Memuat list...</div>`;
+      const user = localStorage.getItem("trusted_user");
+      const sessionToken = localStorage.getItem("session_token");
+      const payload = {
+        targetUser: activeSocialListUser,
+        list: activeSocialListType
+      };
+      if (user && sessionToken && !isPublicMode) {
+        payload.user = user;
+        payload.sessionToken = sessionToken;
+      }
+      const result = await sendJson("/api/profile/social-list", payload);
+      activeSocialListName = result.profile?.displayName || activeSocialListName || activeSocialListUser;
+      socialListTitle.textContent = activeSocialListName;
+      socialListCache = {
+        counts: result.counts || {},
+        users: Array.isArray(result.users) ? result.users : []
+      };
+      renderSocialList();
+    }
+
+    async function openSocialListSheet(targetUser = "", type = "following", displayName = "") {
+      activeSocialListUser = String(targetUser || "").trim().replace(/^@+/, "");
+      activeSocialListName = displayName || activeSocialListUser;
+      if (!activeSocialListUser) {
+        return;
+      }
+      socialListTitle.textContent = activeSocialListName;
+      socialListSheet.classList.add("show");
+      socialListSheet.setAttribute("aria-hidden", "false");
+      socialListSearch.value = "";
+      await loadSocialList(type);
+    }
+
     async function loadSharedPost(targetUser, shareCode) {
       const payload = {
         targetUser,
@@ -16149,7 +16504,7 @@
               <div class="tiktok-profile-copy">
                 <h2 class="tiktok-profile-title">${escapeHtml(item.displayName || item.user || "Account")}</h2>
                 <div class="tiktok-profile-handle">@${escapeHtml(item.user || "-")}</div>
-                ${buildTiktokStatsMarkup(item.posts || [], item.social || {})}
+                ${buildTiktokStatsMarkup(item.posts || [], item.social || {}, item.user || "")}
                 <div class="tiktok-profile-bio">${renderBioMarkup(item.bio || "Belum ada deskripsi user.")}</div>
               </div>
               ${getAvatarMarkup(getSearchPreviewInitial(item.displayName || item.user), item.avatarUrl || "", "profile-avatar tiktok-profile-avatar")}
@@ -16365,7 +16720,7 @@
         : "Belum ada username sebelumnya.";
       profilePostCache = Array.isArray(profile.posts) ? profile.posts : [];
       profileRepostCache = Array.isArray(profile.reposts) ? profile.reposts : [];
-      renderOwnProfileStats(profilePostCache, profile.social || {});
+      renderOwnProfileStats(profilePostCache, profile.social || {}, profile.user || "");
       renderPostFeed(profilePostCache, profilePostFeed, {
         emptyText: "User ini belum punya posting."
       });
@@ -17563,6 +17918,14 @@
         switchProfilePostTab(profileTabButton);
         return;
       }
+      const socialStatButton = event.target.closest("[data-social-list-user]");
+      if (socialStatButton) {
+        event.preventDefault();
+        openSocialListSheet(socialStatButton.dataset.socialListUser || "", socialStatButton.dataset.socialListType || "following").catch((error) => {
+          notify("List Sosial Gagal", error.message, "error");
+        });
+        return;
+      }
       const profileFollowButton = event.target.closest("[data-profile-follow]");
       if (profileFollowButton) {
         event.preventDefault();
@@ -17951,6 +18314,33 @@
       toggleProfileFollow(targetUser, "unfollow").catch((error) => {
         notify("Follow Gagal", error.message, "error");
       });
+    });
+    socialListClose.addEventListener("click", closeSocialListSheet);
+    socialListSheet.addEventListener("click", (event) => {
+      if (event.target === socialListSheet) {
+        closeSocialListSheet();
+      }
+    });
+    socialListTabs.addEventListener("click", (event) => {
+      const tab = event.target.closest("[data-social-list-tab]");
+      if (!tab) {
+        return;
+      }
+      loadSocialList(tab.dataset.socialListTab || "following").catch((error) => {
+        notify("List Sosial Gagal", error.message, "error");
+      });
+    });
+    socialListSearch.addEventListener("input", renderSocialList);
+    socialListBody.addEventListener("click", (event) => {
+      const followButton = event.target.closest("[data-social-row-follow]");
+      if (!followButton) {
+        return;
+      }
+      const targetUser = followButton.dataset.socialRowFollow || "";
+      const mode = followButton.dataset.following === "1" ? "unfollow" : "follow";
+      toggleProfileFollow(targetUser, mode)
+        .then(() => loadSocialList(activeSocialListType))
+        .catch((error) => notify("Follow Gagal", error.message, "error"));
     });
     closeTelegramBridge.addEventListener("click", () => {
       closeTelegramBridgeModal();

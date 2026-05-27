@@ -1421,6 +1421,45 @@ function getSocialStats(store, user = "", viewer = "", posts = [], likesOverride
   };
 }
 
+function getSocialFollowers(social, user = "") {
+  const safeUserLower = String(user || "").trim().toLowerCase();
+  return Object.entries(social?.follows || {})
+    .filter(([, targets]) => Array.isArray(targets)
+      && targets.some((target) => String(target || "").trim().toLowerCase() === safeUserLower))
+    .map(([sourceUser]) => sourceUser);
+}
+
+function getSocialRelationship(social, user = "", viewer = "") {
+  const safeUserLower = String(user || "").trim().toLowerCase();
+  const safeViewerLower = String(viewer || "").trim().toLowerCase();
+  const viewerFollowing = !!safeViewerLower && safeViewerLower !== safeUserLower
+    && getFollowTargets(social, viewer).some((target) => String(target || "").trim().toLowerCase() === safeUserLower);
+  const followedByUser = !!safeViewerLower && safeViewerLower !== safeUserLower
+    && getFollowTargets(social, user).some((target) => String(target || "").trim().toLowerCase() === safeViewerLower);
+  return {
+    viewerFollowing,
+    followedByUser,
+    mutual: viewerFollowing && followedByUser
+  };
+}
+
+function toSocialUserPayload(store, mediaStore, user = "", viewer = "") {
+  const profile = getPublicProfilePayload(store, user, mediaStore);
+  if (!profile) {
+    return null;
+  }
+  const social = normalizeSocialStore(store);
+  return {
+    user: profile.user,
+    displayName: profile.displayName || profile.user,
+    bio: profile.bio || "",
+    role: profile.role || "visitor",
+    online: !!profile.online,
+    avatarUrl: profile.avatarUrl || "",
+    ...getSocialRelationship(social, profile.user, viewer)
+  };
+}
+
 async function getPostLikeCountByUser(user = "") {
   const safeUser = String(user || "").trim();
   if (!safeUser) {
@@ -3756,6 +3795,61 @@ async function handleProfileFollow(body, res) {
   });
 }
 
+async function handleProfileSocialList(body, res) {
+  const safeTargetUser = String(body?.targetUser || "").trim().replace(/^@+/, "");
+  const safeList = String(body?.list || "following").trim().toLowerCase();
+  if (!safeTargetUser) {
+    return json(res, 400, { message: "Target user wajib diisi." });
+  }
+  if (!["following", "followers", "friends"].includes(safeList)) {
+    return json(res, 400, { message: "Jenis list sosial tidak valid." });
+  }
+
+  const store = await readStore();
+  const mediaStore = await readProfileMediaStore();
+  const profile = getPublicProfilePayload(store, safeTargetUser, mediaStore);
+  if (!profile) {
+    return json(res, 404, { message: "Profil user tidak ditemukan." });
+  }
+
+  const viewer = getViewerFromSession(store, body?.user, body?.sessionToken);
+  const social = normalizeSocialStore(store);
+  const following = getFollowTargets(social, profile.user);
+  const followers = getSocialFollowers(social, profile.user);
+  const followingSet = new Set(following.map((item) => String(item || "").trim().toLowerCase()));
+  const source = safeList === "following"
+    ? following
+    : safeList === "followers"
+      ? followers
+      : followers.filter((item) => followingSet.has(String(item || "").trim().toLowerCase()));
+  const seen = new Set();
+  const users = source
+    .filter((item) => {
+      const key = String(item || "").trim().toLowerCase();
+      if (!key || seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    })
+    .map((item) => toSocialUserPayload(store, mediaStore, item, viewer))
+    .filter(Boolean);
+
+  return json(res, 200, {
+    profile: {
+      user: profile.user,
+      displayName: profile.displayName || profile.user
+    },
+    counts: {
+      following: following.length,
+      followers: followers.length,
+      friends: followers.filter((item) => followingSet.has(String(item || "").trim().toLowerCase())).length
+    },
+    activeList: safeList,
+    users
+  });
+}
+
 async function handlePostList(body, res) {
   const store = await readStore();
   const limit = Number(body?.limit || 24);
@@ -4532,6 +4626,10 @@ async function handleRequest(req, res) {
 
     if (req.method === "POST" && parsedUrl.pathname === "/api/profile/follow") {
       return handleProfileFollow(await parseBody(req), res);
+    }
+
+    if (req.method === "POST" && parsedUrl.pathname === "/api/profile/social-list") {
+      return handleProfileSocialList(await parseBody(req), res);
     }
 
     if (req.method === "POST" && parsedUrl.pathname === "/api/post/list") {
