@@ -8195,8 +8195,8 @@
 
       .profile-top,
       .search-account-top.tiktok-profile-head {
-        grid-template-columns: minmax(0, 1fr) 112px;
-        gap: 12px;
+        grid-template-columns: minmax(0, 1fr) 96px;
+        gap: 10px;
       }
 
       .profile-top {
@@ -8206,8 +8206,8 @@
       .profile-avatar,
       .tiktok-profile-avatar,
       .search-account-top .profile-avatar.tiktok-profile-avatar {
-        width: 106px;
-        height: 106px;
+        width: 92px;
+        height: 92px;
         border-radius: 50%;
         justify-self: end;
       }
@@ -8223,21 +8223,30 @@
 
       .profile-head-copy h2,
       .tiktok-profile-title {
-        font-size: clamp(38px, 11vw, 54px);
-        line-height: .96;
+        font-size: clamp(32px, 8.5vw, 44px);
+        line-height: 1;
       }
 
       .profile-head-copy p,
       .tiktok-profile-handle {
-        font-size: 18px;
+        font-size: 16px;
       }
 
       .tiktok-profile-stats {
-        gap: 20px;
+        gap: 16px;
+        flex-wrap: nowrap;
+      }
+
+      .tiktok-profile-stat {
+        min-width: 50px;
       }
 
       .tiktok-profile-stat strong {
-        font-size: 22px;
+        font-size: 20px;
+      }
+
+      .tiktok-profile-stat span {
+        font-size: 12px;
       }
 
       .profile-meta-row {
@@ -8260,7 +8269,7 @@
       .profile-bio-text,
       .search-account-bio p,
       .tiktok-profile-bio {
-        font-size: 16px;
+        font-size: 15px;
         line-height: 1.5;
       }
 
@@ -10658,8 +10667,71 @@
       .profile-top {
         gap: 12px;
       }
+      .profile-page-header {
+        grid-template-columns: 38px minmax(0, 1fr) 38px;
+        min-height: 42px;
+        gap: 8px;
+      }
+      .profile-page-title {
+        font-size: 15px;
+      }
+      .profile-header-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 11px;
+      }
+      .profile-header-icon svg {
+        width: 21px;
+        height: 21px;
+      }
+      .search-account-top.tiktok-profile-head,
+      .profile-panel.tiktok-profile-layout .profile-top {
+        grid-template-columns: minmax(0, 1fr) 86px;
+        gap: 10px;
+      }
+      .profile-panel.tiktok-profile-layout .profile-avatar,
+      .tiktok-profile-avatar,
+      .search-account-top .profile-avatar.tiktok-profile-avatar {
+        width: 82px;
+        height: 82px;
+      }
       .profile-head-copy h2 {
         font-size: clamp(36px, 11vw, 50px);
+      }
+      .tiktok-profile-title {
+        font-size: clamp(31px, 9vw, 38px);
+        line-height: 1;
+      }
+      .tiktok-profile-handle {
+        font-size: 15px;
+      }
+      .tiktok-profile-stats {
+        gap: 14px;
+        flex-wrap: nowrap;
+      }
+      .tiktok-profile-stat {
+        min-width: 44px;
+      }
+      .tiktok-profile-stat strong {
+        font-size: 20px;
+      }
+      .tiktok-profile-stat span {
+        font-size: 11px;
+      }
+      .tiktok-profile-bio {
+        font-size: 14px;
+        line-height: 1.45;
+      }
+      .tiktok-profile-follow,
+      .tiktok-profile-action {
+        min-height: 38px;
+        font-size: 13px;
+      }
+      .tiktok-profile-follow {
+        padding: 0 18px;
+      }
+      .search-account-pill-row {
+        gap: 8px;
       }
       .profile-meta-row {
         gap: 8px;
@@ -10673,6 +10745,21 @@
       }
       .profile-nickname {
         padding: 7px 9px;
+      }
+      .search-preview-status,
+      .profile-nickname {
+        min-height: 34px;
+        font-size: 12px;
+      }
+      .tiktok-profile-tabs {
+        padding-top: 8px;
+      }
+      .tiktok-profile-tab {
+        padding: 10px 0;
+      }
+      .tiktok-profile-tab svg {
+        width: 22px;
+        height: 22px;
       }
       .profile-actions {
         gap: 8px;
