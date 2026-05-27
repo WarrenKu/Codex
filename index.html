@@ -7572,6 +7572,13 @@
       box-shadow: none;
     }
 
+    .tiktok-profile-follow.following {
+      background: rgba(255,255,255,.12);
+      color: #eff7ff;
+      border: 1px solid rgba(255,255,255,.16);
+      box-shadow: none;
+    }
+
     .tiktok-profile-action {
       width: 48px;
       height: 48px;
@@ -14101,27 +14108,27 @@
       return String(number);
     }
 
-    function getProfilePostStats(posts = []) {
+    function getProfilePostStats(posts = [], social = {}) {
       const list = Array.isArray(posts) ? posts : [];
       return {
-        posts: list.length,
-        comments: list.reduce((total, item) => total + Number(item?.stats?.comments || 0), 0),
-        likes: list.reduce((total, item) => total + Number(item?.stats?.likes || 0), 0)
+        following: Number(social?.following ?? 0),
+        followers: Number(social?.followers ?? 0),
+        likes: Number(social?.likes ?? list.reduce((total, item) => total + Number(item?.stats?.likes || 0), 0))
       };
     }
 
-    function buildTiktokStatsItemsMarkup(posts = []) {
-      const stats = getProfilePostStats(posts);
+    function buildTiktokStatsItemsMarkup(posts = [], social = {}) {
+      const stats = getProfilePostStats(posts, social);
       return `
-        <div class="tiktok-profile-stat"><strong>${escapeHtml(formatCompactNumber(stats.posts))}</strong><span>Posting</span></div>
-        <div class="tiktok-profile-stat"><strong>${escapeHtml(formatCompactNumber(stats.comments))}</strong><span>Komentar</span></div>
+        <div class="tiktok-profile-stat"><strong>${escapeHtml(formatCompactNumber(stats.following))}</strong><span>Mengikuti</span></div>
+        <div class="tiktok-profile-stat"><strong>${escapeHtml(formatCompactNumber(stats.followers))}</strong><span>Pengikut</span></div>
         <div class="tiktok-profile-stat"><strong>${escapeHtml(formatCompactNumber(stats.likes))}</strong><span>Suka</span></div>
       `;
     }
 
-    function buildTiktokStatsMarkup(posts = []) {
+    function buildTiktokStatsMarkup(posts = [], social = {}) {
       return `
-        <div class="tiktok-profile-stats">${buildTiktokStatsItemsMarkup(posts)}</div>
+        <div class="tiktok-profile-stats">${buildTiktokStatsItemsMarkup(posts, social)}</div>
       `;
     }
 
@@ -14145,7 +14152,7 @@
       `;
     }
 
-    function renderOwnProfileStats(posts = []) {
+    function renderOwnProfileStats(posts = [], social = {}) {
       let statsNode = profilePanel?.querySelector(".tiktok-profile-stats");
       if (!profilePanel || !profilePanelDesc) {
         return;
@@ -14156,7 +14163,7 @@
         statsNode.className = "tiktok-profile-stats";
         profilePanelDesc?.insertAdjacentElement("afterend", statsNode);
       }
-      statsNode.innerHTML = buildTiktokStatsItemsMarkup(posts);
+      statsNode.innerHTML = buildTiktokStatsItemsMarkup(posts, social);
       if (!profilePanel.querySelector(".tiktok-profile-tabs") && profilePostsCardSection) {
         profilePostsCardSection.insertAdjacentHTML("beforebegin", `
           <div class="tiktok-profile-tabs">
@@ -15243,6 +15250,25 @@
       openLinkConfirm(shareUrl);
     }
 
+    async function toggleProfileFollow(targetUser = "") {
+      const safeTargetUser = String(targetUser || "").trim().replace(/^@+/, "");
+      if (!safeTargetUser) {
+        notify("Follow", "Target user belum terbaca.", "error");
+        return;
+      }
+      if (!isAuthenticated() || isPublicMode) {
+        showAuth({ routeToLogin: true, replaceRoute: true });
+        return;
+      }
+      const result = await sendJson("/api/profile/follow", {
+        user: localStorage.getItem("trusted_user") || "",
+        sessionToken: localStorage.getItem("session_token") || "",
+        targetUser: safeTargetUser
+      });
+      notify("Follow", result.message || "Status follow diperbarui.", "success");
+      await openPublicProfileView(safeTargetUser, { replace: true, updateRoute: false });
+    }
+
     async function loadSharedPost(targetUser, shareCode) {
       const payload = {
         targetUser,
@@ -15923,13 +15949,13 @@
               <div class="tiktok-profile-copy">
                 <h2 class="tiktok-profile-title">${escapeHtml(item.displayName || item.user || "Account")}</h2>
                 <div class="tiktok-profile-handle">@${escapeHtml(item.user || "-")}</div>
-                ${buildTiktokStatsMarkup(item.posts || [])}
+                ${buildTiktokStatsMarkup(item.posts || [], item.social || {})}
                 <div class="tiktok-profile-bio">${renderBioMarkup(item.bio || "Belum ada deskripsi user.")}</div>
               </div>
               ${getAvatarMarkup(getSearchPreviewInitial(item.displayName || item.user), item.avatarUrl || "", "profile-avatar tiktok-profile-avatar")}
             </div>
             <div class="tiktok-profile-actions">
-              <button type="button" class="tiktok-profile-follow ${isOwnPublicProfile ? "editing" : ""}" ${isOwnPublicProfile ? 'data-profile-self-edit="true"' : ""}>${escapeHtml(isOwnPublicProfile ? "Edit profil" : "Ikuti")}</button>
+              <button type="button" class="tiktok-profile-follow ${isOwnPublicProfile ? "editing" : ""} ${item.social?.viewerFollowing ? "following" : ""}" ${isOwnPublicProfile ? 'data-profile-self-edit="true"' : `data-profile-follow="${escapeHtml(item.user || "")}"`}>${escapeHtml(isOwnPublicProfile ? "Edit profil" : item.social?.viewerFollowing ? "Mengikuti" : "Ikuti")}</button>
               <button type="button" class="tiktok-profile-action" data-profile-share-user="${escapeHtml(item.user || "")}" data-profile-share-name="${escapeHtml(item.displayName || item.user || "User")}" aria-label="Share User">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"></path><path d="M16 6l-4-4-4 4"></path><path d="M12 2v14"></path></svg>
               </button>
@@ -16139,7 +16165,7 @@
         : "Belum ada username sebelumnya.";
       profilePostCache = Array.isArray(profile.posts) ? profile.posts : [];
       profileRepostCache = Array.isArray(profile.reposts) ? profile.reposts : [];
-      renderOwnProfileStats(profilePostCache);
+      renderOwnProfileStats(profilePostCache, profile.social || {});
       renderPostFeed(profilePostCache, profilePostFeed, {
         emptyText: "User ini belum punya posting."
       });
@@ -17335,6 +17361,14 @@
       if (profileTabButton) {
         event.preventDefault();
         switchProfilePostTab(profileTabButton);
+        return;
+      }
+      const profileFollowButton = event.target.closest("[data-profile-follow]");
+      if (profileFollowButton) {
+        event.preventDefault();
+        toggleProfileFollow(profileFollowButton.dataset.profileFollow || "").catch((error) => {
+          notify("Follow Gagal", error.message, "error");
+        });
         return;
       }
       const postActionButton = event.target.closest("[data-post-action]");

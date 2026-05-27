@@ -1370,6 +1370,54 @@ function toPublicPostPayload(store, post, viewer = "", mediaStore = null) {
   };
 }
 
+function normalizeSocialStore(store) {
+  store.social = store.social && typeof store.social === "object" ? store.social : {};
+  store.social.follows = store.social.follows && typeof store.social.follows === "object" ? store.social.follows : {};
+  Object.keys(store.social.follows).forEach((user) => {
+    store.social.follows[user] = Array.from(new Set((Array.isArray(store.social.follows[user]) ? store.social.follows[user] : [])
+      .map((item) => String(item || "").trim())
+      .filter(Boolean)
+      .filter((item) => item.toLowerCase() !== String(user || "").toLowerCase())));
+  });
+  return store.social;
+}
+
+function getSocialStats(store, user = "", viewer = "", posts = [], likesOverride = null) {
+  const safeUser = String(user || "").trim();
+  const safeUserLower = safeUser.toLowerCase();
+  const safeViewerLower = String(viewer || "").trim().toLowerCase();
+  const social = normalizeSocialStore(store);
+  const following = Array.isArray(social.follows[safeUser]) ? social.follows[safeUser] : [];
+  const followers = Object.entries(social.follows)
+    .filter(([sourceUser, targets]) => String(sourceUser || "").trim().toLowerCase() !== safeUserLower
+      && Array.isArray(targets)
+      && targets.some((target) => String(target || "").trim().toLowerCase() === safeUserLower))
+    .length;
+  const likedPosts = Array.isArray(posts) ? posts : [];
+  return {
+    following: following.length,
+    followers,
+    likes: likesOverride === null
+      ? likedPosts.reduce((total, post) => total + Number(post?.stats?.likes || 0), 0)
+      : Number(likesOverride || 0),
+    viewerFollowing: !!safeViewerLower && safeViewerLower !== safeUserLower
+      && (Array.isArray(social.follows[viewer]) ? social.follows[viewer] : [])
+        .some((target) => String(target || "").trim().toLowerCase() === safeUserLower)
+  };
+}
+
+async function getPostLikeCountByUser(user = "") {
+  const safeUser = String(user || "").trim();
+  if (!safeUser) {
+    return 0;
+  }
+  const posts = await readPostStore();
+  return posts
+    .map((item) => normalizePostRecord(item))
+    .filter((post) => String(post.user || "").trim() === safeUser)
+    .reduce((total, post) => total + (Array.isArray(post.likes) ? post.likes.length : 0), 0);
+}
+
 async function buildPublicPostPayload(store, post, viewer = "") {
   const mediaStore = await readProfileMediaStore();
   return toPublicPostPayload(store, post, viewer, mediaStore);
@@ -3575,6 +3623,9 @@ async function handleProfile(body, res) {
     return json(res, 404, { message: "Profil user tidak ditemukan." });
   }
 
+  const posts = await getPostsByUser(store, profile.user, 60, user);
+  const likeCount = await getPostLikeCountByUser(profile.user);
+  profile.social = getSocialStats(store, profile.user, user, posts, likeCount);
   return json(res, 200, { profile });
 }
 
@@ -3635,7 +3686,52 @@ async function handlePublicProfile(body, res) {
   const viewer = getViewerFromSession(store, body?.user, body?.sessionToken);
   const posts = await getPostsByUser(store, profile.user, 24, viewer);
   const reposts = await getRepostsByUser(store, profile.user, 24, viewer);
+  const likeCount = await getPostLikeCountByUser(profile.user);
+  profile.social = getSocialStats(store, profile.user, viewer, posts, likeCount);
   return json(res, 200, { profile, posts, reposts });
+}
+
+async function handleProfileFollow(body, res) {
+  const { user, sessionToken, targetUser } = body;
+  const safeUser = String(user || "").trim();
+  const safeTargetUser = String(targetUser || "").trim().replace(/^@+/, "");
+  if (!safeUser || !sessionToken || !safeTargetUser) {
+    return json(res, 400, { message: "User, session token, dan target user wajib diisi." });
+  }
+  if (safeUser.toLowerCase() === safeTargetUser.toLowerCase()) {
+    return json(res, 400, { message: "Tidak bisa follow profil sendiri." });
+  }
+
+  const store = await readStore();
+  if (!hasValidSession(store, safeUser, sessionToken)) {
+    return json(res, 403, { message: "Session tidak valid." });
+  }
+  const targetProfile = getPublicProfilePayload(store, safeTargetUser);
+  if (!targetProfile) {
+    return json(res, 404, { message: "Profil target tidak ditemukan." });
+  }
+
+  const social = normalizeSocialStore(store);
+  const current = Array.isArray(social.follows[safeUser]) ? [...social.follows[safeUser]] : [];
+  const targetIndex = current.findIndex((item) => String(item || "").trim().toLowerCase() === targetProfile.user.toLowerCase());
+  let following = false;
+  if (targetIndex >= 0) {
+    current.splice(targetIndex, 1);
+  } else {
+    current.push(targetProfile.user);
+    following = true;
+  }
+  social.follows[safeUser] = current;
+  await writeStore(store);
+
+  const viewer = safeUser;
+  const posts = await getPostsByUser(store, targetProfile.user, 24, viewer);
+  const likeCount = await getPostLikeCountByUser(targetProfile.user);
+  return json(res, 200, {
+    message: following ? "Berhasil mengikuti user." : "Berhenti mengikuti user.",
+    following,
+    social: getSocialStats(store, targetProfile.user, viewer, posts, likeCount)
+  });
 }
 
 async function handlePostList(body, res) {
@@ -4410,6 +4506,10 @@ async function handleRequest(req, res) {
 
     if (req.method === "POST" && parsedUrl.pathname === "/api/profile/public") {
       return handlePublicProfile(await parseBody(req), res);
+    }
+
+    if (req.method === "POST" && parsedUrl.pathname === "/api/profile/follow") {
+      return handleProfileFollow(await parseBody(req), res);
     }
 
     if (req.method === "POST" && parsedUrl.pathname === "/api/post/list") {
