@@ -3802,7 +3802,7 @@ async function handleProfileSocialList(body, res) {
   if (!safeTargetUser) {
     return json(res, 400, { message: "Target user wajib diisi." });
   }
-  if (!["following", "followers", "friends"].includes(safeList)) {
+  if (!["following", "followers", "friends", "suggested"].includes(safeList)) {
     return json(res, 400, { message: "Jenis list sosial tidak valid." });
   }
 
@@ -3818,7 +3818,10 @@ async function handleProfileSocialList(body, res) {
   const following = getFollowTargets(social, profile.user);
   const followers = getSocialFollowers(social, profile.user);
   const followingSet = new Set(following.map((item) => String(item || "").trim().toLowerCase()));
-  const source = safeList === "following"
+  const suggested = ["sd", "azee", "azee"];
+  const source = safeList === "suggested"
+    ? suggested
+    : safeList === "following"
     ? following
     : safeList === "followers"
       ? followers
@@ -3844,7 +3847,8 @@ async function handleProfileSocialList(body, res) {
     counts: {
       following: following.length,
       followers: followers.length,
-      friends: followers.filter((item) => followingSet.has(String(item || "").trim().toLowerCase())).length
+      friends: followers.filter((item) => followingSet.has(String(item || "").trim().toLowerCase())).length,
+      suggested: suggested.length
     },
     activeList: safeList,
     users

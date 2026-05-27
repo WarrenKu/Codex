@@ -7710,31 +7710,33 @@
     }
 
     .social-list-sheet {
-      position: fixed;
-      inset: 0;
-      z-index: 470;
+      position: relative;
+      inset: auto;
+      z-index: 1;
       display: none;
       align-items: stretch;
       justify-content: center;
-      background: #08121e;
+      background: transparent;
       opacity: 0;
       transition: opacity .24s ease;
+      width: 100%;
     }
 
     .social-list-sheet.show {
-      display: flex;
+      display: block;
       opacity: 1;
+      animation: searchViewFlash .28s cubic-bezier(.22, 1, .36, 1);
     }
 
     .social-list-card {
-      width: min(100%, 1120px);
-      height: 100vh;
-      max-height: 100vh;
-      border-radius: 0;
-      background: #0d1b2d;
+      width: 100%;
+      min-height: 560px;
+      max-height: none;
+      border-radius: 22px;
+      background: rgba(14, 29, 48, .98);
       color: #f4fbff;
-      border: 0;
-      box-shadow: none;
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: 0 24px 70px rgba(0,0,0,.18);
       display: grid;
       grid-template-rows: auto auto auto 1fr;
       overflow: hidden;
@@ -7746,7 +7748,7 @@
       display: grid;
       grid-template-columns: 48px minmax(0, 1fr) 48px;
       align-items: center;
-      padding: 18px 20px 10px;
+      padding: 18px 20px 12px;
       gap: 12px;
     }
 
@@ -7851,6 +7853,7 @@
       align-items: center;
       gap: 12px;
       min-height: 72px;
+      animation: socialRowIn .24s cubic-bezier(.22, 1, .36, 1) both;
     }
 
     .social-user-avatar {
@@ -7948,6 +7951,17 @@
       color: #9fb5d1;
       text-align: center;
       font-weight: 800;
+    }
+
+    @keyframes socialRowIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     @media (max-width: 560px) {
@@ -15755,10 +15769,20 @@
       activeFollowSheetUser = "";
     }
 
-    function closeSocialListSheet() {
+    function closeSocialListSheet(options = {}) {
+      const targetUser = activeSocialListUser;
       socialListSheet.classList.remove("show");
       socialListSheet.setAttribute("aria-hidden", "true");
       socialListSearch.value = "";
+      if (options.skipReturn) {
+        return;
+      }
+      const trustedUser = String(localStorage.getItem("trusted_user") || "").trim().toLowerCase();
+      if (targetUser && trustedUser && targetUser.toLowerCase() === trustedUser && !isPublicMode) {
+        goToProfileSection().catch((error) => notify("Profil Gagal Dibuka", error.message, "error"));
+      } else if (targetUser) {
+        openPublicProfileView(targetUser, { replace: true, updateRoute: false }).catch((error) => notify("Profil Gagal Dibuka", error.message, "error"));
+      }
     }
 
     function getSocialActionLabel(user = {}) {
@@ -15789,10 +15813,12 @@
 
     function renderSocialList() {
       const counts = socialListCache.counts || {};
+      const isOwnList = String(activeSocialListUser || "").trim().toLowerCase() === String(localStorage.getItem("trusted_user") || "").trim().toLowerCase() && !isPublicMode;
       const tabItems = [
         ["following", `Mengikuti ${formatCompactNumber(counts.following || 0)}`],
         ["followers", `Pengikut ${formatCompactNumber(counts.followers || 0)}`],
-        ["friends", `Teman ${formatCompactNumber(counts.friends || 0)}`]
+        ...(isOwnList ? [["friends", `Teman ${formatCompactNumber(counts.friends || 0)}`]] : []),
+        ["suggested", `Disarankan ${formatCompactNumber(counts.suggested || 0)}`]
       ];
       socialListTabs.innerHTML = tabItems.map(([type, label]) => `
         <button type="button" class="social-list-tab ${type === activeSocialListType ? "active" : ""}" data-social-list-tab="${type}">${escapeHtml(label)}</button>
@@ -15806,10 +15832,10 @@
           return String(item.displayName || "").toLowerCase().includes(query)
             || String(item.user || "").toLowerCase().includes(query);
         });
-      socialListBody.innerHTML = users.length ? users.map((item) => {
+      socialListBody.innerHTML = users.length ? users.map((item, index) => {
         const initial = getSearchPreviewInitial(item.displayName || item.user || "U");
         return `
-          <div class="social-user-row">
+          <div class="social-user-row" style="animation-delay:${Math.min(index * 0.035, 0.24)}s">
             <button type="button" class="social-user-avatar" data-post-user="${escapeHtml(item.user || "")}">
               ${item.avatarUrl ? `<img src="${escapeAttribute(item.avatarUrl)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : escapeHtml(initial)}
             </button>
@@ -15830,7 +15856,7 @@
       if (!activeSocialListUser) {
         return;
       }
-      activeSocialListType = ["following", "followers", "friends"].includes(type) ? type : "following";
+      activeSocialListType = ["following", "followers", "friends", "suggested"].includes(type) ? type : "following";
       socialListBody.innerHTML = `<div class="social-empty">Memuat list...</div>`;
       const user = localStorage.getItem("trusted_user");
       const sessionToken = localStorage.getItem("session_token");
@@ -15858,6 +15884,15 @@
       if (!activeSocialListUser) {
         return;
       }
+      homeMainSection.style.display = "none";
+      profilePanel.style.display = "none";
+      searchViewPanel.style.display = "grid";
+      searchViewPanel.innerHTML = "";
+      searchViewPanel.appendChild(socialListSheet);
+      searchViewPanel.classList.remove("flash");
+      void searchViewPanel.offsetWidth;
+      searchViewPanel.classList.add("flash");
+      setSidebarActive(String(activeSocialListUser).toLowerCase() === String(localStorage.getItem("trusted_user") || "").toLowerCase() ? "user" : "home");
       socialListTitle.textContent = activeSocialListName;
       socialListSheet.classList.add("show");
       socialListSheet.setAttribute("aria-hidden", "false");
@@ -18389,7 +18424,7 @@
       }
       const targetUser = followButton.dataset.socialRowFollow || "";
       if (followButton.dataset.self === "1") {
-        closeSocialListSheet();
+        closeSocialListSheet({ skipReturn: true });
         goToProfileSection().catch((error) => notify("Profil Gagal Dibuka", error.message, "error"));
         return;
       }
