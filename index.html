@@ -7269,16 +7269,6 @@
       gap: 22px;
     }
 
-    #search-view-panel.social-list-page {
-      display: block;
-      padding: 0;
-      border: 0;
-      border-radius: 0;
-      background: transparent;
-      box-shadow: none;
-      animation: none;
-    }
-
     .search-account-layout {
       display: grid;
       gap: 26px;
@@ -14677,7 +14667,9 @@
       const safeName = String(name || safeUser || "Profil").trim();
       return `
         <div class="profile-page-header">
-          <button type="button" class="profile-header-icon" data-profile-back aria-label="Kembali">&lt;</button>
+          <button type="button" class="profile-header-icon" data-profile-back aria-label="Kembali">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" aria-hidden="true"><path d="M560-240 320-480l240-240 56 56-184 184 184 184-56 56Z"></path></svg>
+          </button>
           <div class="profile-page-title">${escapeHtml(safeName)}</div>
           <button type="button" class="profile-header-icon" data-profile-share-user="${escapeHtml(safeUser)}" data-profile-share-name="${escapeHtml(safeName)}" aria-label="Share User">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" aria-hidden="true"><path d="M240-80q-33 0-56.5-23.5T160-160v-400q0-33 23.5-56.5T240-640h120v80H240v400h480v-400H600v-80h120q33 0 56.5 23.5T800-560v400q0 33-23.5 56.5T720-80H240Zm200-240v-447l-64 64-56-57 160-160 160 160-56 57-64-64v447h-80Z"></path></svg>
@@ -15853,24 +15845,28 @@
       searchViewPanel.classList.remove("social-list-page");
       socialListSheet.classList.remove("show");
       socialListSheet.setAttribute("aria-hidden", "true");
+      searchViewPanel.style.removeProperty("padding");
+      searchViewPanel.style.removeProperty("border");
+      searchViewPanel.style.removeProperty("border-radius");
+      searchViewPanel.style.removeProperty("background");
+      searchViewPanel.style.removeProperty("box-shadow");
     }
 
     function closeSocialListSheet(options = {}) {
       const targetUser = activeSocialListUser;
       socialListSearch.value = "";
+      clearSocialListPageMode();
       if (options.skipReturn) {
-        clearSocialListPageMode();
         return;
       }
       if (targetUser && socialListReturnView === "profile") {
         goToProfileSection().catch((error) => notify("Profil Gagal Dibuka", error.message, "error"));
       } else if (targetUser) {
         openPublicProfileView(targetUser, { replace: true, updateRoute: false }).catch((error) => {
-          clearSocialListPageMode();
           notify("Profil Gagal Dibuka", error.message, "error");
         });
       } else {
-        clearSocialListPageMode();
+        searchViewPanel.style.display = "none";
       }
     }
 
@@ -15979,7 +15975,7 @@
       socialListReturnView = openedFromOwnProfilePanel ? "profile" : "public";
       homeMainSection.style.display = "none";
       profilePanel.style.display = "none";
-      searchViewPanel.style.display = "block";
+      searchViewPanel.style.display = "grid";
       searchViewPanel.classList.add("social-list-page");
       searchViewPanel.replaceChildren(socialListSheet);
       searchViewPanel.classList.remove("flash");
@@ -18039,6 +18035,7 @@
     window.addEventListener("scroll", updateSearchDropdownPosition, { passive: true });
     window.addEventListener("resize", updateSearchDropdownPosition);
     window.addEventListener("popstate", () => {
+      clearSocialListPageMode();
       if (isLoginRoute()) {
         showAuth();
         return;
