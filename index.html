@@ -17361,12 +17361,24 @@
           return;
         }
         if (action === "repost") {
-          if (openPostRepostPanels.has(postId)) {
+          const targetPost = findPostInCaches(postId);
+          const alreadyReposted = !!targetPost?.reactions?.reposted;
+          if (openPostRepostPanels.has(postId) && alreadyReposted) {
             openPostRepostPanels.delete(postId);
+            void syncPostCardState();
           } else {
             openPostRepostPanels.add(postId);
+            if (alreadyReposted) {
+              void syncPostCardState();
+            } else {
+              performPostAction(postId, "repost", { comment: "", mode: "set" })
+                .then(() => refreshVisibleProfileAfterRepost())
+                .catch((error) => {
+                  openPostRepostPanels.delete(postId);
+                  notify("Repost Gagal", error.message, "error");
+                });
+            }
           }
-          void syncPostCardState();
           return;
         }
         performPostAction(postId, action).catch((error) => {
