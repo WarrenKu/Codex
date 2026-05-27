@@ -41,6 +41,8 @@ const TELEGRAM_TARGET_MAX = 32;
 const POST_TEXT_MAX = 900;
 const POST_CODE_MAX = 20000;
 const POST_COMMENT_MAX = 280;
+const PRESENCE_ONLINE_MS = 18000;
+const PRESENCE_TOUCH_MS = 6000;
 const EMPTY_STORE = {
   reg: {},
   log: {},
@@ -963,8 +965,34 @@ function updateAllUserEntries(section, user, updater) {
 function setActiveSessionToken(store, user, token = "") {
   return updateLatestUserEntry(store.reg, user, (value) => ({
     ...value,
-    active_session_token: token
+    active_session_token: token,
+    active_session_seen_at: token ? Date.now() : 0
   }));
+}
+
+function touchActiveSession(store, user, sessionToken) {
+  const safeUser = String(user || "").trim();
+  const safeToken = String(sessionToken || "").trim();
+  if (!safeUser || !safeToken) {
+    return false;
+  }
+  const entry = findLatestUserEntry(
+    store.reg,
+    (value) => value.user === safeUser && value.status === "success" && value.active_session_token === safeToken
+  );
+  if (!entry) {
+    return false;
+  }
+  const lastSeen = Number(entry.value.active_session_seen_at || 0);
+  const now = Date.now();
+  if (now - lastSeen < PRESENCE_TOUCH_MS) {
+    return false;
+  }
+  store.reg[entry.dateKey][entry.timeKey][entry.username] = {
+    ...entry.value,
+    active_session_seen_at: now
+  };
+  return true;
 }
 
 function hasValidSession(store, user, sessionToken) {
@@ -1567,7 +1595,11 @@ function getStatusFromValue(value) {
 }
 
 function isUserOnline(value) {
-  return !!String(value.active_session_token || "").trim() && getStatusFromValue(value) === "active";
+  const lastSeen = Number(value.active_session_seen_at || 0);
+  return !!String(value.active_session_token || "").trim()
+    && getStatusFromValue(value) === "active"
+    && lastSeen > 0
+    && Date.now() - lastSeen <= PRESENCE_ONLINE_MS;
 }
 
 function buildSearchData(store, query) {
@@ -1663,7 +1695,15 @@ function runAdminAction(store, { user, action, durationSeconds, role, actor }) {
 
   const actionMap = {
     delete() {
-      updateUserEntries(store, user, (value) => ({ ...value, deleted: "yes", trusted: "no", trusted_ip: "", trusted_token: "" }));
+      updateUserEntries(store, user, (value) => ({
+        ...value,
+        deleted: "yes",
+        trusted: "no",
+        trusted_ip: "",
+        trusted_token: "",
+        active_session_token: "",
+        active_session_seen_at: 0
+      }));
       createEvent(store, user, "delete", {
         title: "account telah didelete",
         body: "see you",
@@ -1724,7 +1764,15 @@ function runAdminAction(store, { user, action, durationSeconds, role, actor }) {
       return { message: "Tahan berhasil dihentikan." };
     },
     block() {
-      updateUserEntries(store, user, (value) => ({ ...value, blocked: "yes", trusted: "no", trusted_ip: "", trusted_token: "" }));
+      updateUserEntries(store, user, (value) => ({
+        ...value,
+        blocked: "yes",
+        trusted: "no",
+        trusted_ip: "",
+        trusted_token: "",
+        active_session_token: "",
+        active_session_seen_at: 0
+      }));
       createEvent(store, user, "block", {
         title: "Account anda di suspend",
         body: "akses account sedang diblokir",
@@ -2777,6 +2825,7 @@ async function resolveTelegramHandshake(store, token, req = null) {
       trusted_ip: "",
       trusted_token: "",
       active_session_token: "",
+      active_session_seen_at: 0,
       blocked: "no",
       hold_until: 0,
       deleted: "no",
@@ -3088,6 +3137,7 @@ async function handleRegister(body, res) {
     trusted_ip: "",
     trusted_token: "",
     active_session_token: "",
+    active_session_seen_at: 0,
     blocked: "no",
     hold_until: 0,
     deleted: "no",
@@ -3562,6 +3612,7 @@ async function handleAdminAddUser(body, res) {
     trusted_ip: "",
     trusted_token: "",
     active_session_token: "",
+    active_session_seen_at: 0,
     blocked: "no",
     hold_until: 0,
     deleted: "no",
@@ -3654,6 +3705,7 @@ async function handleSessionStatus(body, res) {
   if (!hasValidSession(store, user, sessionToken)) {
     return json(res, 403, { message: "Session tidak valid." });
   }
+  const presenceChanged = touchActiveSession(store, user, sessionToken);
 
   let telegramChanged = false;
   try {
@@ -3664,7 +3716,7 @@ async function handleSessionStatus(body, res) {
   const changed = clearExpiredEvents(store, user);
   const regRecord = findLatestUserEntry(store.reg, (value) => value.user === user);
   const state = getUserAccountState(regRecord);
-  if (telegramChanged || changed) {
+  if (telegramChanged || changed || presenceChanged) {
     await writeStore(store);
   }
   return json(res, 200, {
@@ -4553,7 +4605,8 @@ async function handleLogout(body, res, req) {
     trusted: "no",
     trusted_ip: "",
     trusted_token: "",
-    active_session_token: ""
+    active_session_token: "",
+    active_session_seen_at: 0
   };
 
   appendConsoleLog(store, "info", `Logout: ${user}`);
