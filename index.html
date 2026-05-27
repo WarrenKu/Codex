@@ -7786,7 +7786,8 @@
     }
 
     .social-list-head {
-      display: flex;
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr) 44px;
       align-items: center;
       padding: 0 0 14px;
       gap: 12px;
@@ -7796,7 +7797,7 @@
       margin: 0;
       font-size: 22px;
       color: #f6fbff;
-      text-align: left;
+      text-align: center;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
