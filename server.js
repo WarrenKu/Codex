@@ -49,6 +49,9 @@ const EMPTY_STORE = {
   telegramMeta: {
     lastUpdateId: 0
   },
+  social: {
+    follows: {}
+  },
   events: {},
   consoleLogs: []
 };
@@ -547,6 +550,7 @@ function normalizeStore(store) {
     telegramMeta: {
       lastUpdateId: Number(store.telegramMeta?.lastUpdateId || 0)
     },
+    social: store.social && typeof store.social === "object" ? store.social : {},
     events: store.events || {},
     consoleLogs: Array.isArray(store.consoleLogs) ? store.consoleLogs : []
   };
