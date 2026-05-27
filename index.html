@@ -4662,7 +4662,9 @@
 
     .profile-panel.settings-mode .profile-top,
     .profile-panel.settings-mode .profile-grid,
-    .profile-panel.settings-mode .profile-posts-card {
+    .profile-panel.settings-mode .profile-posts-card,
+    .profile-panel.settings-mode .tiktok-profile-stats,
+    .profile-panel.settings-mode .tiktok-profile-tabs {
       display: none;
     }
 
@@ -14571,6 +14573,9 @@
       if (profilePostsCardSection) {
         profilePostsCardSection.style.display = hideProfileChrome ? "none" : "";
       }
+      profilePanel?.querySelectorAll(".tiktok-profile-stats, .tiktok-profile-tabs").forEach((node) => {
+        node.style.display = hideProfileChrome ? "none" : "";
+      });
     }
 
     async function refreshBatterySettingsView() {
