@@ -9995,11 +9995,31 @@
         isolation: isolate;
         place-items: center;
         cursor: pointer;
-        transition: transform .24s ease, box-shadow .24s ease, border-color .24s ease, opacity .2s ease, background .24s ease;
+        transition:
+          right .34s cubic-bezier(.2, .8, .2, 1),
+          bottom .34s cubic-bezier(.2, .8, .2, 1),
+          transform .34s cubic-bezier(.2, .8, .2, 1),
+          box-shadow .24s ease,
+          border-color .24s ease,
+          opacity .24s ease,
+          background .24s ease;
+        will-change: transform, opacity, right, bottom;
       }
       .mobile-post-fab.show {
         display: grid;
         animation: fabFloatIn .34s cubic-bezier(.22, 1, .36, 1);
+      }
+      .mobile-post-fab.fab-hidden {
+        right: 4px;
+        bottom: 38px;
+        opacity: 0;
+        pointer-events: none;
+        transform: translate3d(86px, 18px, 0) scale(.76);
+      }
+      .mobile-post-fab.fab-hidden::before,
+      .mobile-post-fab.fab-hidden::after,
+      .mobile-post-fab.fab-hidden .mobile-post-fab-inner {
+        animation-play-state: paused;
       }
       .mobile-bottom-nav {
         display: grid;
@@ -12334,6 +12354,7 @@
     const mobilePanelLink = document.getElementById("mobile-panel-link");
     const mobileMenuBtn = document.getElementById("mobile-menu-btn");
     const mobileMenuPanel = document.getElementById("mobile-menu-panel");
+    let activeMobileTab = "home";
     const logoutBtn = document.getElementById("logout-btn");
     const mobileLogoutBtn = document.getElementById("mobile-logout-btn");
     const profileLogoutBtn = document.getElementById("profile-logout-btn");
@@ -14214,6 +14235,7 @@
       mobileLogoutBtn.style.display = authed ? "inline-flex" : "none";
       mobilePostLink.style.display = authed ? "inline-flex" : "none";
       mobilePostFab.classList.toggle("show", authed);
+      updateMobileFabVisibility();
       sidebarPostLink.style.display = authed ? "inline-flex" : "none";
       sidebarPanelLink.style.display = authed && trustedRole === "owner" ? "inline-flex" : "none";
       sidebarLogoutBtn.style.display = authed ? "inline-flex" : "none";
@@ -14240,6 +14262,7 @@
       postModalName.textContent = displayName;
       postModalUsername.textContent = user;
       updatePostComposerHint();
+      updateMobileFabVisibility();
     }
 
     function getPostContentLimitError(content = "") {
@@ -16632,9 +16655,18 @@
     }
 
     function setMobileTabActive(tab = "home") {
+      activeMobileTab = tab;
       document.querySelectorAll("[data-mobile-tab]").forEach((button) => {
         button.classList.toggle("active", button.dataset.mobileTab === tab);
       });
+      updateMobileFabVisibility();
+    }
+
+    function updateMobileFabVisibility() {
+      if (!mobilePostFab) return;
+      const authed = isAuthenticated() && !isPublicMode;
+      const canShowOnTab = activeMobileTab === "home";
+      mobilePostFab.classList.toggle("fab-hidden", !authed || !canShowOnTab);
     }
 
     function hideMobileAppPages() {
